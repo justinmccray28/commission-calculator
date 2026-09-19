@@ -99,20 +99,70 @@
   },
   "presets": {
     "agility7": {
-      "1": 4.1925,
-      "2": 2.7251
+      "1": {"0": 4.1925, "71": 3.7733, "76": 3.354, "81": 2.9348},
+      "2": {"0": 2.7251, "71": 2.3059, "76": 2.0124, "81": 1.9705},
+      "3": {"0": 1.2578, "71": 1.1739, "76": 1.0901, "81": 1.0062}
     },
     "agility10": {
-      "1": 5.8695,
-      "2": 3.5636
+      "1": {"0": 5.8695, "71": 5.4503, "76": 5.031},
+      "2": {"0": 3.5636, "71": 3.3121, "76": 3.0605},
+      "3": {"0": 1.2578, "71": 1.1739, "76": 1.0901}
     },
     "pe7": {
-      "1": 4.6118,
-      "2": 2.5115
+      "1": {"0": 4.6118, "71": 4.1925, "76": 3.354, "81": 2.9348},
+      "2": {"0": 2.5155, "71": 2.3059, "76": 1.8866, "81": 1.677},
+      "3": {"0": 1.2578, "71": 1.1739, "76": 1.0901, "81": 1.0062}
     },
     "pe10": {
-      "1": 6.288,
-      "2": 3.7733
+      "1": {"0": 6.2888, "71": 5.8695, "76": 5.031},
+      "2": {"0": 3.7733, "71": 3.5217, "76": 3.0605},
+      "3": {"0": 1.2578, "71": 1.1739, "76": 1.0481}
+    },
+    "activate": {
+      "1": {"0": 1.4674, "71": 1.4674, "76": 1.4674, "81": 1.4674},
+      "2": {"0": 2.9348, "71": 2.9348, "76": 2.9348, "81": 2.9348},
+      "3": {"0": 2.9348, "71": 2.9348, "76": 2.9348, "81": 2.9348},
+      "4": {"0": 2.9348, "71": 2.9348, "76": 2.9348, "81": 2.9348}
+    },
+    "velocity": {
+      "1": {"0": 6.2888, "71": 5.8695, "76": 5.031},
+      "2": {"0": 3.7733, "71": 3.4798, "76": 3.0605},
+      "3": {"0": 1.2578, "71": 1.0481, "76": 1.0481}
+    },
+    "maxRate3": {
+      "1": {"0": 1.2997, "71": 1.2997, "76": 0.9643, "81": 0.4193},
+      "2": {"0": 0.545, "71": 0.545, "76": 0.5031, "81": 0.3773},
+      "3": {"0": 0.545, "71": 0.545, "76": 0.5031, "81": 0.3773}
+    },
+    "maxRate5": {
+      "1": {"0": 1.8866, "71": 1.8866, "76": 1.7189, "81": 1.0062},
+      "2": {"0": 0.545, "71": 0.545, "76": 0.5031, "81": 0.3773},
+      "3": {"0": 0.545, "71": 0.545, "76": 0.5031, "81": 0.3773}
+    },
+    "maxRate7": {
+      "1": {"0": 2.3059, "71": 2.3059, "76": 2.0963, "81": 1.2158},
+      "2": {"0": 0.545, "71": 0.545, "76": 0.5031, "81": 0.3773},
+      "3": {"0": 0.545, "71": 0.545, "76": 0.5031, "81": 0.3773}
+    },
+    "pe15": {
+      "1": {"0": 6.2888, "71": 5.8695},
+      "2": {"0": 3.7733, "71": 3.5217},
+      "3": {"0": 1.2578, "71": 1.1739}
+    },
+    "fgAccumulatorPlus7": {
+      "1": {"0": 4.8214, "76": 3.9829, "81": 3.1444}
+    },
+    "fgAccumulatorPlus10": {
+      "1": {"0": 6.2888, "76": 4.4021, "81": 3.354}
+    },
+    "fgPowerAccumulator7": {
+      "1": {"0": 4.4021, "76": 3.5636, "81": 2.7251}
+    },
+    "fgPowerAccumulator10": {
+      "1": {"0": 5.8695, "76": 3.9829, "81": 2.9348}
+    },
+    "fgAcceleratorPlus10": {
+      "1": {"0": 6.2888, "76": 4.6118, "81": 3.1444}
     },
     "ascent10": {
       "1": {
@@ -231,7 +281,7 @@
     "elite30": {
       "1": 121.5825
     },
-    "nationwideAccumulatorIII": {
+    "nationwideAccumulatorII": {
       "base": 109.005
     },
     "nationwideProtectorII2020": {
@@ -273,16 +323,20 @@
   },
   "trailRates": {
     "agility7": {
-      "2": 0.035
+      "2": {"0": 0.035, "71": 0.035, "76": 0.028, "81": 0.021},
+      "3": {"0": 0.0699, "71": 0.0629, "76": 0.0559, "81": 0.049}
     },
     "agility10": {
-      "2": 0.035
+      "2": {"0": 0.035, "71": 0.035, "76": 0.035},
+      "3": {"0": 0.0699, "71": 0.0629, "76": 0.0559}
     },
     "pe7": {
-      "2": 0.035
+      "2": {"0": 0.035, "71": 0.035, "76": 0.0279, "81": 0.021},
+      "3": {"0": 0.0698, "71": 0.0629, "76": 0.0559, "81": 0.0489}
     },
     "pe10": {
-      "2": 0.035
+      "2": {"0": 0.035, "71": 0.0314, "76": 0.0279},
+      "3": {"0": 0.0698, "71": 0.0629, "76": 0.0524}
     },
     "ascent10": {
       "2": {
@@ -297,31 +351,148 @@
       }
     }
   },
+  "deferredTrailSchedules": {
+    "velocity": {
+      "frequency": "quarterly",
+      "startsAfterPolicyYear": 1,
+      "2": {"0": 0.1048, "71": 0.0734, "76": 0.0734},
+      "3": {"0": 0.2096, "71": 0.1572, "76": 0.1572}
+    },
+    "maxRate3": {
+      "frequency": "monthly",
+      "startsAfterPolicyYear": 1,
+      "ceasesAfterSurrenderChargePeriod": true,
+      "2": {"0": 0.0279, "71": 0.0279, "76": 0.0245, "81": 0.014},
+      "3": {"0": 0.0279, "71": 0.0279, "76": 0.0245, "81": 0.014}
+    },
+    "maxRate5": {
+      "frequency": "monthly",
+      "startsAfterPolicyYear": 1,
+      "ceasesAfterSurrenderChargePeriod": true,
+      "2": {"0": 0.0279, "71": 0.0279, "76": 0.0245, "81": 0.014},
+      "3": {"0": 0.0279, "71": 0.0279, "76": 0.0245, "81": 0.014}
+    },
+    "maxRate7": {
+      "frequency": "monthly",
+      "startsAfterPolicyYear": 1,
+      "ceasesAfterSurrenderChargePeriod": true,
+      "2": {"0": 0.0279, "71": 0.0279, "76": 0.0245, "81": 0.014},
+      "3": {"0": 0.0279, "71": 0.0279, "76": 0.0245, "81": 0.014}
+    },
+    "fgAccumulatorPlus7": {
+      "frequency": "quarterly",
+      "startsAfterPolicyYear": 1,
+      "firstTrailYear": {"0": 1.2368, "76": 1.2368, "81": 1.2368},
+      "2Plus": {"0": 0.5031, "76": 0.4612, "81": 0.4612}
+    },
+    "fgAccumulatorPlus10": {
+      "frequency": "quarterly",
+      "startsAfterPolicyYear": 1,
+      "firstTrailYear": {"0": 1.4674, "76": 1.2578, "81": 1.5},
+      "2Plus": {"0": 0.8385, "76": 0.7547, "81": 0.6708}
+    },
+    "fgPowerAccumulator7": {
+      "frequency": "quarterly",
+      "startsAfterPolicyYear": 1,
+      "firstTrailYear": {"0": 1.2578, "76": 1.2578, "81": 1.2578},
+      "2Plus": {"0": 0.5031, "76": 0.4612, "81": 0.4612}
+    },
+    "fgPowerAccumulator10": {
+      "frequency": "quarterly",
+      "startsAfterPolicyYear": 1,
+      "firstTrailYear": {"0": 1.4674, "76": 1.2578, "81": 1.2578},
+      "2Plus": {"0": 0.8385, "76": 0.7547, "81": 0.6708}
+    },
+    "fgAcceleratorPlus10": {
+      "frequency": "quarterly",
+      "startsAfterPolicyYear": 1,
+      "firstTrailYear": {"0": 1.0481, "76": 1.0481, "81": 1.0481},
+      "2Plus": {"0": 0.8385, "76": 0.8385, "81": 0.8385}
+    }
+  },
   "catalog": {
     "agility7": {
       "carrier": "athene",
       "label": "Agility 7",
-      "kind": "fia"
+      "kind": "fia",
+      "usesAgeBands": true,
+      "optionLabels": {"1": "Option 1", "2": "Option 2", "3": "Option 3"}
     },
     "agility10": {
       "carrier": "athene",
       "label": "Agility 10",
-      "kind": "fia"
+      "kind": "fia",
+      "usesAgeBands": true,
+      "optionLabels": {"1": "Option 1", "2": "Option 2", "3": "Option 3"}
     },
     "pe7": {
       "carrier": "athene",
       "label": "Performance Elite 7",
-      "kind": "fia"
+      "kind": "fia",
+      "usesAgeBands": true,
+      "optionLabels": {"1": "Option 1", "2": "Option 2", "3": "Option 3"}
     },
     "pe10": {
       "carrier": "athene",
       "label": "Performance Elite 10",
-      "kind": "fia"
+      "kind": "fia",
+      "usesAgeBands": true,
+      "optionLabels": {"1": "Option 1", "2": "Option 2", "3": "Option 3"}
+    },
+    "activate": {
+      "carrier": "athene",
+      "label": "Athene Activate",
+      "kind": "fia",
+      "usesAgeBands": true,
+      "optionLabels": {"1": "Period Certain 5-9", "2": "Period Certain 10-14", "3": "Period Certain 15+", "4": "Life Contingent"},
+      "note": "First-year compensation only. The supplied schedule notes that commission chargebacks apply only to free looks and may result in a 100% chargeback."
+    },
+    "velocity": {
+      "carrier": "athene",
+      "label": "Athene Velocity",
+      "kind": "fia",
+      "usesAgeBands": true,
+      "optionLabels": {"1": "Option 1", "2": "Option 2", "3": "Option 3"},
+      "note": "Initial compensation shown. Quarterly trails begin after the first policy year and are not included in the initial payout estimate."
+    },
+    "maxRate3": {
+      "carrier": "athene",
+      "label": "Athene MaxRate 3",
+      "kind": "fia",
+      "usesAgeBands": true,
+      "optionLabels": {"1": "Option 1", "2": "Option 2", "3": "Option 3"},
+      "note": "Initial compensation shown. Monthly trails begin after the first policy year and cease after the surrender-charge period."
+    },
+    "maxRate5": {
+      "carrier": "athene",
+      "label": "Athene MaxRate 5",
+      "kind": "fia",
+      "usesAgeBands": true,
+      "optionLabels": {"1": "Option 1", "2": "Option 2", "3": "Option 3"},
+      "note": "Initial compensation shown. Monthly trails begin after the first policy year and cease after the surrender-charge period."
+    },
+    "maxRate7": {
+      "carrier": "athene",
+      "label": "Athene MaxRate 7",
+      "kind": "fia",
+      "usesAgeBands": true,
+      "optionLabels": {"1": "Option 1", "2": "Option 2", "3": "Option 3"},
+      "note": "Initial compensation shown. Monthly trails begin after the first policy year and cease after the surrender-charge period."
+    },
+    "pe15": {
+      "carrier": "athene",
+      "label": "Performance Elite 15",
+      "kind": "fia",
+      "usesAgeBands": true,
+      "optionLabels": {"1": "Option 1", "2": "Option 2", "3": "Option 3"},
+      "note": "Initial compensation and supplied age bands only. Later-year trail compensation is not included in the initial payout estimate."
     },
     "ascent10": {
       "carrier": "athene",
       "label": "Ascent Pro 10 Bonus",
-      "kind": "fia"
+      "kind": "fia",
+      "usesAgeBands": true,
+      "optionLabels": {"1": "Option 1", "2": "Option 2", "3": "Option 3"}
     },
     "symetraAccumulatorIUL": {
       "carrier": "symetra",
@@ -333,9 +504,9 @@
       "label": "Symetra Protector IUL",
       "kind": "iul"
     },
-    "nationwideAccumulatorIII": {
+    "nationwideAccumulatorII": {
       "carrier": "nationwide",
-      "label": "Indexed UL Accumulator III",
+      "label": "Indexed UL Accumulator II",
       "kind": "iul",
       "note": "Rate assumes SVER and APCR riders are not elected. Source schedule effective March 6, 2026."
     },
@@ -401,6 +572,41 @@
       "label": "Horizon ECV IUL (Base/LTC)",
       "kind": "iul",
       "note": "Base/LTC compensation only, at the Target 1 rate. The SVER-I3 rider rate and later target bands are not included. No trail is calculated."
+    },
+    "fgAccumulatorPlus7": {
+      "carrier": "fg",
+      "label": "FG AccumulatorPlus 7",
+      "kind": "fia",
+      "usesAgeBands": true,
+      "note": "First-year compensation shown. Trail compensation begins after the first policy year, is paid quarterly, and is not included in the initial payout estimate. Internal replacements use a reduced rate."
+    },
+    "fgAccumulatorPlus10": {
+      "carrier": "fg",
+      "label": "FG AccumulatorPlus 10",
+      "kind": "fia",
+      "usesAgeBands": true,
+      "note": "First-year compensation shown. Trail compensation begins after the first policy year, is paid quarterly, and is not included in the initial payout estimate. Internal replacements use a reduced rate."
+    },
+    "fgPowerAccumulator7": {
+      "carrier": "fg",
+      "label": "FG Power Accumulator 7",
+      "kind": "fia",
+      "usesAgeBands": true,
+      "note": "First-year compensation shown. Trail compensation begins after the first policy year, is paid quarterly, and is not included in the initial payout estimate. Internal replacements use a reduced rate."
+    },
+    "fgPowerAccumulator10": {
+      "carrier": "fg",
+      "label": "FG Power Accumulator 10",
+      "kind": "fia",
+      "usesAgeBands": true,
+      "note": "First-year compensation shown. Trail compensation begins after the first policy year, is paid quarterly, and is not included in the initial payout estimate. Internal replacements use a reduced rate."
+    },
+    "fgAcceleratorPlus10": {
+      "carrier": "fg",
+      "label": "FG AcceleratorPlus 10",
+      "kind": "fia",
+      "usesAgeBands": true,
+      "note": "First-year compensation shown. Trail compensation begins after the first policy year, is paid quarterly, and is not included in the initial payout estimate. Internal replacements use a reduced rate."
     }
   }
 }
