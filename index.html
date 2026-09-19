@@ -542,12 +542,13 @@
     function ageBand(age){ return age>=81 ? 81 : age>=76 ? 76 : age>=71 ? 71 : 0; }
     function productRate(key, option){
       const data=presets[key]; if(!data) return 0;
-      if(data[option] && typeof data[option]==='object'){
+      const selectedOption=option || '1';
+      if(data[selectedOption] && typeof data[selectedOption]==='object'){
         const selected=ageBand(val('clientAge'));
-        return data[option][selected] ?? data[option][76] ?? data[option][71] ?? data[option][0] ?? 0;
+        return data[selectedOption][selected] ?? data[selectedOption][76] ?? data[selectedOption][71] ?? data[selectedOption][0] ?? 0;
       }
       if(catalog[key]?.kind==='wl') return catalog[key].faceBands.find(b=>val('coverage')>=b.min && (b.max==null || val('coverage')<=b.max))?.rate ?? 0;
-      return data[option] ?? data['1'] ?? data.base ?? 0;
+      return data[selectedOption] ?? data['1'] ?? data.base ?? 0;
     }
     function productTrailRate(key, option){
       const data=trailRates[key]?.[option]; if(data==null) return 0;
