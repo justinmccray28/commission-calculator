@@ -383,7 +383,7 @@
     function productRate(key, option){
       const data=presets[key]; if(!data) return 0;
       if(key==='ascent10') return data[option]?.[ageBand(val('clientAge'))] ?? data[option]?.[0] ?? 0;
-      return data[option] ?? data.base ?? 0;
+      return data[option] ?? data['1'] ?? data.base ?? 0;
     }
     function productTrailRate(key, option){
       const data=trailRates[key]?.[option]; if(data==null) return 0;
