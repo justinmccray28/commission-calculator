@@ -220,7 +220,7 @@
           <option value="downline">Downline business</option>
         </select></div>
         <label for="carrier">▥　Carrier</label>
-        <div class="field-wrap"><span class="field-icon">▥</span><select id="carrier">
+        <div class="field-wrap"><span class="field-icon">▥</span><select id="carrier" disabled>
           <option value="" selected disabled>Select a carrier</option>
           <option value="athene">Athene</option>
           <option value="nationwide">Nationwide</option>
@@ -250,11 +250,11 @@
         <label id="basisLabel" for="basis">$　Premium / deposit ($)</label>
         <div class="field-wrap"><span class="field-icon">$</span><input id="basis" type="text" inputmode="decimal" value="0"></div>
         <label for="rate">%　Payout rate (%)</label>
-        <div class="field-wrap"><span class="field-icon">%</span><input id="rate" type="number" min="0" step="0.0001" value="4.6118"></div>
+        <div class="field-wrap"><span class="field-icon">%</span><input id="rate" type="number" min="0" step="0.0001" value="0"></div>
 
         <div id="trailRateBox" class="hidden">
           <label for="trailRate">Monthly trail rate (%)</label>
-          <div class="field-wrap"><span class="field-icon">%</span><input id="trailRate" type="number" min="0" step="0.0001" value="0.0350"></div>
+          <div class="field-wrap"><span class="field-icon">%</span><input id="trailRate" type="number" min="0" step="0.0001" value="0"></div>
         </div>
         <div id="option2TrailBox" class="hidden">
           <label for="trailBasis">Accumulated value for monthly trail ($)</label>
@@ -307,7 +307,7 @@
           </div>
         </div>
         <div id="trailPanel" class="trail-panel hidden">
-          <div class="trail-title"><h3>Option 2 monthly trail</h3><span class="trail-tag">0.0350% monthly • split first</span></div>
+          <div class="trail-title"><h3>Option 2 monthly trail</h3><span class="trail-tag" id="trailTag">Monthly trail • split first</span></div>
           <div class="trail-grid">
             <div class="trail-stat"><span>Gross monthly trail</span><strong id="trailGrossOutput">$0.00</strong></div>
             <div class="trail-stat"><span>Writing agent trail</span><strong id="trailWritingOutput">$0.00</strong></div>
@@ -324,25 +324,32 @@
     </div>
   </main>
   <script>
-    const contractRates = { md:50, smd:65, sa:45, associate:35, ta:25 };
-    const contractNames = { md:'Marketing Director', smd:'Senior Marketing Director', sa:'Senior Associate', associate:'Associate', ta:'Training Associate' };
-    const presets = {
-      agility7: {1:4.1925, 2:2.7251},
-      agility10: {1:5.8695, 2:3.5636},
-      pe7: {1:4.6118, 2:2.5115},
-      pe10: {1:6.288, 2:3.7733},
-      ascent10: {1:{0:6.2888,71:5.8695,76:5.0310}, 2:{0:3.7733,71:3.5217,76:3.0605}, 3:{0:1.2578,71:1.1739,76:1.0488}},
-      nationwide10: {1:92.2350}, nationwide15: {1:96.4275}, nationwide20: {1:104.8125}, nationwide30: {1:104.8125},
-      swift10: {1:88.0425}, swift15: {1:92.2350}, swift20: {1:104.8125}, swift30: {1:104.8125},
-      symetraLevel10: {1:79.6575}, symetraLevel15: {1:79.6575}, symetraLevel20: {1:92.2350}, symetraLevel30: {1:92.2350},
-      symetraAccumulatorIUL: {base:100.6200, excess:1.6770, renewal:0.8385},
-      symetraProtectorIUL: {base:92.2350, excess:1.6770, renewal:0.8385},
-      trend10: {1:95.8525}, trend15: {1:100.0200}, trend20: {1:104.1875}, trend25: {1:104.1875}, trend30: {1:104.1875}
-    };
-    const trailRates = {
-      agility7:{2:0.0350}, agility10:{2:0.0350}, pe7:{2:0.0350}, pe10:{2:0.0350},
-      ascent10:{2:{0:0.0350,71:0.0314,76:0.0279},3:{0:0.0698,71:0.0629,76:0.0524}}
-    };
+    let contractRates, contractNames, presets, trailRates;
+    async function loadCommissionData(){
+      try {
+        const response=await fetch('./commission-data.json', {cache:'no-store'});
+        if(!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data=await response.json();
+        const keys=['agility7','agility10','pe7','pe10','ascent10','nationwide10','nationwide15','nationwide20','nationwide30','swift10','swift15','swift20','swift30','symetraLevel10','symetraLevel15','symetraLevel20','symetraLevel30','symetraAccumulatorIUL','symetraProtectorIUL','trend10','trend15','trend20','trend25','trend30'];
+        if(!data.contractRates || !data.contractNames || !data.presets || !data.trailRates ||
+          !['ta','associate','sa','md','smd'].every(k=>Number.isFinite(data.contractRates[k]) && data.contractNames[k]) ||
+          !keys.every(k=>data.presets[k]) ||
+          !['agility7','agility10','pe7','pe10'].every(k=>data.presets[k]['1']!=null && data.presets[k]['2']!=null && data.trailRates[k]?.['2']!=null) ||
+          !['1','2','3'].every(k=>data.presets.ascent10[k] && (k==='1' || data.trailRates.ascent10?.[k])) ||
+          !keys.filter(k=>!['agility7','agility10','pe7','pe10','ascent10','symetraAccumulatorIUL','symetraProtectorIUL'].includes(k)).every(k=>data.presets[k]['1']!=null) ||
+          !['symetraAccumulatorIUL','symetraProtectorIUL'].every(k=>data.presets[k].base!=null)) throw new Error('Incomplete commission data');
+        const validNumbers=object=>Object.values(object).every(value=>typeof value==='number' ? Number.isFinite(value) && value>=0 : value && typeof value==='object' && validNumbers(value));
+        if(!validNumbers(data.contractRates) || !validNumbers(data.presets) || !validNumbers(data.trailRates)) throw new Error('Invalid commission rate');
+        ({contractRates,contractNames,presets,trailRates}=data);
+        $('carrier').disabled=false;
+        updateCaseType(); updateSelections(); calculate();
+      } catch(error) {
+        $('summary').textContent='Commission rates could not be loaded';
+        $('note').textContent='Refresh the page to try again. Calculations are unavailable until rates load.';
+        document.querySelector('.status').textContent='Rates unavailable';
+        console.error('Commission data load failed:',error);
+      }
+    }
     const $ = id => document.getElementById(id);
     const money = n => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number.isFinite(n)?n:0);
     const pct = n => `${Number(n).toFixed(4).replace(/0+$/,'').replace(/\.$/,'')}%`;
@@ -379,7 +386,7 @@
       return data[option] ?? data.base ?? 0;
     }
     function productTrailRate(key, option){
-      const data=trailRates[key]?.[option]; if(data==null) return 0.0350;
+      const data=trailRates[key]?.[option]; if(data==null) return 0;
       return typeof data==='number' ? data : (data[ageBand(val('clientAge'))] ?? data[0]);
     }
     function configureProductOptions(){
@@ -422,6 +429,7 @@
       if(carrier==='transamerica'){ $('product').value='trend30'; setPreset(); }
     }
     function setPreset(){
+      if(!presets) return;
       const key=$('product').value;
       configureProductOptions();
       const option=$('optionChoice').value;
@@ -464,12 +472,14 @@
     }
     function renderTrailPanel(active, gross, writing, splitTrail, override){
       $('trailPanel').classList.toggle('hidden', !active);
+      if(active) $('trailTag').textContent=`${Number(val('trailRate')).toFixed(4)}% monthly • split first`;
       animateMoney('trailGrossOutput',gross);
       animateMoney('trailWritingOutput',writing);
       animateMoney('trailSplitOutput',splitTrail);
       animateMoney('trailOverrideOutput',override);
     }
     function calculate(){
+      if(!presets) return;
       const caseType=$('caseType').value, product=$('product').value, term=!!product && !['agility7','agility10','pe7','pe10','ascent10','symetraAccumulatorIUL','symetraProtectorIUL','custom'].includes(product);
       const splitWithDownline=$('splitWithDownline').checked, split=$('isSplit').checked || splitWithDownline, hasOverride=caseType==='downline' || splitWithDownline;
       const enteredBasis=val('basis'), basis=term ? enteredBasis*12 : enteredBasis;
@@ -512,7 +522,8 @@
       element.addEventListener('input',calculate);
       element.addEventListener('change',calculate);
     });
-    updateCaseType(); updateSelections(); calculate();
+    $('summary').textContent='Loading commission rates…';
+    loadCommissionData();
   </script>
 </body>
 </html>
