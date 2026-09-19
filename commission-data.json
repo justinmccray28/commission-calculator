@@ -85,6 +85,16 @@
         "20": "elite20",
         "30": "elite30"
       }
+    },
+    "adVantage": {
+      "carrier": "northamerican",
+      "label": "ADvantage Term",
+      "lengths": {
+        "10": "adVantage10",
+        "15": "adVantage15",
+        "20": "adVantage20",
+        "30": "adVantage30"
+      }
     }
   },
   "presets": {
@@ -244,6 +254,21 @@
     },
     "transamericaLifetimeWL": {
       "base": 121.691
+    },
+    "adVantage10": {
+      "1": 58.695
+    },
+    "adVantage15": {
+      "1": 62.8875
+    },
+    "adVantage20": {
+      "1": 79.6575
+    },
+    "adVantage30": {
+      "1": 79.6575
+    },
+    "pacificHorizonECVIUL": {
+      "base": 96.4275
     }
   },
   "trailRates": {
@@ -370,6 +395,12 @@
       "carrier": "custom",
       "label": "Custom product",
       "kind": "custom"
+    },
+    "pacificHorizonECVIUL": {
+      "carrier": "pacific",
+      "label": "Horizon ECV IUL (Base/LTC)",
+      "kind": "iul",
+      "note": "Base/LTC compensation only, at the Target 1 rate. The SVER-I3 rider rate and later target bands are not included. No trail is calculated."
     }
   }
 }
