@@ -358,8 +358,7 @@
     "pacificPromiseGUL": {
       "carrier": "pacific",
       "label": "Promise GUL",
-      "kind": "target",
-      "note": "Only target-premium compensation is included. Excess-premium compensation is excluded."
+      "kind": "target"
     },
     "pacificHorizonIUL2": {
       "carrier": "pacific",
