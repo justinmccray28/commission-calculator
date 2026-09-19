@@ -261,6 +261,7 @@
         <div class="field-wrap"><span class="field-icon">▥</span><select id="carrier" disabled>
           <option value="" selected disabled>Select a carrier</option>
           <option value="athene">Athene</option>
+          <option value="fg">Fidelity &amp; Guaranty</option>
           <option value="nationwide">Nationwide</option>
           <option value="northamerican">North American</option>
           <option value="symetra">Symetra</option>
@@ -538,25 +539,30 @@
     }
     function contractRate(id){ return (contractRates[$(id).value] || 0) / 100; }
     function contractName(id){ return contractNames[$(id).value] || 'Unknown contract'; }
-    function ageBand(age){ return age>=76 ? 76 : age>=71 ? 71 : 0; }
+    function ageBand(age){ return age>=81 ? 81 : age>=76 ? 76 : age>=71 ? 71 : 0; }
     function productRate(key, option){
       const data=presets[key]; if(!data) return 0;
-      if(key==='ascent10') return data[option]?.[ageBand(val('clientAge'))] ?? data[option]?.[0] ?? 0;
+      if(data[option] && typeof data[option]==='object'){
+        const selected=ageBand(val('clientAge'));
+        return data[option][selected] ?? data[option][76] ?? data[option][71] ?? data[option][0] ?? 0;
+      }
       if(catalog[key]?.kind==='wl') return catalog[key].faceBands.find(b=>val('coverage')>=b.min && (b.max==null || val('coverage')<=b.max))?.rate ?? 0;
       return data[option] ?? data['1'] ?? data.base ?? 0;
     }
     function productTrailRate(key, option){
       const data=trailRates[key]?.[option]; if(data==null) return 0;
-      return typeof data==='number' ? data : (data[ageBand(val('clientAge'))] ?? data[0]);
+      if(typeof data==='number') return data;
+      const selected=ageBand(val('clientAge'));
+      return data[selected] ?? data[76] ?? data[71] ?? data[0] ?? 0;
     }
     function configureProductOptions(){
-      const product=$('product').value, isAscent=product==='ascent10', isFia=['agility7','agility10','pe7','pe10'].includes(product);
-      const options=isAscent ? [['1','Option 1'],['2','Option 2'],['3','Option 3']] : isFia ? [['1','Option 1'],['2','Option 2']] : [];
+      const product=$('product').value, optionLabels=catalog?.[product]?.optionLabels;
+      const options=optionLabels ? Object.entries(optionLabels) : [];
       const current=$('optionChoice').value;
       $('optionChoice').innerHTML=options.map(([value,label])=>`<option value="${value}">${label}</option>`).join('');
       if(options.some(([value])=>value===current)) $('optionChoice').value=current;
       $('optionChoice').disabled=!options.length;
-      $('optionBox').querySelector('label').innerHTML='⚙　FIA option';
+      $('optionBox').querySelector('label').innerHTML=`⚙　${catalog?.[product]?.optionLabel || 'Product option'}`;
     }
     function selectedProductKey(){
       const family=$('product').value;
@@ -580,14 +586,15 @@
       configureTermLengths();
       configureProductOptions();
       const term=!!termProducts?.[product];
-      const fia=['agility7','agility10','pe7','pe10','ascent10'].includes(product);
-      const option2=['2','3'].includes($('optionChoice').value) && fia;
+      const hasOptions=!!catalog?.[product]?.optionLabels;
+      const trailProduct=['agility7','agility10','pe7','pe10','ascent10'].includes(product);
+      const option2=['2','3'].includes($('optionChoice').value) && trailProduct;
       $('productBox').classList.toggle('hidden', !$('carrier').value);
       $('trailRateBox').classList.toggle('hidden', !option2);
       $('option2TrailBox').classList.toggle('hidden', !option2);
-      $('optionBox').classList.toggle('hidden', !fia);
-      $('ageBox').classList.toggle('hidden', product!=='ascent10');
+      $('optionBox').classList.toggle('hidden', !hasOptions);
       const details=catalog?.[product], target=['iul','target','wl'].includes(details?.kind);
+      $('ageBox').classList.toggle('hidden', !details?.usesAgeBands);
       $('coverageBox').classList.toggle('hidden', details?.kind!=='wl');
       $('basisLabel').textContent=term ? 'Monthly term premium ($)' : target ? 'Target Premium ($)' : 'Premium / deposit ($)';
       const scope=details?.kind==='iul' ? 'IUL estimate includes initial compensation on target premium only. Later-year and excess compensation is not calculated.' : target ? 'Estimate includes target-premium compensation only. Later-year and excess compensation is not calculated.' : '';
