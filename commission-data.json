@@ -2,7 +2,7 @@
   "contractRates": {"ta": 25, "associate": 35, "sa": 45, "md": 50, "smd": 65},
   "contractNames": {"ta": "Training Associate", "associate": "Associate", "sa": "Senior Associate", "md": "Marketing Director", "smd": "Senior Marketing Director"},
   "presets": {
-    "agility7": {"1": 4.1925, "2": 2.7251},
+    "agility7": {"1": 5.1925, "2": 2.7251},
     "agility10": {"1": 5.8695, "2": 3.5636},
     "pe7": {"1": 4.6118, "2": 2.5115},
     "pe10": {"1": 6.288, "2": 3.7733},
