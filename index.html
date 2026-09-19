@@ -226,6 +226,7 @@
           <option value="nationwide">Nationwide</option>
           <option value="symetra">Symetra</option>
           <option value="transamerica">Transamerica</option>
+          <option value="pacific">Pacific Life</option>
           <option value="custom">Other / custom carrier</option>
         </select></div>
 
@@ -249,6 +250,10 @@
         <div id="ageBox" class="hidden">
           <label for="clientAge">♙　Client age</label>
           <div class="field-wrap"><span class="field-icon">♙</span><input id="clientAge" type="number" min="0" max="120" step="1" value="0"></div>
+        </div>
+        <div id="coverageBox" class="hidden">
+          <label for="coverage">Specified coverage amount ($)</label>
+          <div class="field-wrap"><span class="field-icon">$</span><input id="coverage" type="text" inputmode="decimal" value="0"></div>
         </div>
 
         <label id="basisLabel" for="basis">$　Premium / deposit ($)</label>
@@ -323,22 +328,25 @@
         <table><thead><tr><th>Component</th><th>Calculation</th><th>Amount</th></tr></thead><tbody id="breakdown"></tbody></table>
         <div class="formula" id="formula">Formula will appear here.</div>
         <div class="note" id="note">Rates are editable. Confirm current carrier schedules and actual coding before relying on a result.</div>
-        <div class="note hidden" id="iulInfo" role="note">IUL estimate includes initial compensation on target premium only. Additional compensation on excess premium and renewals may exist; later years are not included in this estimate.</div>
+        <div class="note hidden" id="productInfo" role="note"></div>
         <div class="footer">Athene Option 2 uses the monthly 0.0350% trail only. No duplicate annual trail is added.</div>
       </section>
     </div>
   </main>
   <script>
-    let contractRates, contractNames, presets, trailRates, termProducts;
+    let contractRates, contractNames, presets, trailRates, termProducts, catalog;
     async function loadCommissionData(){
       try {
         const response=await fetch('./commission-data.json', {cache:'no-store'});
         if(!response.ok) throw new Error(`HTTP ${response.status}`);
         const data=await response.json();
         const keys=['agility7','agility10','pe7','pe10','ascent10','nationwide10','nationwide15','nationwide20','nationwide30','swift10','swift15','swift20','swift30','symetraLevel10','symetraLevel15','symetraLevel20','symetraLevel30','symetraAccumulatorIUL','symetraProtectorIUL','trend10','trend15','trend20','trend25','trend30'];
-        if(!data.contractRates || !data.contractNames || !data.presets || !data.trailRates || !data.termProducts ||
+        if(!data.contractRates || !data.contractNames || !data.presets || !data.trailRates || !data.termProducts || !data.catalog ||
           !['nationwideTerm','swiftTerm','symetraLevelTerm','trendsetterSuper'].every(k=>data.termProducts[k]?.label && data.termProducts[k]?.carrier && data.termProducts[k]?.lengths) ||
+          !Object.values(data.termProducts).every(group=>group.label && group.carrier && group.lengths) ||
           !Object.values(data.termProducts).every(group=>Object.keys(group.lengths).length && Object.values(group.lengths).every(k=>data.presets[k]?.['1']!=null)) ||
+          !Object.entries(data.catalog).every(([k,p])=>p.carrier && p.label && p.kind && (k==='custom' || data.presets[k]) &&
+            (p.kind!=='wl' || p.faceBands?.length && p.faceBands.every(b=>Number.isFinite(b.min) && Number.isFinite(b.rate)))) ||
           !['ta','associate','sa','md','smd'].every(k=>Number.isFinite(data.contractRates[k]) && data.contractNames[k]) ||
           !keys.every(k=>data.presets[k]) ||
           !['agility7','agility10','pe7','pe10'].every(k=>data.presets[k]['1']!=null && data.presets[k]['2']!=null && data.trailRates[k]?.['2']!=null) ||
@@ -347,7 +355,7 @@
           !['symetraAccumulatorIUL','symetraProtectorIUL'].every(k=>data.presets[k].base!=null)) throw new Error('Incomplete commission data');
         const validNumbers=object=>Object.values(object).every(value=>typeof value==='number' ? Number.isFinite(value) && value>=0 : value && typeof value==='object' && validNumbers(value));
         if(!validNumbers(data.contractRates) || !validNumbers(data.presets) || !validNumbers(data.trailRates)) throw new Error('Invalid commission rate');
-        ({contractRates,contractNames,presets,trailRates,termProducts}=data);
+        ({contractRates,contractNames,presets,trailRates,termProducts,catalog}=data);
         $('carrier').disabled=false;
         updateCaseType(); updateSelections(); calculate();
       } catch(error) {
@@ -390,6 +398,7 @@
     function productRate(key, option){
       const data=presets[key]; if(!data) return 0;
       if(key==='ascent10') return data[option]?.[ageBand(val('clientAge'))] ?? data[option]?.[0] ?? 0;
+      if(catalog[key]?.kind==='wl') return catalog[key].faceBands.find(b=>val('coverage')>=b.min && (b.max==null || val('coverage')<=b.max))?.rate ?? 0;
       return data[option] ?? data['1'] ?? data.base ?? 0;
     }
     function productTrailRate(key, option){
@@ -434,14 +443,17 @@
       $('option2TrailBox').classList.toggle('hidden', !option2);
       $('optionBox').classList.toggle('hidden', !fia);
       $('ageBox').classList.toggle('hidden', product!=='ascent10');
-      const isIul=['symetraAccumulatorIUL','symetraProtectorIUL'].includes(product);
-      $('basisLabel').textContent=term ? 'Monthly term premium ($)' : isIul ? 'Target Premium ($)' : 'Premium / deposit ($)';
-      $('iulInfo').classList.toggle('hidden', !isIul);
+      const details=catalog?.[product], target=['iul','target','wl'].includes(details?.kind);
+      $('coverageBox').classList.toggle('hidden', details?.kind!=='wl');
+      $('basisLabel').textContent=term ? 'Monthly term premium ($)' : target ? 'Target Premium ($)' : 'Premium / deposit ($)';
+      const scope=details?.kind==='iul' ? 'IUL estimate includes initial compensation on target premium only. Later-year and excess compensation is not calculated.' : target ? 'Estimate includes target-premium compensation only. Later-year and excess compensation is not calculated.' : '';
+      $('productInfo').textContent=[scope,details?.note].filter(Boolean).join(' ');
+      $('productInfo').classList.toggle('hidden', !scope && !details?.note);
       $('basis').placeholder=term ? 'e.g. 142.76' : '';
     }
     function populateProducts(){
       const carrier=$('carrier').value;
-      const nonTerm=carrier==='athene' ? [['agility7','Agility 7'],['agility10','Agility 10'],['pe7','Performance Elite 7'],['pe10','Performance Elite 10'],['ascent10','Ascent Pro 10 Bonus']] : carrier==='symetra' ? [['symetraAccumulatorIUL','Symetra Accumulator IUL'],['symetraProtectorIUL','Symetra Protector IUL']] : carrier==='custom' ? [['custom','Custom product']] : [];
+      const nonTerm=Object.entries(catalog).filter(([,item])=>item.carrier===carrier).map(([key,item])=>[key,item.label]);
       const termGroups=Object.entries(termProducts).filter(([,group])=>group.carrier===carrier).map(([key,group])=>[key,group.label]);
       const options=[...termGroups,...nonTerm];
       $('product').innerHTML='<option value="" selected disabled>Select a product</option>'+options.map(([value,label])=>`<option value="${value}">${label}</option>`).join('');
@@ -510,7 +522,8 @@
       const enteredBasis=val('basis'), basis=term ? enteredBasis*12 : enteredBasis;
       const myContract=contractRate('myContract'), otherContract=contractRate('otherContract');
       const mySplit=split?val('mySplit')/100:1, otherSplit=split?val('otherSplit')/100:0;
-      const rate=term && !product ? 0 : val('rate')/100;
+      const needsCoverage=catalog[product]?.kind==='wl' && val('coverage')<25000;
+      const rate=(term && !product) || needsCoverage ? 0 : val('rate')/100;
       let gross=basis*rate, myBase=gross*mySplit, otherBase=gross*otherSplit;
       const spread=overrideSpreadRate(caseType, splitWithDownline, myContract, otherContract);
       const overrideBase=splitWithDownline ? (caseType==='downline' ? myBase : otherBase) : myBase;
@@ -532,9 +545,9 @@
       }
       const userTotal=caseType==='downline' ? override : (splitWithDownline ? myPayout+override : myPayout);
       animateMoney('total',userTotal);
-      $('summary').textContent=term && !product ? 'Select a policy length to see its rate' : `${$('product').selectedOptions[0]?.textContent || 'Select a product'}${term ? ` • ${$('termLength').value} years • annualized premium` : ''} • ${split?'split case':'not split'}`;
-      formula=term ? `Annual premium = monthly premium × 12; gross points = annual premium × ${pct(rate*100)}; split first; apply contract percentage second.` : ['symetraAccumulatorIUL','symetraProtectorIUL'].includes(product) ? `Initial gross points = target premium × ${pct(rate*100)}; split first; apply contract percentage second.` : `Gross points = basis × ${pct(rate*100)}; split first; apply contract percentage second.`;
-      note=term ? `${money(enteredBasis)} monthly premium × 12 = ${money(basis)} annual premium before applying the ${pct(rate*100)} payout rate.` : 'Rates are editable so you can replace remembered reference rates with a current carrier payout schedule.';
+      $('summary').textContent=term && !product ? 'Select a policy length to see its rate' : needsCoverage ? 'Enter specified coverage of at least $25,000 to see its rate' : `${$('product').selectedOptions[0]?.textContent || 'Select a product'}${term ? ` • ${$('termLength').value} years • annualized premium` : ''} • ${split?'split case':'not split'}`;
+      formula=term ? `Annual premium = monthly premium × 12; gross points = annual premium × ${pct(rate*100)}; split first; apply contract percentage second.` : ['iul','target','wl'].includes(catalog[product]?.kind) ? `Initial gross points = target premium × ${pct(rate*100)}; split first; apply contract percentage second.` : `Gross points = basis × ${pct(rate*100)}; split first; apply contract percentage second.`;
+      note=term ? `${money(enteredBasis)} monthly premium × 12 = ${money(basis)} annual premium before applying the ${pct(rate*100)} payout rate.` : needsCoverage ? 'The supplied Lifetime WL schedule begins at $25,000 of specified coverage.' : 'Rates are editable so you can replace remembered reference rates with a current carrier payout schedule.';
       renderCommissionPanels(myPayout, otherPayout, myBase, otherBase, override, myContract, otherContract, split, hasOverride, caseType, spread, overrideBase);
       renderTrailPanel(trailActive, trailGross, trailWriting, trailSplit, trailOverride);
       $('breakdown').innerHTML=rows.join(''); $('formula').textContent=formula; $('note').textContent=note;
@@ -542,7 +555,7 @@
     $('caseType').addEventListener('change',()=>{ updateCaseType(); calculate(); });
     $('isSplit').addEventListener('change',()=>{ if(!$('isSplit').checked) $('splitWithDownline').checked=false; updateCaseType(); calculate(); });
     $('splitWithDownline').addEventListener('change',()=>{ if($('splitWithDownline').checked) $('isSplit').checked=true; updateCaseType(); calculate(); });
-    $('carrier').addEventListener('change',populateProducts); $('product').addEventListener('change',setPreset); $('termLength').addEventListener('change',setPreset); $('optionChoice').addEventListener('change',setPreset); $('clientAge').addEventListener('input',()=>{ setPreset(); calculate(); }); $('basis').addEventListener('input',()=>formatCommaInput($('basis')));
+    $('carrier').addEventListener('change',populateProducts); $('product').addEventListener('change',setPreset); $('termLength').addEventListener('change',setPreset); $('optionChoice').addEventListener('change',setPreset); $('clientAge').addEventListener('input',()=>{ setPreset(); calculate(); }); $('basis').addEventListener('input',()=>formatCommaInput($('basis'))); $('coverage').addEventListener('input',()=>{ formatCommaInput($('coverage')); setPreset(); calculate(); });
     document.querySelectorAll('input, select').forEach(element=>{
       element.addEventListener('input',calculate);
       element.addEventListener('change',calculate);
