@@ -319,6 +319,7 @@
         <table><thead><tr><th>Component</th><th>Calculation</th><th>Amount</th></tr></thead><tbody id="breakdown"></tbody></table>
         <div class="formula" id="formula">Formula will appear here.</div>
         <div class="note" id="note">Rates are editable. Confirm current carrier schedules and actual coding before relying on a result.</div>
+        <div class="note hidden" id="iulInfo" role="note">IUL estimate includes initial compensation on target premium only. Additional compensation on excess premium and renewals may exist; later years are not included in this estimate.</div>
         <div class="footer">Athene Option 2 uses the monthly 0.0350% trail only. No duplicate annual trail is added.</div>
       </section>
     </div>
@@ -416,6 +417,7 @@
       $('ageBox').classList.toggle('hidden', product!=='ascent10');
       const isIul=['symetraAccumulatorIUL','symetraProtectorIUL'].includes(product);
       $('basisLabel').textContent=term ? 'Monthly term premium ($)' : isIul ? 'Target Premium ($)' : 'Premium / deposit ($)';
+      $('iulInfo').classList.toggle('hidden', !isIul);
       $('basis').placeholder=term ? 'e.g. 142.76' : '';
     }
     function populateProducts(){
@@ -508,7 +510,7 @@
       const userTotal=caseType==='downline' ? override : (splitWithDownline ? myPayout+override : myPayout);
       animateMoney('total',userTotal);
       $('summary').textContent=`${$('product').selectedOptions[0]?.textContent || 'Select a product'}${term ? ' • annualized premium' : ''} • ${split?'split case':'not split'}`;
-      formula=term ? `Annual premium = monthly premium × 12; gross points = annual premium × ${pct(rate*100)}; split first; apply contract percentage second.` : `Gross points = basis × ${pct(rate*100)}; split first; apply contract percentage second.`;
+      formula=term ? `Annual premium = monthly premium × 12; gross points = annual premium × ${pct(rate*100)}; split first; apply contract percentage second.` : ['symetraAccumulatorIUL','symetraProtectorIUL'].includes(product) ? `Initial gross points = target premium × ${pct(rate*100)}; split first; apply contract percentage second.` : `Gross points = basis × ${pct(rate*100)}; split first; apply contract percentage second.`;
       note=term ? `${money(enteredBasis)} monthly premium × 12 = ${money(basis)} annual premium before applying the ${pct(rate*100)} payout rate.` : 'Rates are editable so you can replace remembered reference rates with a current carrier payout schedule.';
       renderCommissionPanels(myPayout, otherPayout, myBase, otherBase, override, myContract, otherContract, split, hasOverride, caseType, spread, overrideBase);
       renderTrailPanel(trailActive, trailGross, trailWriting, trailSplit, trailOverride);
