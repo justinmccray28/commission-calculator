@@ -233,6 +233,10 @@
           <label for="product">▤　Product</label>
           <div class="field-wrap"><span class="field-icon">▤</span><select id="product"><option value="" selected disabled>Select a product</option></select></div>
         </div>
+        <div id="termLengthBox" class="hidden">
+          <label for="termLength">▣　Policy length</label>
+          <div class="field-wrap"><span class="field-icon">▣</span><select id="termLength"><option value="" selected disabled>Select a policy length</option></select></div>
+        </div>
 
         <div id="optionBox">
           <label for="optionChoice">⚙　FIA option</label>
@@ -325,14 +329,16 @@
     </div>
   </main>
   <script>
-    let contractRates, contractNames, presets, trailRates;
+    let contractRates, contractNames, presets, trailRates, termProducts;
     async function loadCommissionData(){
       try {
         const response=await fetch('./commission-data.json', {cache:'no-store'});
         if(!response.ok) throw new Error(`HTTP ${response.status}`);
         const data=await response.json();
         const keys=['agility7','agility10','pe7','pe10','ascent10','nationwide10','nationwide15','nationwide20','nationwide30','swift10','swift15','swift20','swift30','symetraLevel10','symetraLevel15','symetraLevel20','symetraLevel30','symetraAccumulatorIUL','symetraProtectorIUL','trend10','trend15','trend20','trend25','trend30'];
-        if(!data.contractRates || !data.contractNames || !data.presets || !data.trailRates ||
+        if(!data.contractRates || !data.contractNames || !data.presets || !data.trailRates || !data.termProducts ||
+          !['nationwideTerm','swiftTerm','symetraLevelTerm','trendsetterSuper'].every(k=>data.termProducts[k]?.label && data.termProducts[k]?.carrier && data.termProducts[k]?.lengths) ||
+          !Object.values(data.termProducts).every(group=>Object.keys(group.lengths).length && Object.values(group.lengths).every(k=>data.presets[k]?.['1']!=null)) ||
           !['ta','associate','sa','md','smd'].every(k=>Number.isFinite(data.contractRates[k]) && data.contractNames[k]) ||
           !keys.every(k=>data.presets[k]) ||
           !['agility7','agility10','pe7','pe10'].every(k=>data.presets[k]['1']!=null && data.presets[k]['2']!=null && data.trailRates[k]?.['2']!=null) ||
@@ -341,7 +347,7 @@
           !['symetraAccumulatorIUL','symetraProtectorIUL'].every(k=>data.presets[k].base!=null)) throw new Error('Incomplete commission data');
         const validNumbers=object=>Object.values(object).every(value=>typeof value==='number' ? Number.isFinite(value) && value>=0 : value && typeof value==='object' && validNumbers(value));
         if(!validNumbers(data.contractRates) || !validNumbers(data.presets) || !validNumbers(data.trailRates)) throw new Error('Invalid commission rate');
-        ({contractRates,contractNames,presets,trailRates}=data);
+        ({contractRates,contractNames,presets,trailRates,termProducts}=data);
         $('carrier').disabled=false;
         updateCaseType(); updateSelections(); calculate();
       } catch(error) {
@@ -399,6 +405,18 @@
       $('optionChoice').disabled=!options.length;
       $('optionBox').querySelector('label').innerHTML='⚙　FIA option';
     }
+    function selectedProductKey(){
+      const family=$('product').value;
+      return termProducts?.[family]?.lengths[$('termLength').value] || (termProducts?.[family] ? '' : family);
+    }
+    function configureTermLengths(){
+      const family=$('product').value, group=termProducts?.[family];
+      $('termLengthBox').classList.toggle('hidden', !group);
+      if($('termLength').dataset.family===family) return;
+      $('termLength').dataset.family=family;
+      $('termLength').innerHTML='<option value="" selected disabled>Select a policy length</option>'+
+        (group ? Object.keys(group.lengths).map(years=>`<option value="${years}">${years} years</option>`).join('') : '');
+    }
     function overrideSpreadRate(caseType, splitWithDownline, myContract, otherContract){
       const manual=parseFloat($('overridePercent').value);
       if(Number.isFinite(manual)) return Math.max(manual,0)/100;
@@ -406,8 +424,9 @@
     }
     function updateSelections(){
       const product=$('product').value;
+      configureTermLengths();
       configureProductOptions();
-      const term=!!product && !['agility7','agility10','pe7','pe10','ascent10','symetraAccumulatorIUL','symetraProtectorIUL','custom'].includes(product);
+      const term=!!termProducts?.[product];
       const fia=['agility7','agility10','pe7','pe10','ascent10'].includes(product);
       const option2=['2','3'].includes($('optionChoice').value) && fia;
       $('productBox').classList.toggle('hidden', !$('carrier').value);
@@ -422,22 +441,26 @@
     }
     function populateProducts(){
       const carrier=$('carrier').value;
-      const options=carrier==='athene' ? [['agility7','Agility 7'],['agility10','Agility 10'],['pe7','Performance Elite 7'],['pe10','Performance Elite 10'],['ascent10','Ascent Pro 10 Bonus']] : carrier==='nationwide' ? [['nationwide10','Nationwide Guaranteed Level Term — 10 Year'],['nationwide15','Nationwide Guaranteed Level Term — 15 Year'],['nationwide20','Nationwide Guaranteed Level Term — 20 Year'],['nationwide30','Nationwide Guaranteed Level Term — 30 Year']] : carrier==='symetra' ? [['swift10','SwiftTerm — 10 Year'],['swift15','SwiftTerm — 15 Year'],['swift20','SwiftTerm — 20 Year'],['swift30','SwiftTerm — 30 Year'],['symetraLevel10','Symetra 10 Year Level Term'],['symetraLevel15','Symetra 15 Year Level Term'],['symetraLevel20','Symetra 20 Year Level Term'],['symetraLevel30','Symetra 30 Year Level Term'],['symetraAccumulatorIUL','Symetra Accumulator IUL'],['symetraProtectorIUL','Symetra Protector IUL']] : carrier==='transamerica' ? [['trend10','Trendsetter Super — 10 Year'],['trend15','Trendsetter Super — 15 Year'],['trend20','Trendsetter Super — 20 Year'],['trend25','Trendsetter Super — 25 Year'],['trend30','Trendsetter Super — 30 Year']] : carrier==='custom' ? [['custom','Custom product']] : [];
+      const nonTerm=carrier==='athene' ? [['agility7','Agility 7'],['agility10','Agility 10'],['pe7','Performance Elite 7'],['pe10','Performance Elite 10'],['ascent10','Ascent Pro 10 Bonus']] : carrier==='symetra' ? [['symetraAccumulatorIUL','Symetra Accumulator IUL'],['symetraProtectorIUL','Symetra Protector IUL']] : carrier==='custom' ? [['custom','Custom product']] : [];
+      const termGroups=Object.entries(termProducts).filter(([,group])=>group.carrier===carrier).map(([key,group])=>[key,group.label]);
+      const options=[...termGroups,...nonTerm];
       $('product').innerHTML='<option value="" selected disabled>Select a product</option>'+options.map(([value,label])=>`<option value="${value}">${label}</option>`).join('');
       $('productBox').classList.toggle('hidden', !carrier);
       $('optionBox').classList.add('hidden');
       $('option2TrailBox').classList.add('hidden');
       $('trailRateBox').classList.add('hidden');
-      if(carrier==='transamerica'){ $('product').value='trend30'; setPreset(); }
+      $('termLength').dataset.family='';
+      $('termLengthBox').classList.add('hidden');
+      $('rate').value=0;
+      updateSelections();
     }
     function setPreset(){
       if(!presets) return;
-      const key=$('product').value;
-      configureProductOptions();
-      const option=$('optionChoice').value;
-      if(Object.prototype.hasOwnProperty.call(presets,key)){ $('rate').value=productRate(key,option); }
-      if(['agility7','agility10','pe7','pe10','ascent10'].includes(key) && ['2','3'].includes(option)) $('trailRate').value=productTrailRate(key,option);
       updateSelections();
+      const key=selectedProductKey();
+      const option=$('optionChoice').value;
+      $('rate').value=Object.prototype.hasOwnProperty.call(presets,key) ? productRate(key,option) : 0;
+      if(['agility7','agility10','pe7','pe10','ascent10'].includes(key) && ['2','3'].includes(option)) $('trailRate').value=productTrailRate(key,option);
     }
     function renderRow(name, calc, amount){ const payout=/payout/i.test(name); return `<tr><td>${name}</td><td class="muted">${calc}</td><td class="${payout?'payout-amount':''}">${money(amount)}</td></tr>`; }
     function updateCaseType(){
@@ -482,12 +505,12 @@
     }
     function calculate(){
       if(!presets) return;
-      const caseType=$('caseType').value, product=$('product').value, term=!!product && !['agility7','agility10','pe7','pe10','ascent10','symetraAccumulatorIUL','symetraProtectorIUL','custom'].includes(product);
+      const caseType=$('caseType').value, product=selectedProductKey(), term=!!termProducts[$('product').value];
       const splitWithDownline=$('splitWithDownline').checked, split=$('isSplit').checked || splitWithDownline, hasOverride=caseType==='downline' || splitWithDownline;
       const enteredBasis=val('basis'), basis=term ? enteredBasis*12 : enteredBasis;
       const myContract=contractRate('myContract'), otherContract=contractRate('otherContract');
       const mySplit=split?val('mySplit')/100:1, otherSplit=split?val('otherSplit')/100:0;
-      const rate=val('rate')/100;
+      const rate=term && !product ? 0 : val('rate')/100;
       let gross=basis*rate, myBase=gross*mySplit, otherBase=gross*otherSplit;
       const spread=overrideSpreadRate(caseType, splitWithDownline, myContract, otherContract);
       const overrideBase=splitWithDownline ? (caseType==='downline' ? myBase : otherBase) : myBase;
@@ -509,7 +532,7 @@
       }
       const userTotal=caseType==='downline' ? override : (splitWithDownline ? myPayout+override : myPayout);
       animateMoney('total',userTotal);
-      $('summary').textContent=`${$('product').selectedOptions[0]?.textContent || 'Select a product'}${term ? ' • annualized premium' : ''} • ${split?'split case':'not split'}`;
+      $('summary').textContent=term && !product ? 'Select a policy length to see its rate' : `${$('product').selectedOptions[0]?.textContent || 'Select a product'}${term ? ` • ${$('termLength').value} years • annualized premium` : ''} • ${split?'split case':'not split'}`;
       formula=term ? `Annual premium = monthly premium × 12; gross points = annual premium × ${pct(rate*100)}; split first; apply contract percentage second.` : ['symetraAccumulatorIUL','symetraProtectorIUL'].includes(product) ? `Initial gross points = target premium × ${pct(rate*100)}; split first; apply contract percentage second.` : `Gross points = basis × ${pct(rate*100)}; split first; apply contract percentage second.`;
       note=term ? `${money(enteredBasis)} monthly premium × 12 = ${money(basis)} annual premium before applying the ${pct(rate*100)} payout rate.` : 'Rates are editable so you can replace remembered reference rates with a current carrier payout schedule.';
       renderCommissionPanels(myPayout, otherPayout, myBase, otherBase, override, myContract, otherContract, split, hasOverride, caseType, spread, overrideBase);
@@ -519,7 +542,7 @@
     $('caseType').addEventListener('change',()=>{ updateCaseType(); calculate(); });
     $('isSplit').addEventListener('change',()=>{ if(!$('isSplit').checked) $('splitWithDownline').checked=false; updateCaseType(); calculate(); });
     $('splitWithDownline').addEventListener('change',()=>{ if($('splitWithDownline').checked) $('isSplit').checked=true; updateCaseType(); calculate(); });
-    $('carrier').addEventListener('change',populateProducts); $('product').addEventListener('change',setPreset); $('optionChoice').addEventListener('change',setPreset); $('clientAge').addEventListener('input',()=>{ setPreset(); calculate(); }); $('basis').addEventListener('input',()=>formatCommaInput($('basis')));
+    $('carrier').addEventListener('change',populateProducts); $('product').addEventListener('change',setPreset); $('termLength').addEventListener('change',setPreset); $('optionChoice').addEventListener('change',setPreset); $('clientAge').addEventListener('input',()=>{ setPreset(); calculate(); }); $('basis').addEventListener('input',()=>formatCommaInput($('basis')));
     document.querySelectorAll('input, select').forEach(element=>{
       element.addEventListener('input',calculate);
       element.addEventListener('change',calculate);
