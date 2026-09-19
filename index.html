@@ -488,7 +488,7 @@
       $('overrideContractField').classList.toggle('hidden', splitWithDownline);
       $('totalLabel').textContent=type==='downline' ? 'Your override total' : 'Your estimated total';
     }
-    function renderCommissionPanels(myPayout, otherPayout, myBase, otherBase, override, myContract, otherContract, split, hasOverride, caseType, spread, overrideBase){
+    function renderCommissionPanels(myPayout, otherPayout, myBase, otherBase, override, myContract, otherContract, split, hasOverride, caseType, spread, overrideAmount){
       const overrideRate=contractRate('overrideContract');
       $('yourPanel').querySelector('h3').textContent=caseType==='downline' ? 'Downline writing agent commission' : 'Writing agent commission';
       $('splitPanel').querySelector('h3').textContent=$('splitWithDownline').checked ? 'Downline split-agent commission' : 'Split agent commission';
@@ -505,7 +505,7 @@
       animateMoney('overrideCommission',override);
       $('overrideContractLabel').textContent=`${contractName('overrideContract')} (${pct(overrideRate*100)})`;
       $('overrideSpread').textContent=caseType==='downline' && !$('splitWithDownline').checked && !Number.isFinite(parseFloat($('overridePercent').value)) ? `${pct(spread*100)} (${pct(overrideRate*100)} − ${pct(myContract*100)})` : `${pct(spread*100)} contract spread`;
-      $('overrideAllocated').textContent=money(val('overrideBasis') || overrideBase);
+      $('overrideAllocated').textContent=money(overrideAmount);
     }
     function renderTrailPanel(active, gross, writing, splitTrail, override){
       $('trailPanel').classList.toggle('hidden', !active);
@@ -527,12 +527,13 @@
       let gross=basis*rate, myBase=gross*mySplit, otherBase=gross*otherSplit;
       const spread=overrideSpreadRate(caseType, splitWithDownline, myContract, otherContract);
       const overrideBase=splitWithDownline ? (caseType==='downline' ? myBase : otherBase) : myBase;
-      let override=hasOverride ? (val('overrideBasis')||overrideBase)*spread : 0;
+      const overrideAmount=product && !needsCoverage ? (val('overrideBasis')||overrideBase) : 0;
+      let override=hasOverride ? overrideAmount*spread : 0;
       const myPayout=myBase*myContract, otherPayout=otherBase*otherContract, total=myPayout+override;
       let trailGross=0, trailWriting=0, trailSplit=0, trailOverride=0, trailActive=false, rows=[], formula='', note='';
       rows.push(renderRow('Gross points', `${money(basis)} × ${pct(rate*100)}`, gross), renderRow('Agent points', `${money(gross)} × ${pct(mySplit*100)}`, myBase), renderRow('Agent payout', `${money(myBase)} × ${pct(myContract*100)}`, myPayout));
       if(split) rows.push(renderRow('Split agent points', `${money(gross)} × ${pct(otherSplit*100)}`, otherBase), renderRow('Split agent payout', `${money(otherBase)} × ${pct(otherContract*100)}`, otherPayout));
-      if(hasOverride) rows.push(renderRow('Override agent payout', `${money(val('overrideBasis')||overrideBase)} × ${pct(spread*100)} spread`, override));
+      if(hasOverride) rows.push(renderRow('Override agent payout', `${money(overrideAmount)} × ${pct(spread*100)} spread`, override));
       if(['agility7','agility10','pe7','pe10','ascent10'].includes(product) && ['2','3'].includes($('optionChoice').value)){
         const trailBasis=val('trailBasis') || basis, trailRate=val('trailRate')/100;
         trailGross=trailBasis*trailRate; trailWriting=trailGross*mySplit*myContract; trailSplit=trailGross*otherSplit*otherContract;
@@ -548,7 +549,7 @@
       $('summary').textContent=term && !product ? 'Select a policy length to see its rate' : needsCoverage ? 'Enter specified coverage of at least $25,000 to see its rate' : `${$('product').selectedOptions[0]?.textContent || 'Select a product'}${term ? ` • ${$('termLength').value} years • annualized premium` : ''} • ${split?'split case':'not split'}`;
       formula=term ? `Annual premium = monthly premium × 12; gross points = annual premium × ${pct(rate*100)}; split first; apply contract percentage second.` : ['iul','target','wl'].includes(catalog[product]?.kind) ? `Initial gross points = target premium × ${pct(rate*100)}; split first; apply contract percentage second.` : `Gross points = basis × ${pct(rate*100)}; split first; apply contract percentage second.`;
       note=term ? `${money(enteredBasis)} monthly premium × 12 = ${money(basis)} annual premium before applying the ${pct(rate*100)} payout rate.` : needsCoverage ? 'The supplied Lifetime WL schedule begins at $25,000 of specified coverage.' : 'Rates are editable so you can replace remembered reference rates with a current carrier payout schedule.';
-      renderCommissionPanels(myPayout, otherPayout, myBase, otherBase, override, myContract, otherContract, split, hasOverride, caseType, spread, overrideBase);
+      renderCommissionPanels(myPayout, otherPayout, myBase, otherBase, override, myContract, otherContract, split, hasOverride, caseType, spread, overrideAmount);
       renderTrailPanel(trailActive, trailGross, trailWriting, trailSplit, trailOverride);
       $('breakdown').innerHTML=rows.join(''); $('formula').textContent=formula; $('note').textContent=note;
     }
