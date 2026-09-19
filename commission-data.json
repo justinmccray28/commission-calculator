@@ -1,6 +1,12 @@
 {
   "contractRates": {"ta": 25, "associate": 35, "sa": 45, "md": 50, "smd": 65},
   "contractNames": {"ta": "Training Associate", "associate": "Associate", "sa": "Senior Associate", "md": "Marketing Director", "smd": "Senior Marketing Director"},
+  "termProducts": {
+    "nationwideTerm": {"carrier": "nationwide", "label": "Nationwide Guaranteed Level Term", "lengths": {"10": "nationwide10", "15": "nationwide15", "20": "nationwide20", "30": "nationwide30"}},
+    "swiftTerm": {"carrier": "symetra", "label": "SwiftTerm", "lengths": {"10": "swift10", "15": "swift15", "20": "swift20", "30": "swift30"}},
+    "symetraLevelTerm": {"carrier": "symetra", "label": "Symetra Level Term", "lengths": {"10": "symetraLevel10", "15": "symetraLevel15", "20": "symetraLevel20", "30": "symetraLevel30"}},
+    "trendsetterSuper": {"carrier": "transamerica", "label": "Trendsetter Super", "lengths": {"10": "trend10", "15": "trend15", "20": "trend20", "25": "trend25", "30": "trend30"}}
+  },
   "presets": {
     "agility7": {"1": 4.1925, "2": 2.7251},
     "agility10": {"1": 5.8695, "2": 3.5636},
