@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Commission Calculator</title>
+  <style>
+    :root { --bg:#06101d; --panel:#0b1a2d; --panel2:#102641; --text:#f5f8fc; --muted:#9bb0c9; --accent:#23e0d5; --accent2:#5b9dff; --line:#1c4a73; --warn:#f4c84d; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:radial-gradient(circle at 20% -10%,#153e68 0,#071525 32%,#040b14 100%); color:var(--text); font:15px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+    .wrap { max-width:1375px; margin:0 auto; padding:38px 38px 45px; }
+    .page-head { display:flex; align-items:flex-end; justify-content:space-between; gap:30px; margin-bottom:23px; }
+    h1 { margin:0 0 7px; font-size:39px; letter-spacing:-1.3px; } h2 { margin:0 0 7px; font-size:21px; }
+    .sub { color:#a9c0dc; margin:0; font-size:14px; }
+    .grid { display:grid; grid-template-columns:510px 1fr; gap:17px; align-items:start; }
+    .card { background:linear-gradient(160deg,rgba(11,31,53,.98),rgba(6,17,30,.98)); border:1px solid #1f5d8b; border-radius:16px; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,.30), inset 0 1px rgba(134,207,255,.05); }
+    label { display:block; color:#c9d1d9; font-size:13px; margin:13px 0 6px; }
+    input, select { width:100%; border:1px solid #24557e; background:linear-gradient(120deg,rgba(24,60,94,.72),rgba(12,36,62,.72)); color:var(--text); color-scheme:dark; border-radius:10px; padding:11px 12px; font:inherit; box-shadow:inset 0 1px rgba(152,220,255,.06),0 4px 12px rgba(0,0,0,.08); }
+    select option, select optgroup { background:#102641 !important; color:#f5f8fc !important; }
+    input:focus,select:focus { outline:2px solid rgba(79,209,197,.3); border-color:var(--accent); }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .check { display:flex; align-items:center; gap:9px; margin-top:14px; color:#c9d1d9; }
+    .check input { width:auto; accent-color:var(--accent); }
+    .hidden { display:none; }
+    .hero { display:flex; justify-content:space-between; align-items:center; gap:15px; margin:-24px -24px 18px; padding:17px 24px; border-bottom:1px solid #1e4568; }
+    .hero-title { display:flex; align-items:center; gap:12px; }
+    .heading-icon { width:42px; height:42px; display:grid; place-items:center; color:var(--accent); border:1px solid #217f93; border-radius:10px; background:linear-gradient(145deg,rgba(22,102,124,.5),rgba(8,37,61,.6)); font-size:22px; box-shadow:inset 0 1px rgba(172,255,255,.13); }
+    .field-wrap { position:relative; }
+    .field-icon { position:absolute; z-index:1; left:0; top:0; bottom:0; width:48px; display:grid; place-items:center; color:#86b5d9; border-right:1px solid rgba(83,149,195,.28); font-size:18px; pointer-events:none; }
+    .field-wrap input, .field-wrap select { padding-left:59px; }
+    .status { display:flex; align-items:center; gap:7px; border:1px solid #087f78; color:#56f0d0; background:rgba(15,115,107,.16); border-radius:99px; padding:7px 12px; font-size:12px; white-space:nowrap; }
+    .status-dot { width:8px; height:8px; border-radius:50%; background:#48ebbe; box-shadow:0 0 10px #48ebbe; }
+    .big { font-size:42px; font-weight:850; color:var(--accent); margin:2px 0 3px; letter-spacing:-1px; }
+    .muted { color:var(--muted); }
+    table { width:100%; border-collapse:collapse; margin-top:12px; }
+    th,td { text-align:left; border-bottom:1px solid var(--line); padding:10px 6px; }
+    th { color:var(--muted); font-size:12px; font-weight:600; }
+    td:last-child,th:last-child { text-align:right; }
+    .note { margin-top:15px; border-left:3px solid var(--warn); padding:9px 11px; color:#d8b365; background:rgba(210,153,34,.08); border-radius:4px; font-size:13px; }
+    .formula { color:#c9d1d9; background:#0d1117; border:1px solid var(--line); border-radius:8px; padding:11px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; overflow:auto; }
+    .commission-panels { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:18px 0; }
+    .commission-panel { background:linear-gradient(145deg,rgba(9,55,65,.72),rgba(6,22,39,.74)); border:1px solid #127d82; border-left:4px solid var(--accent); border-radius:12px; padding:16px; box-shadow:inset 0 1px rgba(151,255,247,.07),0 8px 20px rgba(0,0,0,.12); }
+    #splitPanel { background:linear-gradient(145deg,rgba(10,31,62,.76),rgba(6,20,39,.76)); border-color:#1e72c2; border-left-color:#57a5ff; }
+    #overridePanel { grid-column:1 / -1; }
+    .commission-panel h3 { display:flex; align-items:center; gap:9px; margin:0 0 7px; font-size:15px; }
+    .commission-panel h3:before { content:'♙'; width:27px; height:27px; display:grid; place-items:center; border:1px solid currentColor; border-radius:50%; color:#7defff; font-size:16px; }
+    #splitPanel h3:before { color:#8ebcff; }
+    .panel-total { color:var(--accent); font-size:27px; font-weight:850; margin:2px 0 8px; }
+    #yourCommission, #splitCommission, #overrideCommission { color:#2de5db; }
+    .payout-amount { color:#2de5db !important; font-weight:800; }
+    .clarity-row { display:flex; align-items:center; gap:28px; margin:5px 0 10px; }
+    .clarity-copy { min-width:260px; padding-left:28px; border-left:1px solid #285171; }
+    .clarity-copy h3 { margin:0 0 7px; font-size:15px; font-weight:600; }
+    .clarity-copy p { margin:0; color:#a9c0dc; font-size:13px; line-height:1.55; }
+    .panel-line { display:flex; justify-content:space-between; gap:10px; color:var(--muted); font-size:13px; padding:4px 0; }
+    .panel-line strong { color:#c9d1d9; text-align:right; }
+    .trail-panel { margin:16px 0; padding:17px; border:1px solid rgba(124,140,255,.55); border-radius:13px; background:linear-gradient(120deg,rgba(80,93,185,.18),rgba(6,15,28,.58)); }
+    .section-title { display:flex; align-items:center; gap:10px; margin:22px 0 7px; font-size:16px; }
+    .section-title .section-icon { color:var(--accent); font-size:18px; }
+    .trail-title { display:flex; justify-content:space-between; gap:12px; align-items:baseline; margin-bottom:9px; }
+    .trail-title h3 { margin:0; font-size:16px; }
+    .trail-tag { color:#bfc6ff; font-size:12px; }
+    .trail-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    .trail-stat { padding:10px; border:1px solid rgba(124,140,255,.24); border-radius:9px; background:rgba(8,17,31,.5); }
+    .trail-stat span { display:block; color:var(--muted); font-size:12px; margin-bottom:4px; }
+    .trail-stat strong { font-size:16px; color:#dfe3ff; }
+    .footer { margin-top:18px; color:var(--muted); font-size:12px; }
+    @media(max-width:1050px){ .grid{grid-template-columns:1fr}.page-head{align-items:flex-start} }
+    @media(max-width:800px){ .wrap{padding:25px 14px 35px}.big{font-size:31px}.trail-grid{grid-template-columns:1fr 1fr}.commission-panels{grid-template-columns:1fr}.overridePanel{grid-column:auto} }
+    /* Refined glass dashboard */
+    :root { --bg:#071422; --panel:#102237; --panel2:#152b42; --text:#f7f9fd; --muted:#abc0d8; --accent:#5af3de; --accent2:#73b5ff; --line:#26435f; --warn:#ffd572; }
+    body { min-height:100vh; background:radial-gradient(ellipse 72% 35% at 53% -8%,rgba(31,77,125,.31),transparent 83%),linear-gradient(145deg,#0b1726 0%,#071524 47%,#071320 100%); font-size:14px; letter-spacing:-.012em; }
+    body:before { content:""; position:fixed; inset:0; pointer-events:none; background:linear-gradient(90deg,transparent 49.95%,rgba(112,195,240,.025) 50%,transparent 50.05%); background-size:28px 28px; opacity:.35; }
+    .wrap { position:relative; max-width:1420px; padding:32px 38px 42px; }
+    .page-head { align-items:center; margin-bottom:21px; }
+    h1 { font-size:clamp(32px,3.3vw,43px); font-weight:790; line-height:1.1; letter-spacing:-.045em; text-shadow:0 2px 24px rgba(166,211,255,.12); }
+    h2 { font-size:20px; letter-spacing:-.025em; }
+    .sub { color:#abc2df; font-size:14px; letter-spacing:.002em; }
+    .head-mark { display:flex; align-items:center; gap:23px; color:#a9bdd7; padding-right:5px; }
+    .bars { height:59px; display:flex; gap:9px; align-items:flex-end; }
+    .bars i { display:block; width:13px; height:var(--h); background:linear-gradient(0deg,rgba(22,92,138,.08),rgba(42,161,207,.7)); }
+    .head-mark span { border-left:1px solid #31536d; padding:3px 0 3px 21px; font-size:10px; line-height:1.42; letter-spacing:.23em; }
+    .grid { grid-template-columns:minmax(380px, 475px) minmax(0,1fr); gap:14px; }
+    .card { padding:22px; border:1px solid rgba(78,137,186,.47); background:linear-gradient(148deg,rgba(20,42,66,.87),rgba(9,26,43,.92) 57%,rgba(9,26,42,.9)); border-radius:14px; box-shadow:0 16px 44px rgba(0,0,0,.27),inset 0 1px rgba(181,221,255,.09),inset 0 0 32px rgba(81,155,221,.035); backdrop-filter:blur(18px); }
+    .input-head { display:flex; gap:16px; align-items:center; margin-bottom:12px; }
+    .input-head h2 { margin:0 0 2px; }
+    .input-head p { color:#aec3dc; margin:0; font-size:12px; }
+    .heading-icon { flex:none; width:49px; height:49px; border-radius:11px; border:1px solid rgba(78,177,196,.34); color:#5eead8; background:linear-gradient(145deg,rgba(25,69,84,.76),rgba(17,44,64,.69)); box-shadow:inset 0 1px rgba(219,255,255,.12),0 5px 16px rgba(0,0,0,.12); }
+    .heading-icon svg { width:24px; height:24px; stroke:currentColor; stroke-width:2.5; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+    label { margin:11px 0 5px; color:#d6e1ef; font-size:12px; font-weight:500; }
+    input, select { min-height:39px; padding:9px 12px; border-radius:8px; border:1px solid #2c4b69; background:linear-gradient(110deg,rgba(24,48,74,.91),rgba(19,42,68,.91)); color:#f3f8ff; box-shadow:inset 0 1px rgba(186,220,255,.05); font-size:13px; }
+    select option,select optgroup { background:#12263c !important; color:#f5f9ff !important; }
+    .field-icon { width:42px; background:linear-gradient(105deg,rgba(37,74,111,.55),rgba(30,63,96,.24)); color:#a1c8eb; border-right:1px solid rgba(115,165,208,.16); font-size:16px; }
+    .field-wrap input,.field-wrap select { padding-left:54px; }
+    select { cursor:pointer; }
+    .check { margin-top:10px; cursor:pointer; font-size:13px; }
+    .check input { min-height:auto; accent-color:#41e7d4; }
+    .row { gap:13px; }
+    #results { padding:0 22px 18px; overflow:hidden; }
+    .hero { margin:0 -22px 0; padding:15px 22px; min-height:76px; border-color:rgba(94,154,199,.19); background:linear-gradient(180deg,rgba(28,56,84,.23),transparent); }
+    .hero .heading-icon { width:47px; height:47px; color:#58eadd; }
+    .hero h2 { margin:0 0 2px; }
+    .hero .muted { font-size:12px; }
+    .status { background:rgba(20,104,85,.15); color:#79eacb; border-color:#1b7f71; padding:7px 11px; font-size:11px; }
+    .status-dot { width:7px; height:7px; }
+    .clarity-row { position:relative; justify-content:space-between; min-height:105px; margin:0 -22px; padding:14px 22px 12px; gap:20px; overflow:hidden; }
+    .total-block { min-width:260px; position:relative; z-index:1; }
+    .total-block .muted { font-size:13px; color:#c3d4e9; }
+    .big { font-size:clamp(37px,4vw,56px); line-height:1.04; margin:3px 0; font-weight:800; letter-spacing:-.055em; color:#59e9df; text-shadow:0 0 24px rgba(52,225,211,.09); }
+    .clarity-copy { position:relative; z-index:1; min-width:215px; max-width:350px; flex:1; margin-right:14%; padding-left:26px; }
+    .clarity-copy h3 { font-size:13px; margin:0 0 4px; color:#eef5fe; }
+    .clarity-copy p { font-size:12px; line-height:1.5; }
+    .wave { position:absolute; right:12px; bottom:3px; width:18%; height:86px; opacity:.7; pointer-events:none; }
+    .commission-panels { gap:14px; margin:0 0 14px; }
+    .commission-panel { position:relative; padding:15px 17px 13px 20px; min-height:157px; border-radius:11px; border:1px solid rgba(37,143,137,.54); border-left:5px solid #32e8d8; background:linear-gradient(125deg,rgba(16,65,67,.51),rgba(14,44,58,.43)); box-shadow:inset 0 1px rgba(130,252,230,.09); }
+    #splitPanel { border-color:rgba(46,115,208,.56); border-left-color:#68adff; background:linear-gradient(125deg,rgba(22,53,88,.5),rgba(15,38,68,.48)); }
+    .commission-panel h3 { margin:0 0 2px; font-size:13px; padding-left:48px; min-height:23px; }
+    .commission-panel h3:before { position:absolute; top:15px; left:17px; content:' '; width:37px; height:37px; background-color:rgba(17,88,94,.4); background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='8' r='4' fill='%2393fff1'/%3E%3Cpath d='M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8' fill='%2393fff1'/%3E%3C/svg%3E"); background-size:20px; background-position:center; background-repeat:no-repeat; border:1px solid #22d5bc; color:transparent; }
+    #splitPanel h3:before { border-color:#68adff; background-color:rgba(42,89,144,.34); filter:hue-rotate(54deg); }
+    .contract-caption { padding-left:48px; color:#abc1db; font-size:12px; min-height:21px; }
+    .panel-total { padding-left:48px; margin:1px 0 7px; font-size:26px; line-height:1.1; letter-spacing:-.035em; }
+    #yourCommission,#splitCommission,#overrideCommission { color:#62efe4; }
+    .panel-line { border-top:1px solid rgba(109,167,198,.17); font-size:11px; padding:4px 0 2px; }
+    .panel-line strong { color:#f2f6fb; font-weight:600; }
+    .panel-line.contract-line { display:none; }
+    #overridePanel { min-height:0; }
+    #overridePanel .panel-total { margin-bottom:10px; }
+    .section-title { margin:18px 0 9px; font-size:14px; }
+    .section-title .section-icon { display:grid; place-items:center; color:#78c0ff; }
+    .section-title .muted { font-weight:400; }
+    table { margin:0; border:1px solid #2a4a67; border-collapse:separate; border-spacing:0; border-radius:8px; overflow:hidden; font-size:12px; }
+    th,td { padding:7px 13px; border-right:1px solid rgba(60,95,124,.45); border-bottom:1px solid rgba(72,112,146,.36); }
+    th:last-child,td:last-child { border-right:0; }
+    tbody tr:last-child td { border-bottom:0; }
+    th { background:rgba(30,60,90,.56); color:#c8d7ea; font-size:11px; font-weight:500; }
+    td { color:#e7eef7; }
+    .payout-amount { color:#6ceee5!important; }
+    .formula { margin-top:13px; border:1px solid rgba(180,143,70,.38); border-left:4px solid #ffd56f; background:linear-gradient(90deg,rgba(141,102,33,.16),rgba(23,50,70,.44)); color:#ffd987; font-family:inherit; font-size:12px; line-height:1.5; }
+    .formula:before { content:'◫'; margin-right:12px; font-size:17px; color:#ffd067; vertical-align:-1px; }
+    .note { margin-top:6px; border:1px solid rgba(68,118,160,.35); border-left:1px solid rgba(68,118,160,.35); background:rgba(25,59,89,.39); color:#b8cde3; font-size:11px; padding:8px 12px; }
+    .note:before { content:'ⓘ'; color:#83c2ff; margin-right:12px; font-size:15px; vertical-align:-1px; }
+    .footer { font-size:11px; margin-top:13px; }
+    .trail-panel { background:linear-gradient(120deg,rgba(36,67,104,.51),rgba(12,30,51,.52)); }
+    .hidden { display:none!important; }
+    @media(max-width:1100px) { .head-mark { display:none; } .grid { grid-template-columns:minmax(340px,41%) minmax(0,1fr); } .clarity-copy { margin-right:0; } .wave { opacity:.2; } .commission-panels { grid-template-columns:1fr; } #overridePanel { grid-column:auto; } }
+    @media(max-width:850px) { .wrap { padding:24px 16px 38px; } .grid { grid-template-columns:1fr; } .commission-panels { grid-template-columns:repeat(2,minmax(0,1fr)); } #overridePanel { grid-column:1/-1; } }
+    @media(max-width:600px) { .card { padding:17px; } #results { padding:0 17px 17px; } .hero,.clarity-row { margin-left:-17px; margin-right:-17px; padding-left:17px; padding-right:17px; } .hero { flex-wrap:wrap; } .clarity-row { flex-wrap:wrap; } .clarity-copy { border-left:0; padding-left:0; max-width:none; } .commission-panels { grid-template-columns:1fr; } #overridePanel { grid-column:auto; } .row { grid-template-columns:1fr; } .section-title .muted { display:none; } th,td { padding:7px; font-size:11px; } }
+    /* Subtle illuminated ink and tiny highlights from the reference */
+    .big,.panel-total,.payout-amount {
+      background:linear-gradient(110deg,#49d9f4 3%,#76fff0 49%,#57eac4 96%);
+      background-clip:text;
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .big { display:inline-block; filter:drop-shadow(0 0 12px rgba(45,233,222,.27)) drop-shadow(0 4px 20px rgba(14,195,200,.13)); }
+    .panel-total { width:max-content; max-width:100%; filter:drop-shadow(0 0 8px rgba(66,230,219,.22)); }
+    .payout-amount { filter:drop-shadow(0 0 5px rgba(59,223,217,.16)); }
+    .commission-panel { isolation:isolate; overflow:hidden; }
+    .commission-panel:after {
+      content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+      background:radial-gradient(circle at 8% 4%,rgba(133,255,231,.16) 0 1px,transparent 2px),
+                 radial-gradient(circle at 96% 10%,rgba(138,253,247,.14) 0 1px,transparent 2px),
+                 radial-gradient(ellipse 55% 75% at 35% 6%,rgba(68,220,198,.075),transparent 80%);
+    }
+    #splitPanel:after { background:radial-gradient(circle at 8% 4%,rgba(182,219,255,.18) 0 1px,transparent 2px),radial-gradient(circle at 96% 10%,rgba(147,212,255,.16) 0 1px,transparent 2px),radial-gradient(ellipse 55% 75% at 35% 6%,rgba(87,161,255,.085),transparent 80%); }
+    .commission-panel:before { content:""; position:absolute; top:-75px; left:15%; width:70%; height:105px; border-radius:50%; background:rgba(74,238,220,.1); filter:blur(35px); pointer-events:none; }
+    #splitPanel:before { background:rgba(102,169,255,.11); }
+    .clarity-row:before { content:""; position:absolute; left:8%; top:40%; width:29%; height:48px; pointer-events:none; background:rgba(39,213,207,.09); filter:blur(29px); }
+    @supports not ((background-clip:text) and (-webkit-text-fill-color:transparent)) { .big,.panel-total,.payout-amount { background:none; color:#70eee4!important; } }
+    /* Light through translucent glass over a textured navy backdrop */
+    body {
+      background-color:#06111e;
+      background-image:
+        radial-gradient(ellipse 50% 50% at 9% 16%,rgba(28,100,142,.31),transparent 80%),
+        radial-gradient(ellipse 43% 60% at 93% 18%,rgba(23,86,149,.34),transparent 85%),
+        radial-gradient(ellipse 36% 55% at 44% 82%,rgba(12,88,115,.18),transparent 90%),
+        linear-gradient(113deg,rgba(6,17,30,.95) 0%,rgba(15,39,63,.83) 49%,rgba(5,18,32,.96) 100%);
+    }
+    body:before { background:radial-gradient(ellipse 70% 22% at 55% 8%,rgba(120,204,249,.13),transparent 85%); opacity:1; }
+    body:after {
+      content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.63' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
+      opacity:.085; mix-blend-mode:screen;
+    }
+    .wrap { z-index:1; }
+    .card {
+      border-color:rgba(108,171,222,.57);
+      background:linear-gradient(155deg,rgba(27,56,84,.76) 0%,rgba(11,32,53,.83) 52%,rgba(13,36,57,.76) 100%);
+      box-shadow:0 20px 55px rgba(0,5,14,.47),inset 0 1px rgba(229,247,255,.17),inset 0 0 50px rgba(80,158,221,.055);
+      backdrop-filter:blur(24px) saturate(145%);
+      -webkit-backdrop-filter:blur(24px) saturate(145%);
+    }
+    .card:first-child { background:linear-gradient(155deg,rgba(27,55,80,.82),rgba(10,31,51,.88) 72%); }
+    #results { background:linear-gradient(145deg,rgba(23,49,75,.77),rgba(8,28,48,.86) 68%,rgba(13,34,54,.78)); }
+    .hero { background:linear-gradient(180deg,rgba(75,142,191,.14),rgba(18,50,80,.025)); }
+    input,select { background:linear-gradient(110deg,rgba(31,64,96,.92),rgba(23,50,78,.93)); border-color:#3a6283; box-shadow:inset 0 1px rgba(220,242,255,.09),0 2px 9px rgba(0,9,24,.12); }
+    input:focus,select:focus { outline:2px solid rgba(70,237,219,.25); border-color:#67d9d5; box-shadow:0 0 0 4px rgba(62,226,208,.08); }
+    .commission-panel { box-shadow:inset 0 1px rgba(169,255,243,.16),0 12px 24px rgba(0,7,17,.18),0 0 22px rgba(49,204,188,.045); }
+    #splitPanel { box-shadow:inset 0 1px rgba(199,226,255,.15),0 12px 24px rgba(0,7,17,.18),0 0 22px rgba(103,168,255,.05); }
+    .section-title { font-size:16px; margin-top:20px; }
+    table { font-size:14px; border-color:#3a5d7d; background:rgba(9,25,44,.35); }
+    th { font-size:13px; color:#d5e5f5; background:rgba(45,84,121,.63); }
+    th,td { padding:10px 13px; border-bottom-color:rgba(93,145,184,.33); border-right-color:rgba(82,130,168,.3); }
+    td { color:#f1f6ff; }
+    td.muted { color:#c1d7ed; }
+    tbody tr:nth-child(even) { background:rgba(41,82,116,.13); }
+    tbody tr:hover { background:rgba(58,123,164,.15); }
+    @media(max-width:600px) { table { font-size:12px; } th,td { font-size:12px; padding:8px 6px; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="page-head"><div><h1>Commission Calculator</h1><p class="sub">MD 50% default • split-first logic • downline overrides • carrier-specific payout rules</p></div><div class="head-mark" aria-hidden="true"><div class="bars"><i style="--h:13px"></i><i style="--h:25px"></i><i style="--h:37px"></i><i style="--h:50px"></i><i style="--h:63px"></i></div><span>MORE<br>INSIGHT<br>HIGHER<br>POTENTIAL</span></div></div>
+    <div class="grid">
+      <section class="card">
+        <div class="input-head"><span class="heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="9" cy="6" r="2.4" fill="#163c4e"/><circle cx="16" cy="12" r="2.4" fill="#163c4e"/><circle cx="9" cy="18" r="2.4" fill="#163c4e"/></svg></span><div><h2>Case inputs</h2><p>Enter the case details to calculate estimated commissions.</p></div></div>
+        <label for="caseType">▣　Case type</label>
+        <div class="field-wrap"><span class="field-icon">▣</span><select id="caseType">
+          <option value="personal">My business</option>
+          <option value="downline">Downline business</option>
+        </select></div>
+        <label for="carrier">▥　Carrier</label>
+        <div class="field-wrap"><span class="field-icon">▥</span><select id="carrier">
+          <option value="" selected disabled>Select a carrier</option>
+          <option value="athene">Athene</option>
+          <option value="nationwide">Nationwide</option>
+          <option value="symetra">Symetra</option>
+          <option value="transamerica">Transamerica</option>
+          <option value="custom">Other / custom carrier</option>
+        </select></div>
+
+        <div id="productBox" class="hidden">
+          <label for="product">▤　Product</label>
+          <div class="field-wrap"><span class="field-icon">▤</span><select id="product"><option value="" selected disabled>Select a product</option></select></div>
+        </div>
+
+        <div id="optionBox">
+          <label for="optionChoice">⚙　FIA option</label>
+        <div class="field-wrap"><span class="field-icon">⚙</span><select id="optionChoice">
+          <option value="1">Option 1</option>
+          <option value="2">Option 2</option>
+        </select></div>
+        </div>
+
+        <div id="ageBox" class="hidden">
+          <label for="clientAge">♙　Client age</label>
+          <div class="field-wrap"><span class="field-icon">♙</span><input id="clientAge" type="number" min="0" max="120" step="1" value="0"></div>
+        </div>
+
+        <label id="basisLabel" for="basis">$　Premium / deposit ($)</label>
+        <div class="field-wrap"><span class="field-icon">$</span><input id="basis" type="text" inputmode="decimal" value="0"></div>
+        <label for="rate">%　Payout rate (%)</label>
+        <div class="field-wrap"><span class="field-icon">%</span><input id="rate" type="number" min="0" step="0.0001" value="4.6118"></div>
+
+        <div id="trailRateBox" class="hidden">
+          <label for="trailRate">Monthly trail rate (%)</label>
+          <div class="field-wrap"><span class="field-icon">%</span><input id="trailRate" type="number" min="0" step="0.0001" value="0.0350"></div>
+        </div>
+        <div id="option2TrailBox" class="hidden">
+          <label for="trailBasis">Accumulated value for monthly trail ($)</label>
+          <div class="field-wrap"><span class="field-icon">$</span><input id="trailBasis" type="number" min="0" step="0.01" value="0"></div>
+        </div>
+
+        <div class="row">
+          <div><label for="myContract">Writing agent contract</label><div class="field-wrap"><span class="field-icon">♙</span><select id="myContract"><option value="ta">Training Associate</option><option value="associate">Associate</option><option value="sa">Senior Associate</option><option value="md" selected>Marketing Director</option><option value="smd">Senior Marketing Director</option></select></div></div>
+          <div id="splitContractField"><label for="otherContract">Split agent contract</label><div class="field-wrap"><span class="field-icon">♙</span><select id="otherContract"><option value="ta">Training Associate</option><option value="associate">Associate</option><option value="sa" selected>Senior Associate</option><option value="md">Marketing Director</option><option value="smd">Senior Marketing Director</option></select></div></div>
+        </div>
+
+        <label class="check"><input id="isSplit" type="checkbox"> <span>Split case</span></label>
+        <div id="splitDownlineChoice"><label class="check"><input id="splitWithDownline" type="checkbox"> <span>Split with downline</span></label></div>
+        <div id="splitFields" class="hidden">
+          <div class="row">
+            <div><label for="mySplit">Writing agent split (%)</label><input id="mySplit" type="number" min="0" max="100" step="0.01" value="50"></div>
+            <div><label for="otherSplit">Split agent split (%)</label><input id="otherSplit" type="number" min="0" max="100" step="0.01" value="50"></div>
+          </div>
+        </div>
+
+        <div id="overrideFields" class="hidden">
+          <div id="overrideContractField"><label for="overrideContract">Override agent's contract level</label>
+          <select id="overrideContract"><option value="ta">Training Associate</option><option value="associate">Associate</option><option value="sa">Senior Associate</option><option value="md" selected>Marketing Director</option><option value="smd">Senior Marketing Director</option></select></div>
+          <label for="overridePercent">Override percentage <span class="muted">(leave blank for automatic contract spread)</span></label>
+          <div class="field-wrap"><span class="field-icon">%</span><input id="overridePercent" type="number" min="0" step="0.01" placeholder="Auto"></div>
+          <label for="overrideBasis">Override basis ($; leave blank to use other party's allocated gross)</label>
+          <input id="overrideBasis" type="number" min="0" step="0.01" placeholder="Auto">
+        </div>
+      </section>
+
+      <section class="card" id="results">
+        <div class="hero"><div class="hero-title"><span class="heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24" style="stroke:none"><rect x="3" y="14" width="4" height="7" rx="1" fill="#4be0dc"/><rect x="10" y="9" width="4" height="12" rx="1" fill="#4be0dc"/><rect x="17" y="3" width="4" height="18" rx="1" fill="#4be0dc"/></svg></span><div><h2>Estimated payout</h2><div class="muted" id="summary">Select a carrier and product to see your estimate.</div></div></div><div class="status"><span class="status-dot"></span>Calculation complete</div></div>
+        <div class="clarity-row"><div class="total-block"><div class="muted" id="totalLabel">Your estimated total</div><div class="big" id="total">$0.00</div></div><div class="clarity-copy"><h3>Same case. Greater clarity.</h3><p>Accurate commission estimates help you plan, partner, and grow with confidence.</p></div><svg class="wave" viewBox="0 0 170 85" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="wavefill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#2589ac" stop-opacity=".62"/><stop offset="1" stop-color="#147095" stop-opacity="0"/></linearGradient></defs><path d="M0 80 C18 64 18 46 33 54 S50 63 66 36 S85 56 102 38 S118 20 133 8 S153 36 170 72 L170 85 L0 85Z" fill="url(#wavefill)" stroke="#278aad" stroke-width="1"/></svg></div>
+        <div class="commission-panels">
+          <div class="commission-panel" id="yourPanel">
+            <h3>Writing agent commission</h3><div class="contract-caption" id="yourContractCaption">Marketing Director (50%)</div><div class="panel-total" id="yourCommission">$0.00</div>
+            <div class="panel-line contract-line"><span>Contract</span><strong id="yourContractLabel">Marketing Director</strong></div>
+            <div class="panel-line"><span>Allocated gross</span><strong id="yourAllocated">$0.00</strong></div>
+          </div>
+          <div class="commission-panel" id="splitPanel">
+            <h3>Split agent commission</h3><div class="contract-caption" id="splitContractCaption">Senior Associate (45%)</div><div class="panel-total" id="splitCommission">$0.00</div>
+            <div class="panel-line contract-line"><span>Contract</span><strong id="splitContractLabel">Senior Associate</strong></div>
+            <div class="panel-line"><span>Allocated gross</span><strong id="splitAllocated">$0.00</strong></div>
+          </div>
+          <div class="commission-panel hidden" id="overridePanel">
+            <h3>Override agent commission</h3><div class="contract-caption">Contract spread</div><div class="panel-total" id="overrideCommission">$0.00</div>
+            <div class="panel-line"><span>Override contract</span><strong id="overrideContractLabel">Marketing Director</strong></div>
+            <div class="panel-line"><span>Contract spread</span><strong id="overrideSpread">0%</strong></div>
+            <div class="panel-line"><span>Override basis</span><strong id="overrideAllocated">$0.00</strong></div>
+          </div>
+        </div>
+        <div id="trailPanel" class="trail-panel hidden">
+          <div class="trail-title"><h3>Option 2 monthly trail</h3><span class="trail-tag">0.0350% monthly • split first</span></div>
+          <div class="trail-grid">
+            <div class="trail-stat"><span>Gross monthly trail</span><strong id="trailGrossOutput">$0.00</strong></div>
+            <div class="trail-stat"><span>Writing agent trail</span><strong id="trailWritingOutput">$0.00</strong></div>
+            <div class="trail-stat"><span>Split agent trail</span><strong id="trailSplitOutput">$0.00</strong></div>
+            <div class="trail-stat"><span>Override agent trail</span><strong id="trailOverrideOutput">$0.00</strong></div>
+          </div>
+        </div>
+        <div class="section-title"><span class="section-icon">▣</span><strong>Calculation breakdown</strong><span class="muted" style="margin-left:auto;font-size:12px">Based on entered case details　ⓘ</span></div>
+        <table><thead><tr><th>Component</th><th>Calculation</th><th>Amount</th></tr></thead><tbody id="breakdown"></tbody></table>
+        <div class="formula" id="formula">Formula will appear here.</div>
+        <div class="note" id="note">Rates are editable. Confirm current carrier schedules and actual coding before relying on a result.</div>
+        <div class="footer">Athene Option 2 uses the monthly 0.0350% trail only. No duplicate annual trail is added.</div>
+      </section>
+    </div>
+  </main>
+  <script>
+    const contractRates = { md:50, smd:65, sa:45, associate:35, ta:25 };
+    const contractNames = { md:'Marketing Director', smd:'Senior Marketing Director', sa:'Senior Associate', associate:'Associate', ta:'Training Associate' };
+    const presets = {
+      agility7: {1:4.1925, 2:2.7251},
+      agility10: {1:5.8695, 2:3.5636},
+      pe7: {1:4.6118, 2:2.5115},
+      pe10: {1:6.288, 2:3.7733},
+      ascent10: {1:{0:6.2888,71:5.8695,76:5.0310}, 2:{0:3.7733,71:3.5217,76:3.0605}, 3:{0:1.2578,71:1.1739,76:1.0488}},
+      nationwide10: {1:92.2350}, nationwide15: {1:96.4275}, nationwide20: {1:104.8125}, nationwide30: {1:104.8125},
+      swift10: {1:88.0425}, swift15: {1:92.2350}, swift20: {1:104.8125}, swift30: {1:104.8125},
+      symetraLevel10: {1:79.6575}, symetraLevel15: {1:79.6575}, symetraLevel20: {1:92.2350}, symetraLevel30: {1:92.2350},
+      symetraAccumulatorIUL: {base:100.6200, excess:1.6770, renewal:0.8385},
+      symetraProtectorIUL: {base:92.2350, excess:1.6770, renewal:0.8385},
+      trend10: {1:95.8525}, trend15: {1:100.0200}, trend20: {1:104.1875}, trend25: {1:104.1875}, trend30: {1:104.1875}
+    };
+    const trailRates = {
+      agility7:{2:0.0350}, agility10:{2:0.0350}, pe7:{2:0.0350}, pe10:{2:0.0350},
+      ascent10:{2:{0:0.0350,71:0.0314,76:0.0279},3:{0:0.0698,71:0.0629,76:0.0524}}
+    };
+    const $ = id => document.getElementById(id);
+    const money = n => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number.isFinite(n)?n:0);
+    const pct = n => `${Number(n).toFixed(4).replace(/0+$/,'').replace(/\.$/,'')}%`;
+    function val(id){ return parseFloat(String($(id).value).replace(/,/g,'')) || 0; }
+    function formatCommaInput(input){
+      const raw=input.value.replace(/,/g,'');
+      if(raw==='' || raw==='.') return;
+      const parts=raw.split('.');
+      const whole=parts[0] || '0';
+      const formatted=Number(whole).toLocaleString('en-US');
+      input.value=parts.length>1 ? `${formatted}.${parts.slice(1).join('')}` : formatted;
+    }
+    function animateMoney(id, value){
+      const el=$(id); if(!el) return;
+      const end=Number.isFinite(value)?value:0;
+      const start=Number.isFinite(Number(el.dataset.value))?Number(el.dataset.value):0;
+      if(Math.abs(end-start)<0.005){ el.textContent=money(end); el.dataset.value=end; return; }
+      if(el._moneyFrame) cancelAnimationFrame(el._moneyFrame);
+      const started=performance.now(), duration=520;
+      const tick=now=>{
+        const progress=Math.min((now-started)/duration,1), eased=1-Math.pow(1-progress,3);
+        const current=start+(end-start)*eased;
+        el.textContent=money(current); el.dataset.value=current;
+        if(progress<1) el._moneyFrame=requestAnimationFrame(tick); else el.dataset.value=end;
+      };
+      el._moneyFrame=requestAnimationFrame(tick);
+    }
+    function contractRate(id){ return (contractRates[$(id).value] || 0) / 100; }
+    function contractName(id){ return contractNames[$(id).value] || 'Unknown contract'; }
+    function ageBand(age){ return age>=76 ? 76 : age>=71 ? 71 : 0; }
+    function productRate(key, option){
+      const data=presets[key]; if(!data) return 0;
+      if(key==='ascent10') return data[option]?.[ageBand(val('clientAge'))] ?? data[option]?.[0] ?? 0;
+      return data[option] ?? data.base ?? 0;
+    }
+    function productTrailRate(key, option){
+      const data=trailRates[key]?.[option]; if(data==null) return 0.0350;
+      return typeof data==='number' ? data : (data[ageBand(val('clientAge'))] ?? data[0]);
+    }
+    function configureProductOptions(){
+      const product=$('product').value, isAscent=product==='ascent10', isFia=['agility7','agility10','pe7','pe10'].includes(product);
+      const options=isAscent ? [['1','Option 1'],['2','Option 2'],['3','Option 3']] : isFia ? [['1','Option 1'],['2','Option 2']] : [];
+      const current=$('optionChoice').value;
+      $('optionChoice').innerHTML=options.map(([value,label])=>`<option value="${value}">${label}</option>`).join('');
+      if(options.some(([value])=>value===current)) $('optionChoice').value=current;
+      $('optionChoice').disabled=!options.length;
+      $('optionBox').querySelector('label').innerHTML='⚙　FIA option';
+    }
+    function overrideSpreadRate(caseType, splitWithDownline, myContract, otherContract){
+      const manual=parseFloat($('overridePercent').value);
+      if(Number.isFinite(manual)) return Math.max(manual,0)/100;
+      return caseType==='downline' && !splitWithDownline ? Math.max(contractRate('overrideContract')-myContract,0) : Math.abs(myContract-otherContract);
+    }
+    function updateSelections(){
+      const product=$('product').value;
+      configureProductOptions();
+      const term=!!product && !['agility7','agility10','pe7','pe10','ascent10','symetraAccumulatorIUL','symetraProtectorIUL','custom'].includes(product);
+      const fia=['agility7','agility10','pe7','pe10','ascent10'].includes(product);
+      const option2=['2','3'].includes($('optionChoice').value) && fia;
+      $('productBox').classList.toggle('hidden', !$('carrier').value);
+      $('trailRateBox').classList.toggle('hidden', !option2);
+      $('option2TrailBox').classList.toggle('hidden', !option2);
+      $('optionBox').classList.toggle('hidden', !fia);
+      $('ageBox').classList.toggle('hidden', product!=='ascent10');
+      const isIul=['symetraAccumulatorIUL','symetraProtectorIUL'].includes(product);
+      $('basisLabel').textContent=term ? 'Monthly term premium ($)' : isIul ? 'Target Premium ($)' : 'Premium / deposit ($)';
+      $('basis').placeholder=term ? 'e.g. 142.76' : '';
+    }
+    function populateProducts(){
+      const carrier=$('carrier').value;
+      const options=carrier==='athene' ? [['agility7','Agility 7'],['agility10','Agility 10'],['pe7','Performance Elite 7'],['pe10','Performance Elite 10'],['ascent10','Ascent Pro 10 Bonus']] : carrier==='nationwide' ? [['nationwide10','Nationwide Guaranteed Level Term — 10 Year'],['nationwide15','Nationwide Guaranteed Level Term — 15 Year'],['nationwide20','Nationwide Guaranteed Level Term — 20 Year'],['nationwide30','Nationwide Guaranteed Level Term — 30 Year']] : carrier==='symetra' ? [['swift10','SwiftTerm — 10 Year'],['swift15','SwiftTerm — 15 Year'],['swift20','SwiftTerm — 20 Year'],['swift30','SwiftTerm — 30 Year'],['symetraLevel10','Symetra 10 Year Level Term'],['symetraLevel15','Symetra 15 Year Level Term'],['symetraLevel20','Symetra 20 Year Level Term'],['symetraLevel30','Symetra 30 Year Level Term'],['symetraAccumulatorIUL','Symetra Accumulator IUL'],['symetraProtectorIUL','Symetra Protector IUL']] : carrier==='transamerica' ? [['trend10','Trendsetter Super — 10 Year'],['trend15','Trendsetter Super — 15 Year'],['trend20','Trendsetter Super — 20 Year'],['trend25','Trendsetter Super — 25 Year'],['trend30','Trendsetter Super — 30 Year']] : carrier==='custom' ? [['custom','Custom product']] : [];
+      $('product').innerHTML='<option value="" selected disabled>Select a product</option>'+options.map(([value,label])=>`<option value="${value}">${label}</option>`).join('');
+      $('productBox').classList.toggle('hidden', !carrier);
+      $('optionBox').classList.add('hidden');
+      $('option2TrailBox').classList.add('hidden');
+      $('trailRateBox').classList.add('hidden');
+      if(carrier==='transamerica'){ $('product').value='trend30'; setPreset(); }
+    }
+    function setPreset(){
+      const key=$('product').value;
+      configureProductOptions();
+      const option=$('optionChoice').value;
+      if(Object.prototype.hasOwnProperty.call(presets,key)){ $('rate').value=productRate(key,option); }
+      if(['agility7','agility10','pe7','pe10','ascent10'].includes(key) && ['2','3'].includes(option)) $('trailRate').value=productTrailRate(key,option);
+      updateSelections();
+    }
+    function renderRow(name, calc, amount){ const payout=/payout/i.test(name); return `<tr><td>${name}</td><td class="muted">${calc}</td><td class="${payout?'payout-amount':''}">${money(amount)}</td></tr>`; }
+    function updateCaseType(){
+      const type=$('caseType').value;
+      if(type==='downline') $('splitWithDownline').checked=false;
+      const splitWithDownline=$('splitWithDownline').checked, split=$('isSplit').checked || splitWithDownline, hasOverride=type==='downline' || splitWithDownline;
+      if(type==='personal'){ $('myContract').value='md'; $('otherContract').value='sa'; }
+      if(type==='downline'){ $('myContract').value='sa'; $('otherContract').value='sa'; $('overrideContract').value='md'; }
+      $('splitFields').classList.toggle('hidden', !split);
+      $('splitContractField').classList.toggle('hidden', !split);
+      $('overrideFields').classList.toggle('hidden', !hasOverride);
+      $('splitDownlineChoice').classList.toggle('hidden', type==='downline');
+      $('overrideContractField').classList.toggle('hidden', splitWithDownline);
+      $('totalLabel').textContent=type==='downline' ? 'Your override total' : 'Your estimated total';
+    }
+    function renderCommissionPanels(myPayout, otherPayout, myBase, otherBase, override, myContract, otherContract, split, hasOverride, caseType, spread, overrideBase){
+      const overrideRate=contractRate('overrideContract');
+      $('yourPanel').querySelector('h3').textContent=caseType==='downline' ? 'Downline writing agent commission' : 'Writing agent commission';
+      $('splitPanel').querySelector('h3').textContent=$('splitWithDownline').checked ? 'Downline split-agent commission' : 'Split agent commission';
+      animateMoney('yourCommission',myPayout);
+      $('yourContractLabel').textContent=`${contractName('myContract')} (${pct(myContract*100)})`;
+      $('yourContractCaption').textContent=$('yourContractLabel').textContent;
+      $('yourAllocated').textContent=money(myBase);
+      $('splitPanel').classList.toggle('hidden', !split);
+      animateMoney('splitCommission',otherPayout);
+      $('splitContractLabel').textContent=`${contractName('otherContract')} (${pct(otherContract*100)})`;
+      $('splitContractCaption').textContent=$('splitContractLabel').textContent;
+      $('splitAllocated').textContent=money(otherBase);
+      $('overridePanel').classList.toggle('hidden', !hasOverride);
+      animateMoney('overrideCommission',override);
+      $('overrideContractLabel').textContent=`${contractName('overrideContract')} (${pct(overrideRate*100)})`;
+      $('overrideSpread').textContent=caseType==='downline' && !$('splitWithDownline').checked && !Number.isFinite(parseFloat($('overridePercent').value)) ? `${pct(spread*100)} (${pct(overrideRate*100)} − ${pct(myContract*100)})` : `${pct(spread*100)} contract spread`;
+      $('overrideAllocated').textContent=money(val('overrideBasis') || overrideBase);
+    }
+    function renderTrailPanel(active, gross, writing, splitTrail, override){
+      $('trailPanel').classList.toggle('hidden', !active);
+      animateMoney('trailGrossOutput',gross);
+      animateMoney('trailWritingOutput',writing);
+      animateMoney('trailSplitOutput',splitTrail);
+      animateMoney('trailOverrideOutput',override);
+    }
+    function calculate(){
+      const caseType=$('caseType').value, product=$('product').value, term=!!product && !['agility7','agility10','pe7','pe10','ascent10','symetraAccumulatorIUL','symetraProtectorIUL','custom'].includes(product);
+      const splitWithDownline=$('splitWithDownline').checked, split=$('isSplit').checked || splitWithDownline, hasOverride=caseType==='downline' || splitWithDownline;
+      const enteredBasis=val('basis'), basis=term ? enteredBasis*12 : enteredBasis;
+      const myContract=contractRate('myContract'), otherContract=contractRate('otherContract');
+      const mySplit=split?val('mySplit')/100:1, otherSplit=split?val('otherSplit')/100:0;
+      const rate=val('rate')/100;
+      let gross=basis*rate, myBase=gross*mySplit, otherBase=gross*otherSplit;
+      const spread=overrideSpreadRate(caseType, splitWithDownline, myContract, otherContract);
+      const overrideBase=splitWithDownline ? (caseType==='downline' ? myBase : otherBase) : myBase;
+      let override=hasOverride ? (val('overrideBasis')||overrideBase)*spread : 0;
+      const myPayout=myBase*myContract, otherPayout=otherBase*otherContract, total=myPayout+override;
+      let trailGross=0, trailWriting=0, trailSplit=0, trailOverride=0, trailActive=false, rows=[], formula='', note='';
+      rows.push(renderRow('Gross points', `${money(basis)} × ${pct(rate*100)}`, gross), renderRow('Agent points', `${money(gross)} × ${pct(mySplit*100)}`, myBase), renderRow('Agent payout', `${money(myBase)} × ${pct(myContract*100)}`, myPayout));
+      if(split) rows.push(renderRow('Split agent points', `${money(gross)} × ${pct(otherSplit*100)}`, otherBase), renderRow('Split agent payout', `${money(otherBase)} × ${pct(otherContract*100)}`, otherPayout));
+      if(hasOverride) rows.push(renderRow('Override agent payout', `${money(val('overrideBasis')||overrideBase)} × ${pct(spread*100)} spread`, override));
+      if(['agility7','agility10','pe7','pe10','ascent10'].includes(product) && ['2','3'].includes($('optionChoice').value)){
+        const trailBasis=val('trailBasis') || basis, trailRate=val('trailRate')/100;
+        trailGross=trailBasis*trailRate; trailWriting=trailGross*mySplit*myContract; trailSplit=trailGross*otherSplit*otherContract;
+        const trailOverrideBase=splitWithDownline ? (caseType==='downline' ? trailGross*mySplit : trailGross*otherSplit) : trailGross*mySplit;
+        trailOverride=hasOverride ? trailOverrideBase*spread : 0; trailActive=true;
+        const trailLabel=$('optionChoice').value==='3' ? 'Option 3' : 'Option 2';
+        rows.push(renderRow(`Gross monthly ${trailLabel} trail`, `${money(trailBasis)} × ${pct(trailRate*100)}`, trailGross), renderRow('Writing agent monthly trail', `${money(trailGross*mySplit)} × ${pct(myContract*100)}`, trailWriting));
+        if(split) rows.push(renderRow('Split agent monthly trail', `${money(trailGross*otherSplit)} × ${pct(otherContract*100)}`, trailSplit));
+        if(hasOverride) rows.push(renderRow('Override agent monthly trail', `${money(trailOverrideBase)} × ${pct(spread*100)} spread`, trailOverride));
+      }
+      const userTotal=caseType==='downline' ? override : (splitWithDownline ? myPayout+override : myPayout);
+      animateMoney('total',userTotal);
+      $('summary').textContent=`${$('product').selectedOptions[0]?.textContent || 'Select a product'}${term ? ' • annualized premium' : ''} • ${split?'split case':'not split'}`;
+      formula=term ? `Annual premium = monthly premium × 12; gross points = annual premium × ${pct(rate*100)}; split first; apply contract percentage second.` : `Gross points = basis × ${pct(rate*100)}; split first; apply contract percentage second.`;
+      note=term ? `${money(enteredBasis)} monthly premium × 12 = ${money(basis)} annual premium before applying the ${pct(rate*100)} payout rate.` : 'Rates are editable so you can replace remembered reference rates with a current carrier payout schedule.';
+      renderCommissionPanels(myPayout, otherPayout, myBase, otherBase, override, myContract, otherContract, split, hasOverride, caseType, spread, overrideBase);
+      renderTrailPanel(trailActive, trailGross, trailWriting, trailSplit, trailOverride);
+      $('breakdown').innerHTML=rows.join(''); $('formula').textContent=formula; $('note').textContent=note;
+    }
+    $('caseType').addEventListener('change',()=>{ updateCaseType(); calculate(); });
+    $('isSplit').addEventListener('change',()=>{ if(!$('isSplit').checked) $('splitWithDownline').checked=false; updateCaseType(); calculate(); });
+    $('splitWithDownline').addEventListener('change',()=>{ if($('splitWithDownline').checked) $('isSplit').checked=true; updateCaseType(); calculate(); });
+    $('carrier').addEventListener('change',populateProducts); $('product').addEventListener('change',setPreset); $('optionChoice').addEventListener('change',setPreset); $('clientAge').addEventListener('input',()=>{ setPreset(); calculate(); }); $('basis').addEventListener('input',()=>formatCommaInput($('basis')));
+    document.querySelectorAll('input, select').forEach(element=>{
+      element.addEventListener('input',calculate);
+      element.addEventListener('change',calculate);
+    });
+    updateCaseType(); updateSelections(); calculate();
+  </script>
+</body>
+</html>
