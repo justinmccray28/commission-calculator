@@ -227,7 +227,7 @@
 </head>
 <body>
   <main class="wrap">
-    <div class="page-head"><div><h1>Commission Calculator</h1><p class="sub">MD 50% default • split-first logic • downline overrides • carrier-specific payout rules</p></div><div class="head-mark" aria-hidden="true"><div class="bars"><i style="--h:13px"></i><i style="--h:25px"></i><i style="--h:37px"></i><i style="--h:50px"></i><i style="--h:63px"></i></div><span>MISSION<br>BEFORE<br>COMMISSION</span></div></div>
+    <div class="page-head"><div><h1>Commission Calculator</h1></div><div class="head-mark" aria-hidden="true"><div class="bars"><i style="--h:13px"></i><i style="--h:25px"></i><i style="--h:37px"></i><i style="--h:50px"></i><i style="--h:63px"></i></div><span>MISSION<br>BEFORE<br>COMMISSION</span></div></div>
     <details class="settings-panel" id="settingsPanel">
       <summary>Settings <span>Save your personal defaults on this device</span></summary>
       <div class="settings-body">
@@ -369,7 +369,7 @@
         <div class="formula" id="formula">Formula will appear here.</div>
         <div class="note" id="note">Rates are editable. Confirm current carrier schedules and actual coding before relying on a result.</div>
         <div class="note hidden" id="productInfo" role="note"></div>
-        <div class="footer">Athene Option 2 uses the monthly 0.0350% trail only. No duplicate annual trail is added.</div>
+        <div class="footer hidden" id="atheneTrailNote">Athene Option 2 uses the monthly 0.0350% trail only. No duplicate annual trail is added.</div>
       </section>
     </div>
   </main>
@@ -696,6 +696,8 @@
         if(split) rows.push(renderRow('Split agent monthly trail', `${money(trailGross*otherSplit)} × ${pct(otherContract*100)}`, trailSplit));
         if(hasOverride) rows.push(renderRow('Override agent monthly trail', `${money(trailOverrideBase)} × ${pct(spread*100)} spread`, trailOverride));
       }
+      const exactAtheneOption2Trail = trailActive && ['agility7','agility10','pe7','pe10','ascent10'].includes(product) && $('optionChoice').value==='2' && Math.abs((val('trailRate') || 0) - 0.035) < 0.0000001;
+      $('atheneTrailNote').classList.toggle('hidden', !exactAtheneOption2Trail);
       const userTotal=caseType==='downline' ? override : (splitWithDownline ? myPayout+override : myPayout);
       animateMoney('total',userTotal);
       $('summary').textContent=term && !product ? 'Select a policy length to see its rate' : needsCoverage ? 'Enter specified coverage of at least $25,000 to see its rate' : `${$('product').selectedOptions[0]?.textContent || 'Select a product'}${term ? ` • ${$('termLength').value} years • annualized premium` : ''} • ${split?'split case':'not split'}`;
