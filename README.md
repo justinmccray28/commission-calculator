@@ -8,6 +8,8 @@ Open https://justinmccray28.github.io/commission-calculator/ in Safari or anothe
 
 To update rates, edit `commission-data.json` on GitHub, preserving the product keys and valid JSON syntax, and commit to `main`. To change the interface or formulas, edit `index.html` instead. GitHub Pages publishes the new version from the root of that branch. Refresh the webpage to load the update; teammates use the same URL. Publishing changes can take up to 10 minutes. Opening a downloaded HTML file inside ChatGPT may not run its JavaScript, so use the published page.
 
+Term products are grouped in the product dropdown. Their available policy lengths and corresponding payout keys are listed under `termProducts` in `commission-data.json`; the rate for each length remains under `presets`. Choose a carrier, then a term product, then a policy length to load the correct rate.
+
 ## Working on the calculator
 
 Serve the folder with a local web server to check the interface; opening `index.html` as a local file may block the JSON request. Keep the rates in `commission-data.json` as percentages (for example, `4.6118` means 4.6118%, and `0.035` means 0.0350% monthly). Review premium basis, option selection, splits, overrides, and trails together before publishing. Do not put client names or case data in the repository or its commit history.
