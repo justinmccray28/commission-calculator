@@ -12,4 +12,6 @@ To update rates, edit `commission-data.json` on GitHub, preserving the product k
 
 Serve the folder with a local web server to check the interface; opening `index.html` as a local file may block the JSON request. Keep the rates in `commission-data.json` as percentages (for example, `4.6118` means 4.6118%, and `0.035` means 0.0350% monthly). Review premium basis, option selection, splits, overrides, and trails together before publishing. Do not put client names or case data in the repository or its commit history.
 
+IUL estimates use initial compensation on target premium only. Excess-premium and renewal compensation can exist but are informational and are not calculated in later years.
+
 This version stores no submitted cases. Payouts are calculated in the visitor's browser.
