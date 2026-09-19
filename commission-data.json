@@ -231,7 +231,7 @@
     "elite30": {
       "1": 121.5825
     },
-    "nationwideAccumulatorII": {
+    "nationwideAccumulatorIII": {
       "base": 109.005
     },
     "nationwideProtectorII2020": {
@@ -333,9 +333,9 @@
       "label": "Symetra Protector IUL",
       "kind": "iul"
     },
-    "nationwideAccumulatorII": {
+    "nationwideAccumulatorIII": {
       "carrier": "nationwide",
-      "label": "Indexed UL Accumulator II",
+      "label": "Indexed UL Accumulator III",
       "kind": "iul",
       "note": "Rate assumes SVER and APCR riders are not elected. Source schedule effective March 6, 2026."
     },
