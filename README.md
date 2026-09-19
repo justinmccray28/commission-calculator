@@ -18,6 +18,6 @@ IUL estimates use initial compensation on target premium only. Excess-premium an
 
 The September 2026 supplied screenshots added Nationwide Indexed UL Accumulator II (2026), Nationwide Protector II 2020 and Accumulator II 2020, Transamerica Trendsetter LB, Financial Foundation IUL II, Financial Choice IUL II and Lifetime WL, Pacific Life Promise Term, Elite Term 2025, Promise GUL and Horizon IUL 2. Only the shown first-year/initial target rate is calculated. Nationwide rates with rider conditions apply only under the configuration shown in each product's information note. Lifetime WL requires specified coverage to choose its $25,000–$99,999 or $100,000+ band.
 
-Pending clarification: Pacific Horizon ECV IUL lists materially different Base/LTC and SVER-I3 rates; its rider selection and premium basis need confirming before it is added. The North American ADvantage 10/15/20/30 schedule identifies Base/Target rates but does not identify the policy type or whether the premium entered should be monthly term premium or target premium. Neither schedule is available for selection yet.
+North American ADvantage 10/15/20/30 uses monthly term premium multiplied by 12, with first-year rates of 58.6950%, 62.8875%, 79.6575%, and 79.6575% respectively. Pacific Horizon ECV IUL uses the Base/LTC Target 1 initial rate of 96.4275% on target premium. SVER-I3 and later target bands are excluded.
 
 This version stores no submitted cases. Payouts are calculated in the visitor's browser.
