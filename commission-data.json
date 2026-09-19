@@ -1,27 +1,376 @@
 {
-  "contractRates": {"ta": 25, "associate": 35, "sa": 45, "md": 50, "smd": 65},
-  "contractNames": {"ta": "Training Associate", "associate": "Associate", "sa": "Senior Associate", "md": "Marketing Director", "smd": "Senior Marketing Director"},
+  "contractRates": {
+    "ta": 25,
+    "associate": 35,
+    "sa": 45,
+    "md": 50,
+    "smd": 65
+  },
+  "contractNames": {
+    "ta": "Training Associate",
+    "associate": "Associate",
+    "sa": "Senior Associate",
+    "md": "Marketing Director",
+    "smd": "Senior Marketing Director"
+  },
   "termProducts": {
-    "nationwideTerm": {"carrier": "nationwide", "label": "Nationwide Guaranteed Level Term", "lengths": {"10": "nationwide10", "15": "nationwide15", "20": "nationwide20", "30": "nationwide30"}},
-    "swiftTerm": {"carrier": "symetra", "label": "SwiftTerm", "lengths": {"10": "swift10", "15": "swift15", "20": "swift20", "30": "swift30"}},
-    "symetraLevelTerm": {"carrier": "symetra", "label": "Symetra Level Term", "lengths": {"10": "symetraLevel10", "15": "symetraLevel15", "20": "symetraLevel20", "30": "symetraLevel30"}},
-    "trendsetterSuper": {"carrier": "transamerica", "label": "Trendsetter Super", "lengths": {"10": "trend10", "15": "trend15", "20": "trend20", "25": "trend25", "30": "trend30"}}
+    "nationwideTerm": {
+      "carrier": "nationwide",
+      "label": "Nationwide Guaranteed Level Term",
+      "lengths": {
+        "10": "nationwide10",
+        "15": "nationwide15",
+        "20": "nationwide20",
+        "30": "nationwide30"
+      }
+    },
+    "swiftTerm": {
+      "carrier": "symetra",
+      "label": "SwiftTerm",
+      "lengths": {
+        "10": "swift10",
+        "15": "swift15",
+        "20": "swift20",
+        "30": "swift30"
+      }
+    },
+    "symetraLevelTerm": {
+      "carrier": "symetra",
+      "label": "Symetra Level Term",
+      "lengths": {
+        "10": "symetraLevel10",
+        "15": "symetraLevel15",
+        "20": "symetraLevel20",
+        "30": "symetraLevel30"
+      }
+    },
+    "trendsetterSuper": {
+      "carrier": "transamerica",
+      "label": "Trendsetter Super",
+      "lengths": {
+        "10": "trend10",
+        "15": "trend15",
+        "20": "trend20",
+        "25": "trend25",
+        "30": "trend30"
+      }
+    },
+    "trendsetterLB": {
+      "carrier": "transamerica",
+      "label": "Trendsetter LB",
+      "lengths": {
+        "10": "lb10",
+        "15": "lb15",
+        "20": "lb20",
+        "25": "lb25",
+        "30": "lb30"
+      }
+    },
+    "pacificPromiseTerm": {
+      "carrier": "pacific",
+      "label": "Promise Term",
+      "lengths": {
+        "10": "promise10",
+        "15": "promise15",
+        "20": "promise20",
+        "25": "promise25",
+        "30": "promise30"
+      }
+    },
+    "pacificEliteTerm": {
+      "carrier": "pacific",
+      "label": "Elite Term 2025",
+      "lengths": {
+        "10": "elite10",
+        "20": "elite20",
+        "30": "elite30"
+      }
+    }
   },
   "presets": {
-    "agility7": {"1": 4.1925, "2": 2.7251},
-    "agility10": {"1": 5.8695, "2": 3.5636},
-    "pe7": {"1": 4.6118, "2": 2.5115},
-    "pe10": {"1": 6.288, "2": 3.7733},
-    "ascent10": {"1": {"0": 6.2888, "71": 5.8695, "76": 5.031}, "2": {"0": 3.7733, "71": 3.5217, "76": 3.0605}, "3": {"0": 1.2578, "71": 1.1739, "76": 1.0488}},
-    "nationwide10": {"1": 92.235}, "nationwide15": {"1": 96.4275}, "nationwide20": {"1": 104.8125}, "nationwide30": {"1": 104.8125},
-    "swift10": {"1": 88.0425}, "swift15": {"1": 92.235}, "swift20": {"1": 104.8125}, "swift30": {"1": 104.8125},
-    "symetraLevel10": {"1": 79.6575}, "symetraLevel15": {"1": 79.6575}, "symetraLevel20": {"1": 92.235}, "symetraLevel30": {"1": 92.235},
-    "symetraAccumulatorIUL": {"base": 100.62, "excess": 1.677, "renewal": 0.8385},
-    "symetraProtectorIUL": {"base": 92.235, "excess": 1.677, "renewal": 0.8385},
-    "trend10": {"1": 95.8525}, "trend15": {"1": 100.02}, "trend20": {"1": 104.1875}, "trend25": {"1": 104.1875}, "trend30": {"1": 104.1875}
+    "agility7": {
+      "1": 4.1925,
+      "2": 2.7251
+    },
+    "agility10": {
+      "1": 5.8695,
+      "2": 3.5636
+    },
+    "pe7": {
+      "1": 4.6118,
+      "2": 2.5115
+    },
+    "pe10": {
+      "1": 6.288,
+      "2": 3.7733
+    },
+    "ascent10": {
+      "1": {
+        "0": 6.2888,
+        "71": 5.8695,
+        "76": 5.031
+      },
+      "2": {
+        "0": 3.7733,
+        "71": 3.5217,
+        "76": 3.0605
+      },
+      "3": {
+        "0": 1.2578,
+        "71": 1.1739,
+        "76": 1.0488
+      }
+    },
+    "nationwide10": {
+      "1": 92.235
+    },
+    "nationwide15": {
+      "1": 96.4275
+    },
+    "nationwide20": {
+      "1": 104.8125
+    },
+    "nationwide30": {
+      "1": 104.8125
+    },
+    "swift10": {
+      "1": 88.0425
+    },
+    "swift15": {
+      "1": 92.235
+    },
+    "swift20": {
+      "1": 104.8125
+    },
+    "swift30": {
+      "1": 104.8125
+    },
+    "symetraLevel10": {
+      "1": 79.6575
+    },
+    "symetraLevel15": {
+      "1": 79.6575
+    },
+    "symetraLevel20": {
+      "1": 92.235
+    },
+    "symetraLevel30": {
+      "1": 92.235
+    },
+    "symetraAccumulatorIUL": {
+      "base": 100.62,
+      "excess": 1.677,
+      "renewal": 0.8385
+    },
+    "symetraProtectorIUL": {
+      "base": 92.235,
+      "excess": 1.677,
+      "renewal": 0.8385
+    },
+    "trend10": {
+      "1": 95.8525
+    },
+    "trend15": {
+      "1": 100.02
+    },
+    "trend20": {
+      "1": 104.1875
+    },
+    "trend25": {
+      "1": 104.1875
+    },
+    "trend30": {
+      "1": 104.1875
+    },
+    "lb10": {
+      "1": 110.022
+    },
+    "lb15": {
+      "1": 116.69
+    },
+    "lb20": {
+      "1": 126.692
+    },
+    "lb25": {
+      "1": 126.692
+    },
+    "lb30": {
+      "1": 126.692
+    },
+    "promise10": {
+      "1": 92.235
+    },
+    "promise15": {
+      "1": 100.62
+    },
+    "promise20": {
+      "1": 113.1975
+    },
+    "promise25": {
+      "1": 113.1975
+    },
+    "promise30": {
+      "1": 113.1975
+    },
+    "elite10": {
+      "1": 100.62
+    },
+    "elite20": {
+      "1": 121.5825
+    },
+    "elite30": {
+      "1": 121.5825
+    },
+    "nationwideAccumulatorII": {
+      "base": 109.005
+    },
+    "nationwideProtectorII2020": {
+      "base": 109.005
+    },
+    "nationwideAccumulatorII2020": {
+      "base": 109.005
+    },
+    "transamericaFinancialFoundationIULII": {
+      "base": 125
+    },
+    "financialChoiceIULII": {
+      "base": 116.0102
+    },
+    "pacificPromiseGUL": {
+      "base": 104.8125
+    },
+    "pacificHorizonIUL2": {
+      "base": 93.912
+    },
+    "transamericaLifetimeWL": {
+      "base": 121.691
+    }
   },
   "trailRates": {
-    "agility7": {"2": 0.035}, "agility10": {"2": 0.035}, "pe7": {"2": 0.035}, "pe10": {"2": 0.035},
-    "ascent10": {"2": {"0": 0.035, "71": 0.0314, "76": 0.0279}, "3": {"0": 0.0698, "71": 0.0629, "76": 0.0524}}
+    "agility7": {
+      "2": 0.035
+    },
+    "agility10": {
+      "2": 0.035
+    },
+    "pe7": {
+      "2": 0.035
+    },
+    "pe10": {
+      "2": 0.035
+    },
+    "ascent10": {
+      "2": {
+        "0": 0.035,
+        "71": 0.0314,
+        "76": 0.0279
+      },
+      "3": {
+        "0": 0.0698,
+        "71": 0.0629,
+        "76": 0.0524
+      }
+    }
+  },
+  "catalog": {
+    "agility7": {
+      "carrier": "athene",
+      "label": "Agility 7",
+      "kind": "fia"
+    },
+    "agility10": {
+      "carrier": "athene",
+      "label": "Agility 10",
+      "kind": "fia"
+    },
+    "pe7": {
+      "carrier": "athene",
+      "label": "Performance Elite 7",
+      "kind": "fia"
+    },
+    "pe10": {
+      "carrier": "athene",
+      "label": "Performance Elite 10",
+      "kind": "fia"
+    },
+    "ascent10": {
+      "carrier": "athene",
+      "label": "Ascent Pro 10 Bonus",
+      "kind": "fia"
+    },
+    "symetraAccumulatorIUL": {
+      "carrier": "symetra",
+      "label": "Symetra Accumulator IUL",
+      "kind": "iul"
+    },
+    "symetraProtectorIUL": {
+      "carrier": "symetra",
+      "label": "Symetra Protector IUL",
+      "kind": "iul"
+    },
+    "nationwideAccumulatorII": {
+      "carrier": "nationwide",
+      "label": "Indexed UL Accumulator II",
+      "kind": "iul",
+      "note": "Rate assumes SVER and APCR riders are not elected. Source schedule effective March 6, 2026."
+    },
+    "nationwideProtectorII2020": {
+      "carrier": "nationwide",
+      "label": "Indexed UL Protector II 2020",
+      "kind": "iul",
+      "note": "Only compensation up to commission target premium is included. Source schedule effective April 24, 2024."
+    },
+    "nationwideAccumulatorII2020": {
+      "carrier": "nationwide",
+      "label": "Indexed UL Accumulator II 2020",
+      "kind": "iul",
+      "note": "Rate assumes SVER rider is not elected. Source schedule effective April 24, 2024."
+    },
+    "transamericaFinancialFoundationIULII": {
+      "carrier": "transamerica",
+      "label": "Financial Foundation IUL II",
+      "kind": "iul",
+      "note": "Initial target-premium rate is for premiums received in the first 24 policy months, up to the first-year target. Source schedule revised October 12, 2024."
+    },
+    "financialChoiceIULII": {
+      "carrier": "transamerica",
+      "label": "Financial Choice IUL II",
+      "kind": "iul",
+      "note": "Initial target-premium rate applies to premiums received in the first 24 policy months, up to the first-year target."
+    },
+    "transamericaLifetimeWL": {
+      "carrier": "transamerica",
+      "label": "Lifetime WL",
+      "kind": "wl",
+      "note": "Select the specified coverage amount to apply the correct first-year target-premium band. Amounts below $25,000 are not covered by the supplied schedule.",
+      "faceBands": [
+        {
+          "min": 25000,
+          "max": 99999,
+          "rate": 121.691
+        },
+        {
+          "min": 100000,
+          "rate": 91.685
+        }
+      ]
+    },
+    "pacificPromiseGUL": {
+      "carrier": "pacific",
+      "label": "Promise GUL",
+      "kind": "target",
+      "note": "Only target-premium compensation is included. Excess-premium compensation is excluded."
+    },
+    "pacificHorizonIUL2": {
+      "carrier": "pacific",
+      "label": "Horizon IUL 2",
+      "kind": "iul",
+      "note": "Only Target 1 compensation is included. Later target bands and trails are excluded."
+    },
+    "custom": {
+      "carrier": "custom",
+      "label": "Custom product",
+      "kind": "custom"
+    }
   }
 }
