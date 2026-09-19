@@ -8,12 +8,16 @@ Open https://justinmccray28.github.io/commission-calculator/ in Safari or anothe
 
 To update rates, edit `commission-data.json` on GitHub, preserving the product keys and valid JSON syntax, and commit to `main`. To change the interface or formulas, edit `index.html` instead. GitHub Pages publishes the new version from the root of that branch. Refresh the webpage to load the update; teammates use the same URL. Publishing changes can take up to 10 minutes. Opening a downloaded HTML file inside ChatGPT may not run its JavaScript, so use the published page.
 
-Term products are grouped in the product dropdown. Their available policy lengths and corresponding payout keys are listed under `termProducts` in `commission-data.json`; the rate for each length remains under `presets`. Choose a carrier, then a term product, then a policy length to load the correct rate.
+Term products are grouped in the product dropdown. Their available policy lengths and corresponding payout keys are listed under `termProducts` in `commission-data.json`; the rate for each length remains under `presets`. Non-term product names, carrier assignment, first-year assumptions, and product types are in `catalog`. Choose a carrier, then a term product, then a policy length to load the correct rate.
 
 ## Working on the calculator
 
 Serve the folder with a local web server to check the interface; opening `index.html` as a local file may block the JSON request. Keep the rates in `commission-data.json` as percentages (for example, `4.6118` means 4.6118%, and `0.035` means 0.0350% monthly). Review premium basis, option selection, splits, overrides, and trails together before publishing. Do not put client names or case data in the repository or its commit history.
 
 IUL estimates use initial compensation on target premium only. Excess-premium and renewal compensation can exist but are informational and are not calculated in later years.
+
+The September 2026 supplied screenshots added Nationwide Indexed UL Accumulator II (2026), Nationwide Protector II 2020 and Accumulator II 2020, Transamerica Trendsetter LB, Financial Foundation IUL II, Financial Choice IUL II and Lifetime WL, Pacific Life Promise Term, Elite Term 2025, Promise GUL and Horizon IUL 2. Only the shown first-year/initial target rate is calculated. Nationwide rates with rider conditions apply only under the configuration shown in each product's information note. Lifetime WL requires specified coverage to choose its $25,000–$99,999 or $100,000+ band.
+
+Pending clarification: Pacific Horizon ECV IUL lists materially different Base/LTC and SVER-I3 rates; its rider selection and premium basis need confirming before it is added. The North American ADvantage 10/15/20/30 schedule identifies Base/Target rates but does not identify the policy type or whether the premium entered should be monthly term premium or target premium. Neither schedule is available for selection yet.
 
 This version stores no submitted cases. Payouts are calculated in the visitor's browser.
