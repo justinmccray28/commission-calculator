@@ -26,6 +26,13 @@ async function authRequest(path, options = {}) {
   const data = await response.json().catch(() => ({}));
   return { ok: response.ok, status: response.status, data };
 }
+async function settingsRequest(access, options = {}) {
+  return fetch(`${supabase}/rest/v1/agent_settings?select=settings`, {
+    ...options,
+    headers: { apikey: key, Authorization: `Bearer ${access}`, ...options.headers },
+    signal: AbortSignal.timeout(8000)
+  });
+}
 async function userFromRequest(req, res) {
   const current = cookies(req);
   const access = current[cookieName('access')];
@@ -118,11 +125,32 @@ const server = createServer(async (req, res) => {
       return send(res, 200, page('Check email', '<h1>Check your email</h1><p>If that address has an account, a reset link is on its way.</p><a href="/login">Return to sign in</a>'));
     }
     if (req.method === 'POST' && path === '/auth/logout') { clearSession(res); return redirect(res, '/login'); }
-    if (['/app', '/api/commission-data', '/account/password', '/auth/password'].includes(path)) {
+    if (['/app', '/api/commission-data', '/api/settings', '/account/password', '/auth/password'].includes(path)) {
       const session = await userFromRequest(req, res);
       if (!session) return path.startsWith('/api/') ? send(res, 401, 'Sign in required', 'text/plain') : redirect(res, '/login');
       if (req.method === 'GET' && path === '/app') return send(res, 200, protectedHTML.replace('<body>', `<body><div style="display:flex;justify-content:flex-end;padding:10px 24px 0"><form method="POST" action="/auth/logout">${csrfField(csrfToken(res))}<button style="border:1px solid #38748e;border-radius:7px;background:#102a40;color:#e5f8ff;padding:7px 14px;cursor:pointer">Sign out</button></form></div>`));
       if (req.method === 'GET' && path === '/api/commission-data') return send(res, 200, commissionData, 'application/json; charset=utf-8');
+      if (path === '/api/settings' && req.method === 'GET') {
+        const result = await settingsRequest(session.access);
+        if (!result.ok) return send(res, 503, 'Settings unavailable', 'text/plain');
+        const rows = await result.json();
+        return send(res, 200, JSON.stringify({ settings: rows[0]?.settings ?? null }), 'application/json; charset=utf-8');
+      }
+      if (path === '/api/settings' && req.method === 'POST') {
+        let settings;
+        try { settings = JSON.parse(posted.settings); } catch { return send(res, 400, 'Invalid settings', 'text/plain'); }
+        const names = ['caseType','carrier','product','option','termLength','writingContract','splitContract','overrideContract','isSplit','splitWithDownline','mySplit','otherSplit','overridePercent'];
+        if (!settings || Array.isArray(settings) || typeof settings !== 'object' ||
+            Object.keys(settings).some(name => !names.includes(name)) ||
+            names.some(name => typeof settings[name] !== (['isSplit','splitWithDownline'].includes(name) ? 'boolean' : 'string') || (typeof settings[name] === 'string' && settings[name].length > 100)))
+          return send(res, 400, 'Invalid settings', 'text/plain');
+        const result = await settingsRequest(session.access, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
+          body: JSON.stringify({ user_id: session.user.id, settings })
+        });
+        return result.ok ? send(res, 200, 'Saved', 'text/plain') : send(res, 503, 'Could not save settings', 'text/plain');
+      }
       if (req.method === 'GET' && path === '/account/password') return send(res, 200, page('Set password', `<h1>Set your password</h1><p>Choose a password for your agent account.</p><form method="POST" action="/auth/password">${csrfField(csrfToken(res))}<label for="password">New password</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="12" required><button>Save password</button></form>`));
       if (req.method === 'POST' && path === '/auth/password') {
         const { password } = posted;
