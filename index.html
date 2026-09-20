@@ -397,7 +397,7 @@
         if(!validNumbers(data.contractRates) || !validNumbers(data.presets) || !validNumbers(data.trailRates)) throw new Error('Invalid commission rate');
         ({contractRates,contractNames,presets,trailRates,termProducts,catalog}=data);
         $('carrier').disabled=false;
-        initializeSettings();
+        await initializeSettings();
       } catch(error) {
         $('summary').textContent='Commission rates could not be loaded';
         $('note').textContent='Refresh the page to try again. Calculations are unavailable until rates load.';
@@ -497,22 +497,46 @@
       }
       updateCaseType(); calculate();
     }
-    function initializeSettings(){
+    async function persistSettings(settings){
+      const token=document.querySelector('form[action="/auth/logout"] input[name="csrf"]')?.value;
+      if(!token) throw new Error('Missing form token');
+      const response=await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({csrf:token,settings:JSON.stringify(settings)})});
+      if(!response.ok) throw new Error(`Settings save failed: ${response.status}`);
+    }
+    async function initializeSettings(){
       populateDefaultCarriers();
-      const saved=readSavedSettings();
+      let saved=null;
+      try {
+        const response=await fetch('/api/settings',{cache:'no-store'});
+        if(!response.ok) throw new Error(`Settings load failed: ${response.status}`);
+        saved=(await response.json()).settings;
+        const legacy=readSavedSettings();
+        if(!saved && legacy){
+          await persistSettings(legacy);
+          saved=legacy;
+          $('settingsStatus').textContent='Device defaults moved to your account';
+        }
+        localStorage.removeItem(SETTINGS_KEY);
+      } catch(error){
+        $('settingsStatus').textContent='Account defaults unavailable. Try refreshing.';
+        console.error('Account settings load failed:',error);
+      }
       setSettingsForm(saved||defaultSettings());
       applySettings(saved||defaultSettings());
     }
-    function saveSettings(){
+    async function saveSettings(){
       const settings=settingsFromForm();
-      try { localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings)); $('settingsStatus').textContent='Defaults saved on this device'; }
-      catch(error){ $('settingsStatus').textContent='Unable to save defaults in this browser'; }
-      applySettings(settings);
+      $('saveSettings').disabled=true;
+      try { await persistSettings(settings); $('settingsStatus').textContent='Defaults saved to your account'; applySettings(settings); }
+      catch(error){ $('settingsStatus').textContent='Could not save defaults. Try again.'; console.error(error); }
+      finally { $('saveSettings').disabled=false; }
     }
-    function resetSettings(){
-      try { localStorage.removeItem(SETTINGS_KEY); } catch(error) { /* ignore storage errors */ }
+    async function resetSettings(){
       const settings=defaultSettings();
-      setSettingsForm(settings); applySettings(settings); $('settingsStatus').textContent='Defaults reset';
+      $('resetSettings').disabled=true;
+      try { await persistSettings(settings); setSettingsForm(settings); applySettings(settings); $('settingsStatus').textContent='Account defaults reset'; }
+      catch(error){ $('settingsStatus').textContent='Could not reset defaults. Try again.'; console.error(error); }
+      finally { $('resetSettings').disabled=false; }
     }
     function formatCommaInput(input){
       const raw=input.value.replace(/,/g,'');
