@@ -1,5 +1,17 @@
 # Commission Calculator
 
+## Invite-only pilot
+
+`server.mjs` provides an authenticated version of the existing calculator. It serves both `index.html` and `commission-data.json` only to signed-in agents. The formula code and verified rates remain unchanged. The pilot does not collect payment or store cases. Saved calculator defaults still live on each device.
+
+To run it, use Node 20 or later and set `APP_ORIGIN`, `SUPABASE_URL`, and `SUPABASE_PUBLISHABLE_KEY` as shown in `.env.example`. Environment files are not loaded automatically; set the variables in your hosting provider or run locally with `node --env-file=.env server.mjs` after copying `.env.example` to `.env` and replacing its placeholders. `npm start` works when the variables are already set. No package installation is needed.
+
+Set up a Supabase project with email authentication, **disable public sign-ups**, and add the deployed `https://YOUR-DOMAIN/auth/callback` to Auth redirect URLs. Set the Auth site URL to the deployed origin. In the Supabase Auth user dashboard, invite pilot users by email. Invite and password-reset links return to `/auth/callback`, where the user sets their password. Configure SMTP before sending production invitations. No Supabase service-role key is needed and no keys should be committed. Users can reset passwords from `/recover`.
+
+Deploy as a Node web service from GitHub with start command `npm start`, Node 20+, and the three environment variables above. `APP_ORIGIN` must exactly match the deployed HTTPS origin; it is also used to reject cross-site form submissions. The health check is `/health`. The service does not need a build step. After deployment, open `/login`, invite one agent, test the invitation and password reset, and confirm `/app` and `/api/commission-data` redirect or return 401 when signed out.
+
+**Important:** The GitHub Pages deployment below remains a public copy of the whole calculator and JSON. Do not market this as exclusive or protected while that Pages URL or a public source repository still exposes them. Move the source to a private repository and disable the public Pages deployment before using protected access as a subscription gate. Authentication can be piloted independently of that migration.
+
 An early working version of the commission calculator. `index.html` holds the interface and calculation logic; `commission-data.json` holds contract percentages, product payout rates, and monthly trail rates. There is no build step or server-side storage.
 
 ## Live calculator
