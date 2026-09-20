@@ -4,6 +4,9 @@ import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 
+const storedSettings = new Map();
+const agentOne = '11111111-1111-4111-8111-111111111111';
+const agentTwo = '22222222-2222-4222-8222-222222222222';
 const auth = createServer(async (req, res) => {
   let body = '';
   for await (const chunk of req) body += chunk;
@@ -18,8 +21,19 @@ const auth = createServer(async (req, res) => {
     return res.end(res.statusCode === 200 ? JSON.stringify({ access_token: 'valid-token', refresh_token: 'valid-refresh', expires_in: 3600 }) : '{}');
   }
   if (req.url === '/auth/v1/user') {
-    res.statusCode = req.headers.authorization === 'Bearer valid-token' ? 200 : 401;
-    return res.end(res.statusCode === 200 ? JSON.stringify({ id: 'agent-1' }) : '{}');
+    const id = req.headers.authorization === 'Bearer valid-token' ? agentOne : req.headers.authorization === 'Bearer valid-token-two' ? agentTwo : null;
+    res.statusCode = id ? 200 : 401;
+    return res.end(id ? JSON.stringify({ id }) : '{}');
+  }
+  if (req.url.startsWith('/rest/v1/agent_settings')) {
+    const id = req.headers.authorization === 'Bearer valid-token' ? agentOne : req.headers.authorization === 'Bearer valid-token-two' ? agentTwo : null;
+    if (!id) { res.statusCode = 401; return res.end('{}'); }
+    if (req.method === 'GET') return res.end(JSON.stringify(storedSettings.has(id) ? [{ settings: storedSettings.get(id) }] : []));
+    const data = JSON.parse(body);
+    if (data.user_id !== id) { res.statusCode = 403; return res.end('{}'); }
+    storedSettings.set(id, data.settings);
+    res.statusCode = 201;
+    return res.end('{}');
   }
   res.statusCode = 200;
   res.end('{}');
@@ -70,6 +84,20 @@ test('pilot access requires a real authenticated session and survives refresh', 
     const appToken = appHTML.match(/name="csrf" value="([a-f0-9]{64})"/)?.[1];
     const appCsrfCookie = page.headers.getSetCookie().find(item => item.startsWith('cc-csrf='))?.split(';')[0];
     assert.ok(appToken && appCsrfCookie);
+    const defaults = {caseType:'personal',carrier:'',product:'',option:'1',termLength:'',writingContract:'md',splitContract:'sa',overrideContract:'md',isSplit:false,splitWithDownline:false,mySplit:'50',otherSplit:'50',overridePercent:''};
+    const ownCookie = `${cookieHeader}; ${appCsrfCookie}`;
+    const settingsPost = (settings, cookie, csrf) => request('/api/settings', { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded', Cookie:cookie }, body:new URLSearchParams({ csrf, settings:JSON.stringify(settings) }) });
+    const initial = await request('/api/settings', { headers:{Cookie:ownCookie} });
+    assert.deepEqual(await initial.json(), {settings:null});
+    assert.equal((await settingsPost(defaults, ownCookie, appToken)).status,200);
+    assert.deepEqual(await (await request('/api/settings',{headers:{Cookie:ownCookie}})).json(),{settings:defaults});
+    const otherPage = await request('/app',{headers:{Cookie:'cc-access=valid-token-two'}});
+    const otherToken = (await otherPage.text()).match(/name="csrf" value="([a-f0-9]{64})"/)?.[1];
+    const otherCookie = `cc-access=valid-token-two; ${otherPage.headers.getSetCookie().find(item => item.startsWith('cc-csrf='))?.split(';')[0]}`;
+    assert.deepEqual(await (await request('/api/settings',{headers:{Cookie:otherCookie}})).json(),{settings:null});
+    assert.equal((await settingsPost({...defaults,writingContract:'sa'},otherCookie,otherToken)).status,200);
+    assert.deepEqual((await (await request('/api/settings',{headers:{Cookie:ownCookie}})).json()).settings,defaults);
+    assert.equal((await request('/api/settings',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Cookie:ownCookie},body:new URLSearchParams({settings:JSON.stringify(defaults)})})).status,403);
     const logout = await request('/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', Cookie: `${cookieHeader}; ${appCsrfCookie}` }, body: new URLSearchParams({ csrf: appToken }) });
     assert.equal(logout.status, 303);
     assert.ok(logout.headers.getSetCookie().some(item => item.includes('Max-Age=0')));
