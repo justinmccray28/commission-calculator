@@ -28,8 +28,6 @@
     .field-wrap { position:relative; }
     .field-icon { position:absolute; z-index:1; left:0; top:0; bottom:0; width:48px; display:grid; place-items:center; color:#86b5d9; border-right:1px solid rgba(83,149,195,.28); font-size:18px; pointer-events:none; }
     .field-wrap input, .field-wrap select { padding-left:59px; }
-    .status { display:flex; align-items:center; gap:7px; border:1px solid #087f78; color:#56f0d0; background:rgba(15,115,107,.16); border-radius:99px; padding:7px 12px; font-size:12px; white-space:nowrap; }
-    .status-dot { width:8px; height:8px; border-radius:50%; background:#48ebbe; box-shadow:0 0 10px #48ebbe; }
     .big { font-size:42px; font-weight:850; color:var(--accent); margin:2px 0 3px; letter-spacing:-1px; }
     .muted { color:var(--muted); }
     table { width:100%; border-collapse:collapse; margin-top:12px; }
@@ -101,8 +99,6 @@
     .hero .heading-icon { width:47px; height:47px; color:#58eadd; }
     .hero h2 { margin:0 0 2px; }
     .hero .muted { font-size:12px; }
-    .status { background:rgba(20,104,85,.15); color:#79eacb; border-color:#1b7f71; padding:7px 11px; font-size:11px; }
-    .status-dot { width:7px; height:7px; }
     .clarity-row { position:relative; justify-content:space-between; min-height:105px; margin:0 -22px; padding:14px 22px 12px; gap:20px; overflow:hidden; }
     .total-block { min-width:260px; position:relative; z-index:1; }
     .total-block .muted { font-size:13px; color:#c3d4e9; }
@@ -221,15 +217,54 @@
     .settings-actions button { border:1px solid rgba(106,188,224,.5); border-radius:8px; padding:9px 13px; color:#eaf8ff; background:linear-gradient(120deg,rgba(27,111,130,.7),rgba(29,77,111,.7)); font:inherit; font-size:12px; font-weight:650; cursor:pointer; }
     .settings-actions button.secondary { color:#b7cbe0; background:rgba(22,44,67,.7); }
     .settings-status { color:#70e8d1; font-size:12px; }
+    .app-tabs { display:flex; gap:6px; width:max-content; margin:0 0 14px; padding:5px; border:1px solid rgba(108,171,222,.4); border-radius:12px; background:rgba(8,25,43,.7); box-shadow:inset 0 1px rgba(229,247,255,.08); }
+    .app-tab { border:0; border-radius:8px; padding:9px 17px; color:#9fb9d2; background:transparent; font:650 13px system-ui; cursor:pointer; }
+    .app-tab.active { color:#071f31; background:linear-gradient(90deg,#42dae0,#61e5aa); box-shadow:0 4px 18px rgba(61,226,201,.2); }
+    .tab-badge { display:inline-grid; place-items:center; min-width:18px; height:18px; margin-left:6px; padding:0 5px; border-radius:9px; background:rgba(114,164,207,.22); color:inherit; font-size:10px; }
+    .save-case-button { flex:0 0 auto; border:1px solid rgba(83,228,211,.62); border-radius:99px; padding:9px 15px; color:#e7fffb; background:linear-gradient(115deg,rgba(20,125,132,.76),rgba(25,82,116,.78)); font:700 12px system-ui; white-space:nowrap; cursor:pointer; box-shadow:inset 0 1px rgba(218,255,251,.13),0 7px 20px rgba(0,11,22,.22),0 0 17px rgba(65,231,212,.08); }
+    .save-case-button:hover:not(:disabled) { border-color:rgba(105,255,232,.88); transform:translateY(-1px); box-shadow:inset 0 1px rgba(218,255,251,.18),0 9px 22px rgba(0,11,22,.26),0 0 20px rgba(65,231,212,.13); }
+    .save-case-button:disabled { cursor:not-allowed; opacity:.42; box-shadow:none; }
+    .tracker-card { padding:22px; }
+    .tracker-head { display:flex; justify-content:space-between; align-items:flex-end; gap:20px; margin-bottom:18px; }
+    .tracker-head h2 { margin:0 0 5px; }
+    .tracker-metrics { display:grid; grid-template-columns:repeat(2,minmax(180px,1fr)); gap:10px; }
+    .tracker-total { min-width:180px; padding:14px 18px; border:1px solid rgba(73,229,208,.5); border-radius:12px; background:linear-gradient(135deg,rgba(12,100,106,.32),rgba(15,46,75,.55)); text-align:right; }
+    .tracker-total.points { border-color:rgba(90,169,255,.52); background:linear-gradient(135deg,rgba(21,75,132,.38),rgba(15,46,75,.55)); }
+    .tracker-total span { display:block; color:#9fb9d2; font-size:11px; text-transform:uppercase; letter-spacing:.08em; }
+    .tracker-total strong { display:block; margin-top:2px; color:#63efe1; font-size:28px; }
+    .tracker-total.points strong { color:#82c7ff; }
+    .case-list { display:grid; gap:10px; }
+    .saved-case { display:grid; grid-template-columns:minmax(150px,1.1fr) minmax(180px,1.4fr) minmax(120px,.7fr) auto; gap:16px; align-items:center; padding:14px 16px; border:1px solid rgba(84,140,183,.38); border-radius:11px; background:linear-gradient(120deg,rgba(24,54,81,.64),rgba(9,29,49,.72)); }
+    .saved-case-name { color:#f4f9ff; font-weight:700; }
+    .saved-case-product,.saved-case-date { color:#9fb9d2; font-size:12px; }
+    .saved-case-amount { color:#61eadc; font-size:19px; font-weight:800; text-align:right; }
+    .saved-case-trail { display:block; color:#8bb5d6; font-size:10px; font-weight:500; }
+    .saved-case-points { display:block; margin-top:3px; color:#82c7ff; font-size:11px; font-weight:650; }
+    .delete-case { border:1px solid rgba(238,120,132,.36); border-radius:7px; padding:7px 9px; color:#eeb2b9; background:rgba(91,31,46,.28); cursor:pointer; }
+    .tracker-empty { padding:38px 18px; border:1px dashed rgba(110,160,199,.35); border-radius:12px; color:#92aec8; text-align:center; }
+    .modal-backdrop { position:fixed; inset:0; z-index:20; display:grid; place-items:center; padding:20px; background:rgba(2,10,19,.76); backdrop-filter:blur(8px); }
+    .modal-card { width:min(420px,100%); padding:24px; border:1px solid rgba(102,181,220,.58); border-radius:16px; background:linear-gradient(150deg,#173653,#091c30); box-shadow:0 25px 80px #000a; }
+    .modal-card h2 { margin:0 0 5px; }
+    .modal-card p { margin:0 0 16px; color:#9fb9d2; font-size:13px; }
+    .modal-summary { display:flex; justify-content:space-between; gap:12px; margin:14px 0; padding:12px; border-radius:9px; background:rgba(7,26,45,.62); color:#b9cee1; font-size:12px; }
+    .modal-summary strong { color:#62ecdf; font-size:16px; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:17px; }
+    .modal-actions button { border:1px solid rgba(103,169,208,.45); border-radius:8px; padding:9px 14px; color:#dcecf8; background:#17344e; font-weight:700; cursor:pointer; }
+    .modal-actions .primary { border:0; color:#082238; background:linear-gradient(90deg,#42dae0,#62e7aa); }
+    .modal-status { min-height:18px; margin-top:8px; color:#ffb4bd; font-size:12px; }
     @media(max-width:850px) { .settings-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-    @media(max-width:520px) { .settings-grid { grid-template-columns:1fr; } .settings-grid .check { margin-top:12px; } .settings-actions { align-items:flex-start; flex-wrap:wrap; } }
+    @media(max-width:700px) { .tracker-head { align-items:stretch; flex-direction:column; } .tracker-metrics { grid-template-columns:1fr 1fr; } .tracker-total { min-width:0; text-align:left; } .saved-case { grid-template-columns:1fr auto; gap:5px 12px; } .saved-case-product { grid-column:1; } .saved-case-amount { grid-column:2; grid-row:1/3; } .delete-case { grid-column:1/-1; width:max-content; margin-top:7px; } }
+    @media(max-width:430px) { .tracker-metrics { grid-template-columns:1fr; } }
+    @media(max-width:520px) { .settings-grid { grid-template-columns:1fr; } .settings-grid .check { margin-top:12px; } .settings-actions { align-items:flex-start; flex-wrap:wrap; } .app-tabs { width:100%; } .app-tab { flex:1; } }
   </style>
 </head>
 <body>
   <main class="wrap">
     <div class="page-head"><div><h1>Commission Calculator</h1></div><div class="head-mark" aria-hidden="true"><div class="bars"><i style="--h:13px"></i><i style="--h:25px"></i><i style="--h:37px"></i><i style="--h:50px"></i><i style="--h:63px"></i></div><span>MISSION<br>BEFORE<br>COMMISSION</span></div></div>
+    <nav class="app-tabs" aria-label="Calculator sections"><button class="app-tab active" id="calculatorTab" type="button">Calculator</button><button class="app-tab" id="trackerTab" type="button">Tracking <span class="tab-badge" id="caseCount">0</span></button></nav>
+    <div id="calculatorView">
     <details class="settings-panel" id="settingsPanel">
-      <summary>Settings <span>Save your personal defaults on this device</span></summary>
+      <summary>Settings <span>Save your personal account defaults</span></summary>
       <div class="settings-body">
         <div class="settings-grid">
           <div><label for="defaultCaseType">Default case type</label><select id="defaultCaseType"><option value="personal">My business</option><option value="downline">Downline business</option></select></div>
@@ -335,7 +370,7 @@
       </section>
 
       <section class="card" id="results">
-        <div class="hero"><div class="hero-title"><span class="heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24" style="stroke:none"><rect x="3" y="14" width="4" height="7" rx="1" fill="#4be0dc"/><rect x="10" y="9" width="4" height="12" rx="1" fill="#4be0dc"/><rect x="17" y="3" width="4" height="18" rx="1" fill="#4be0dc"/></svg></span><div><h2>Estimated payout</h2><div class="muted" id="summary">Select a carrier and product to see your estimate.</div></div></div><div class="status"><span class="status-dot"></span>Calculation complete</div></div>
+        <div class="hero"><div class="hero-title"><span class="heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24" style="stroke:none"><rect x="3" y="14" width="4" height="7" rx="1" fill="#4be0dc"/><rect x="10" y="9" width="4" height="12" rx="1" fill="#4be0dc"/><rect x="17" y="3" width="4" height="18" rx="1" fill="#4be0dc"/></svg></span><div><h2>Estimated payout</h2><div class="muted" id="summary">Select a carrier and product to see your estimate.</div></div></div><button class="save-case-button" id="openSaveCase" type="button" disabled>＋ Save calculation</button></div>
         <div class="clarity-row"><div class="total-block"><div class="muted" id="totalLabel">Your estimated total</div><div class="big" id="total">$0.00</div></div><div class="clarity-copy"><h3>Same case. Greater clarity.</h3><p>Accurate commission estimates help you plan, partner, and grow with confidence.</p></div><svg class="wave" viewBox="0 0 170 85" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="wavefill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#2589ac" stop-opacity=".62"/><stop offset="1" stop-color="#147095" stop-opacity="0"/></linearGradient></defs><path d="M0 80 C18 64 18 46 33 54 S50 63 66 36 S85 56 102 38 S118 20 133 8 S153 36 170 72 L170 85 L0 85Z" fill="url(#wavefill)" stroke="#278aad" stroke-width="1"/></svg></div>
         <div class="commission-panels">
           <div class="commission-panel" id="yourPanel">
@@ -372,7 +407,15 @@
         <div class="footer hidden" id="atheneTrailNote">Athene Option 2 uses the monthly 0.0350% trail only. No duplicate annual trail is added.</div>
       </section>
     </div>
+    </div>
+    <section class="card tracker-card hidden" id="trackerView">
+      <div class="tracker-head"><div><h2>Commission tracking</h2><div class="muted">Saved calculations and agent points tied to your account.</div></div><div class="tracker-metrics"><div class="tracker-total"><span>Combined commission</span><strong id="trackedTotal">$0.00</strong></div><div class="tracker-total points"><span>Your agent points</span><strong id="trackedPoints">0.00</strong></div></div></div>
+      <div class="case-list" id="caseList"><div class="tracker-empty">No calculations saved yet.</div></div>
+    </section>
   </main>
+  <div class="modal-backdrop hidden" id="saveCaseModal" role="dialog" aria-modal="true" aria-labelledby="saveCaseTitle">
+    <div class="modal-card"><h2 id="saveCaseTitle">Save calculation</h2><p>Add a client or case name. Use initials if you prefer.</p><label for="savedCaseName">Client or case name</label><input id="savedCaseName" type="text" maxlength="120" autocomplete="off"><div class="modal-summary"><span id="saveCaseProduct">Product</span><strong id="saveCaseAmount">$0.00</strong></div><div class="modal-status" id="saveCaseStatus" aria-live="polite"></div><div class="modal-actions"><button id="cancelSaveCase" type="button">Cancel</button><button class="primary" id="confirmSaveCase" type="button">Save case</button></div></div>
+  </div>
   <script>
     let contractRates, contractNames, presets, trailRates, termProducts, catalog;
     async function loadCommissionData(){
@@ -397,18 +440,22 @@
         if(!validNumbers(data.contractRates) || !validNumbers(data.presets) || !validNumbers(data.trailRates)) throw new Error('Invalid commission rate');
         ({contractRates,contractNames,presets,trailRates,termProducts,catalog}=data);
         $('carrier').disabled=false;
-        initializeSettings();
+        await initializeSettings();
+        await loadSavedCases();
       } catch(error) {
         $('summary').textContent='Commission rates could not be loaded';
         $('note').textContent='Refresh the page to try again. Calculations are unavailable until rates load.';
-        document.querySelector('.status').textContent='Rates unavailable';
+        $('openSaveCase').disabled=true;
         console.error('Commission data load failed:',error);
       }
     }
     const $ = id => document.getElementById(id);
     const SETTINGS_KEY='commissionCalculator.defaults.v1';
+    let currentCalculation=null, savedCases=[];
     const money = n => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number.isFinite(n)?n:0);
+    const points = n => new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number.isFinite(n)?n:0);
     const pct = n => `${Number(n).toFixed(4).replace(/0+$/,'').replace(/\.$/,'')}%`;
+    const escapeText = value => String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
     function val(id){ return parseFloat(String($(id).value).replace(/,/g,'')) || 0; }
     function settingValue(id){ return $(id).value; }
     function populateDefaultCarriers(){
@@ -497,22 +544,107 @@
       }
       updateCaseType(); calculate();
     }
-    function initializeSettings(){
+    async function persistSettings(settings){
+      const token=document.querySelector('form[action="/auth/logout"] input[name="csrf"]')?.value;
+      if(!token) throw new Error('Missing form token');
+      const response=await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({csrf:token,settings:JSON.stringify(settings)})});
+      if(!response.ok) throw new Error(`Settings save failed: ${response.status}`);
+    }
+    async function initializeSettings(){
       populateDefaultCarriers();
-      const saved=readSavedSettings();
+      let saved=null;
+      try {
+        const response=await fetch('/api/settings',{cache:'no-store'});
+        if(!response.ok) throw new Error(`Settings load failed: ${response.status}`);
+        saved=(await response.json()).settings;
+        const legacy=readSavedSettings();
+        if(!saved && legacy){
+          await persistSettings(legacy);
+          saved=legacy;
+          $('settingsStatus').textContent='Device defaults moved to your account';
+        }
+        localStorage.removeItem(SETTINGS_KEY);
+      } catch(error){
+        $('settingsStatus').textContent='Account defaults unavailable. Try refreshing.';
+        console.error('Account settings load failed:',error);
+      }
       setSettingsForm(saved||defaultSettings());
       applySettings(saved||defaultSettings());
     }
-    function saveSettings(){
+    async function saveSettings(){
       const settings=settingsFromForm();
-      try { localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings)); $('settingsStatus').textContent='Defaults saved on this device'; }
-      catch(error){ $('settingsStatus').textContent='Unable to save defaults in this browser'; }
-      applySettings(settings);
+      $('saveSettings').disabled=true;
+      try { await persistSettings(settings); $('settingsStatus').textContent='Defaults saved to your account'; applySettings(settings); }
+      catch(error){ $('settingsStatus').textContent='Could not save defaults. Try again.'; console.error(error); }
+      finally { $('saveSettings').disabled=false; }
     }
-    function resetSettings(){
-      try { localStorage.removeItem(SETTINGS_KEY); } catch(error) { /* ignore storage errors */ }
+    async function resetSettings(){
       const settings=defaultSettings();
-      setSettingsForm(settings); applySettings(settings); $('settingsStatus').textContent='Defaults reset';
+      $('resetSettings').disabled=true;
+      try { await persistSettings(settings); setSettingsForm(settings); applySettings(settings); $('settingsStatus').textContent='Account defaults reset'; }
+      catch(error){ $('settingsStatus').textContent='Could not reset defaults. Try again.'; console.error(error); }
+      finally { $('resetSettings').disabled=false; }
+    }
+    function csrfValue(){ return document.querySelector('form[action="/auth/logout"] input[name="csrf"]')?.value || ''; }
+    function showView(view){
+      const tracking=view==='tracker';
+      $('calculatorView').classList.toggle('hidden',tracking);
+      $('trackerView').classList.toggle('hidden',!tracking);
+      $('calculatorTab').classList.toggle('active',!tracking);
+      $('trackerTab').classList.toggle('active',tracking);
+      if(tracking) loadSavedCases();
+    }
+    function renderSavedCases(){
+      $('caseCount').textContent=String(savedCases.length);
+      $('trackedTotal').textContent=money(savedCases.reduce((sum,item)=>sum+Number(item.commission||0),0));
+      $('trackedPoints').textContent=points(savedCases.reduce((sum,item)=>item.calculation?.caseType==='downline' ? sum : sum+Number(item.agent_points||0),0));
+      if(!savedCases.length){ $('caseList').innerHTML='<div class="tracker-empty">No calculations saved yet. Save one from the calculator to begin tracking.</div>'; return; }
+      $('caseList').innerHTML=savedCases.map(item=>{
+        const date=new Date(item.created_at);
+        const trail=Number(item.monthly_trail||0)>0 ? `<span class="saved-case-trail">${money(Number(item.monthly_trail))}/mo trail</span>` : '';
+        const pointLabel=item.calculation?.caseType==='downline' ? 'Downline agent points' : 'Your agent points';
+        return `<article class="saved-case"><div><div class="saved-case-name">${escapeText(item.client_name)}</div><div class="saved-case-date">${Number.isNaN(date.getTime())?'':date.toLocaleDateString()}</div></div><div class="saved-case-product">${escapeText(item.carrier)} · ${escapeText(item.product)}<span class="saved-case-points">${pointLabel}: ${points(Number(item.agent_points||0))}</span></div><div class="saved-case-amount">${money(Number(item.commission))}${trail}</div><button class="delete-case" type="button" data-case-id="${escapeText(item.id)}" aria-label="Delete ${escapeText(item.client_name)}">Delete</button></article>`;
+      }).join('');
+    }
+    async function loadSavedCases(){
+      try {
+        const response=await fetch('/api/cases',{cache:'no-store'});
+        if(!response.ok) throw new Error(`Saved cases load failed: ${response.status}`);
+        savedCases=await response.json();
+        renderSavedCases();
+      } catch(error){
+        $('caseList').innerHTML='<div class="tracker-empty">Saved cases could not be loaded. Refresh and try again.</div>';
+        console.error(error);
+      }
+    }
+    function openSaveCaseModal(){
+      if(!currentCalculation) return;
+      $('savedCaseName').value=''; $('saveCaseStatus').textContent='';
+      $('saveCaseProduct').textContent=`${currentCalculation.carrier} · ${currentCalculation.product}`;
+      $('saveCaseAmount').textContent=money(currentCalculation.commission);
+      $('saveCaseModal').classList.remove('hidden');
+      setTimeout(()=>$('savedCaseName').focus(),0);
+    }
+    function closeSaveCaseModal(){ $('saveCaseModal').classList.add('hidden'); }
+    async function saveCurrentCase(){
+      const name=$('savedCaseName').value.trim();
+      if(!name){ $('saveCaseStatus').textContent='Enter a client or case name.'; return; }
+      if(!currentCalculation){ $('saveCaseStatus').textContent='This calculation is no longer available.'; return; }
+      $('confirmSaveCase').disabled=true; $('saveCaseStatus').textContent='Saving…';
+      try {
+        const response=await fetch('/api/cases',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({csrf:csrfValue(),saved_case:JSON.stringify({...currentCalculation,client_name:name})})});
+        if(!response.ok) throw new Error(`Case save failed: ${response.status}`);
+        closeSaveCaseModal(); await loadSavedCases(); showView('tracker');
+      } catch(error){ $('saveCaseStatus').textContent='Could not save this case. Refresh and try again.'; console.error(error); }
+      finally { $('confirmSaveCase').disabled=false; }
+    }
+    async function deleteSavedCase(id){
+      if(!confirm('Remove this saved calculation from tracking?')) return;
+      try {
+        const response=await fetch('/api/cases/delete',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({csrf:csrfValue(),id})});
+        if(!response.ok) throw new Error(`Case delete failed: ${response.status}`);
+        await loadSavedCases();
+      } catch(error){ console.error(error); alert('Could not delete this saved calculation. Refresh and try again.'); }
     }
     function formatCommaInput(input){
       const raw=input.value.replace(/,/g,'');
@@ -699,6 +831,17 @@
       const exactAtheneOption2Trail = trailActive && ['agility7','agility10','pe7','pe10','ascent10'].includes(product) && $('optionChoice').value==='2' && Math.abs((val('trailRate') || 0) - 0.035) < 0.0000001;
       $('atheneTrailNote').classList.toggle('hidden', !exactAtheneOption2Trail);
       const userTotal=caseType==='downline' ? override : (splitWithDownline ? myPayout+override : myPayout);
+      const userMonthlyTrail=caseType==='downline' ? trailOverride : (splitWithDownline ? trailWriting+trailOverride : trailWriting);
+      const productLabel=`${$('product').selectedOptions[0]?.textContent || ''}${term && $('termLength').value ? ` · ${$('termLength').value} years` : ''}`;
+      currentCalculation=product && !needsCoverage && userTotal>0 ? {
+        carrier:$('carrier').selectedOptions[0]?.textContent || $('carrier').value,
+        product:productLabel,
+        commission:Number(userTotal.toFixed(2)),
+        agent_points:Number(myBase.toFixed(2)),
+        monthly_trail:Number(userMonthlyTrail.toFixed(2)),
+        calculation:{caseType,carrier:$('carrier').value,productFamily:$('product').value,productKey:product,termLength:$('termLength').value,option:$('optionChoice').value,basis:$('basis').value,rate:$('rate').value,clientAge:$('clientAge').value,coverage:$('coverage').value,writingContract:$('myContract').value,splitContract:$('otherContract').value,overrideContract:$('overrideContract').value,isSplit:split,splitWithDownline,mySplit:$('mySplit').value,otherSplit:$('otherSplit').value,overridePercent:$('overridePercent').value,overrideBasis:$('overrideBasis').value,trailRate:$('trailRate').value,trailBasis:$('trailBasis').value}
+      } : null;
+      $('openSaveCase').disabled=!currentCalculation;
       animateMoney('total',userTotal);
       $('summary').textContent=term && !product ? 'Select a policy length to see its rate' : needsCoverage ? 'Enter specified coverage of at least $25,000 to see its rate' : `${$('product').selectedOptions[0]?.textContent || 'Select a product'}${term ? ` • ${$('termLength').value} years • annualized premium` : ''} • ${split?'split case':'not split'}`;
       formula=term ? `Annual premium = monthly premium × 12; gross points = annual premium × ${pct(rate*100)}; split first; apply contract percentage second.` : ['iul','target','wl'].includes(catalog[product]?.kind) ? `Initial gross points = target premium × ${pct(rate*100)}; split first; apply contract percentage second.` : `Gross points = basis × ${pct(rate*100)}; split first; apply contract percentage second.`;
@@ -712,6 +855,11 @@
     $('splitWithDownline').addEventListener('change',()=>{ if($('splitWithDownline').checked) $('isSplit').checked=true; updateCaseType(); calculate(); });
     $('carrier').addEventListener('change',populateProducts); $('product').addEventListener('change',setPreset); $('termLength').addEventListener('change',setPreset); $('optionChoice').addEventListener('change',setPreset); $('clientAge').addEventListener('input',()=>{ setPreset(); calculate(); }); $('basis').addEventListener('input',()=>formatCommaInput($('basis'))); $('coverage').addEventListener('input',()=>{ formatCommaInput($('coverage')); setPreset(); calculate(); });
     $('defaultCarrier').addEventListener('change',populateDefaultProducts); $('defaultProduct').addEventListener('change',populateDefaultDependencies); $('saveSettings').addEventListener('click',saveSettings); $('resetSettings').addEventListener('click',resetSettings);
+    $('calculatorTab').addEventListener('click',()=>showView('calculator')); $('trackerTab').addEventListener('click',()=>showView('tracker'));
+    $('openSaveCase').addEventListener('click',openSaveCaseModal); $('cancelSaveCase').addEventListener('click',closeSaveCaseModal); $('confirmSaveCase').addEventListener('click',saveCurrentCase);
+    $('savedCaseName').addEventListener('keydown',event=>{ if(event.key==='Enter'){ event.preventDefault(); saveCurrentCase(); } });
+    $('saveCaseModal').addEventListener('click',event=>{ if(event.target===$('saveCaseModal')) closeSaveCaseModal(); });
+    $('caseList').addEventListener('click',event=>{ const button=event.target.closest('[data-case-id]'); if(button) deleteSavedCase(button.dataset.caseId); });
     document.querySelectorAll('input, select').forEach(element=>{
       element.addEventListener('input',calculate);
       element.addEventListener('change',calculate);
