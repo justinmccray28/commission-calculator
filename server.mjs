@@ -33,6 +33,13 @@ async function settingsRequest(access, options = {}) {
     signal: AbortSignal.timeout(8000)
   });
 }
+async function savedCasesRequest(access, query = '', options = {}) {
+  return fetch(`${supabase}/rest/v1/saved_cases${query}`, {
+    ...options,
+    headers: { apikey: key, Authorization: `Bearer ${access}`, ...options.headers },
+    signal: AbortSignal.timeout(8000)
+  });
+}
 async function userFromRequest(req, res) {
   const current = cookies(req);
   const access = current[cookieName('access')];
@@ -125,7 +132,7 @@ const server = createServer(async (req, res) => {
       return send(res, 200, page('Check email', '<h1>Check your email</h1><p>If that address has an account, a reset link is on its way.</p><a href="/login">Return to sign in</a>'));
     }
     if (req.method === 'POST' && path === '/auth/logout') { clearSession(res); return redirect(res, '/login'); }
-    if (['/app', '/api/commission-data', '/api/settings', '/account/password', '/auth/password'].includes(path)) {
+    if (['/app', '/api/commission-data', '/api/settings', '/api/cases', '/api/cases/delete', '/account/password', '/auth/password'].includes(path)) {
       const session = await userFromRequest(req, res);
       if (!session) return path.startsWith('/api/') ? send(res, 401, 'Sign in required', 'text/plain') : redirect(res, '/login');
       if (req.method === 'GET' && path === '/app') return send(res, 200, protectedHTML.replace('<body>', `<body><div style="display:flex;justify-content:flex-end;padding:10px 24px 0"><form method="POST" action="/auth/logout">${csrfField(csrfToken(res))}<button style="border:1px solid #38748e;border-radius:7px;background:#102a40;color:#e5f8ff;padding:7px 14px;cursor:pointer">Sign out</button></form></div>`));
@@ -150,6 +157,40 @@ const server = createServer(async (req, res) => {
           body: JSON.stringify({ user_id: session.user.id, settings })
         });
         return result.ok ? send(res, 200, 'Saved', 'text/plain') : send(res, 503, 'Could not save settings', 'text/plain');
+      }
+      if (path === '/api/cases' && req.method === 'GET') {
+        const result = await savedCasesRequest(session.access, '?select=id,client_name,carrier,product,commission,monthly_trail,created_at&order=created_at.desc');
+        if (!result.ok) return send(res, 503, 'Saved cases unavailable', 'text/plain');
+        return send(res, 200, await result.text(), 'application/json; charset=utf-8');
+      }
+      if (path === '/api/cases' && req.method === 'POST') {
+        let savedCase;
+        try { savedCase = JSON.parse(posted.saved_case); } catch { return send(res, 400, 'Invalid saved case', 'text/plain'); }
+        const clean = {
+          client_name: typeof savedCase?.client_name === 'string' ? savedCase.client_name.trim() : '',
+          carrier: typeof savedCase?.carrier === 'string' ? savedCase.carrier.trim() : '',
+          product: typeof savedCase?.product === 'string' ? savedCase.product.trim() : '',
+          commission: Number(savedCase?.commission),
+          monthly_trail: Number(savedCase?.monthly_trail || 0),
+          calculation: savedCase?.calculation
+        };
+        if (!clean.client_name || clean.client_name.length > 120 || !clean.carrier || clean.carrier.length > 100 ||
+            !clean.product || clean.product.length > 160 || !Number.isFinite(clean.commission) || clean.commission < 0 || clean.commission > 100000000 ||
+            !Number.isFinite(clean.monthly_trail) || clean.monthly_trail < 0 || clean.monthly_trail > 10000000 ||
+            !clean.calculation || Array.isArray(clean.calculation) || typeof clean.calculation !== 'object' || Object.keys(clean.calculation).length > 40)
+          return send(res, 400, 'Invalid saved case', 'text/plain');
+        const result = await savedCasesRequest(session.access, '', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+          body: JSON.stringify({ user_id: session.user.id, ...clean })
+        });
+        return result.ok ? send(res, 201, 'Saved', 'text/plain') : send(res, 503, 'Could not save case', 'text/plain');
+      }
+      if (path === '/api/cases/delete' && req.method === 'POST') {
+        const id = posted.id || '';
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) return send(res, 400, 'Invalid case', 'text/plain');
+        const result = await savedCasesRequest(session.access, `?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
+        return result.ok ? send(res, 200, 'Deleted', 'text/plain') : send(res, 503, 'Could not delete case', 'text/plain');
       }
       if (req.method === 'GET' && path === '/account/password') return send(res, 200, page('Set password', `<h1>Set your password</h1><p>Choose a password for your agent account.</p><form method="POST" action="/auth/password">${csrfField(csrfToken(res))}<label for="password">New password</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="12" required><button>Save password</button></form>`));
       if (req.method === 'POST' && path === '/auth/password') {
