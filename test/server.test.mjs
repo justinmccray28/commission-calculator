@@ -7,6 +7,9 @@ import { once } from 'node:events';
 const storedSettings = new Map();
 const agentOne = '11111111-1111-4111-8111-111111111111';
 const agentTwo = '22222222-2222-4222-8222-222222222222';
+const caseOne = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const caseTwo = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+const storedCases = new Map([[agentOne, []], [agentTwo, []]]);
 const auth = createServer(async (req, res) => {
   let body = '';
   for await (const chunk of req) body += chunk;
@@ -34,6 +37,26 @@ const auth = createServer(async (req, res) => {
     storedSettings.set(id, data.settings);
     res.statusCode = 201;
     return res.end('{}');
+  }
+  if (req.url.startsWith('/rest/v1/saved_cases')) {
+    const id = req.headers.authorization === 'Bearer valid-token' ? agentOne : req.headers.authorization === 'Bearer valid-token-two' ? agentTwo : null;
+    if (!id) { res.statusCode = 401; return res.end('{}'); }
+    const records = storedCases.get(id);
+    if (req.method === 'GET') return res.end(JSON.stringify([...records].reverse()));
+    if (req.method === 'POST') {
+      const data = JSON.parse(body);
+      if (data.user_id !== id) { res.statusCode = 403; return res.end('{}'); }
+      records.push({ ...data, id: id === agentOne ? caseOne : caseTwo, created_at: '2026-09-21T12:00:00.000Z' });
+      res.statusCode = 201;
+      return res.end('{}');
+    }
+    if (req.method === 'DELETE') {
+      const requested = new URL(req.url, 'http://localhost').searchParams.get('id')?.replace(/^eq\./, '');
+      const index = records.findIndex(item => item.id === requested);
+      if (index >= 0) records.splice(index, 1);
+      res.statusCode = 204;
+      return res.end();
+    }
   }
   res.statusCode = 200;
   res.end('{}');
@@ -98,6 +121,21 @@ test('pilot access requires a real authenticated session and survives refresh', 
     assert.equal((await settingsPost({...defaults,writingContract:'sa'},otherCookie,otherToken)).status,200);
     assert.deepEqual((await (await request('/api/settings',{headers:{Cookie:ownCookie}})).json()).settings,defaults);
     assert.equal((await request('/api/settings',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Cookie:ownCookie},body:new URLSearchParams({settings:JSON.stringify(defaults)})})).status,403);
+    const savedCase = {client_name:'Sample Client',carrier:'Athene',product:'Performance Elite 7',commission:1729.43,monthly_trail:12.25,calculation:{caseType:'personal',productKey:'pe7'}};
+    const casePost = (saved_case,cookie=ownCookie,csrf=appToken) => request('/api/cases',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Cookie:cookie},body:new URLSearchParams({csrf,saved_case:JSON.stringify(saved_case)})});
+    assert.deepEqual(await (await request('/api/cases',{headers:{Cookie:ownCookie}})).json(),[]);
+    assert.equal((await casePost(savedCase)).status,201);
+    const ownCases = await (await request('/api/cases',{headers:{Cookie:ownCookie}})).json();
+    assert.equal(ownCases.length,1);
+    assert.equal(ownCases[0].client_name,'Sample Client');
+    assert.deepEqual(await (await request('/api/cases',{headers:{Cookie:otherCookie}})).json(),[]);
+    assert.equal((await casePost({...savedCase,client_name:'Other Agent'},otherCookie,otherToken)).status,201);
+    assert.equal((await (await request('/api/cases',{headers:{Cookie:ownCookie}})).json()).length,1);
+    assert.equal((await request('/api/cases/delete',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Cookie:otherCookie},body:new URLSearchParams({csrf:otherToken,id:caseOne})})).status,200);
+    assert.equal((await (await request('/api/cases',{headers:{Cookie:ownCookie}})).json()).length,1);
+    assert.equal((await request('/api/cases/delete',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Cookie:ownCookie},body:new URLSearchParams({csrf:appToken,id:caseOne})})).status,200);
+    assert.deepEqual(await (await request('/api/cases',{headers:{Cookie:ownCookie}})).json(),[]);
+    assert.equal((await request('/api/cases',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Cookie:ownCookie},body:new URLSearchParams({saved_case:JSON.stringify(savedCase)})})).status,403);
     const logout = await request('/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', Cookie: `${cookieHeader}; ${appCsrfCookie}` }, body: new URLSearchParams({ csrf: appToken }) });
     assert.equal(logout.status, 303);
     assert.ok(logout.headers.getSetCookie().some(item => item.includes('Max-Age=0')));
