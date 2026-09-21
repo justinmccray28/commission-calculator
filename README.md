@@ -2,9 +2,9 @@
 
 ## Invite-only pilot
 
-`server.mjs` provides an authenticated version of the existing calculator. It serves both `index.html` and `commission-data.json` only to signed-in agents. The formula code and verified rates remain unchanged. The pilot does not collect payment or store cases. Calculator defaults are saved per account in the Supabase `agent_settings` table.
+`server.mjs` provides an authenticated version of the existing calculator. It serves both `index.html` and `commission-data.json` only to signed-in agents. The formula code and verified rates remain unchanged. The pilot does not collect payment. Calculator defaults are saved per account in the Supabase `agent_settings` table, and calculations that an agent chooses to keep are saved in the account's private case tracker.
 
-The database migration is in `supabase/migrations/20260920000000_agent_settings.sql`. Apply it to the same Supabase project used for Auth before deploying the settings endpoints. Its row policies allow agents to read and edit only their own settings. The app reads settings through the authenticated server and transfers previously saved browser defaults once, then removes the device copy. Saving and resetting defaults update the account, so they follow the agent across devices. No service-role key is needed.
+Database migrations are in `supabase/migrations/`. Apply them to the same Supabase project used for Auth before deploying. Row policies allow agents to access only their own settings and saved cases. The app reads settings through the authenticated server and transfers previously saved browser defaults once, then removes the device copy. Saving and resetting defaults update the account, so they follow the agent across devices. The case tracker stores the entered case name, product, commission, monthly trail when applicable, and a calculation snapshot. No service-role key is needed.
 
 To run it, use Node 20 or later and set `APP_ORIGIN`, `SUPABASE_URL`, and `SUPABASE_PUBLISHABLE_KEY` as shown in `.env.example`. Environment files are not loaded automatically; set the variables in your hosting provider or run locally with `node --env-file=.env server.mjs` after copying `.env.example` to `.env` and replacing its placeholders. `npm start` works when the variables are already set. No package installation is needed.
 
@@ -14,7 +14,7 @@ Deploy as a Node web service from GitHub with start command `npm start`, Node 20
 
 **Important:** The GitHub Pages deployment below remains a public copy of the whole calculator and JSON. Do not market this as exclusive or protected while that Pages URL or a public source repository still exposes them. Move the source to a private repository and disable the public Pages deployment before using protected access as a subscription gate. Authentication can be piloted independently of that migration.
 
-An early working version of the commission calculator. `index.html` holds the interface and calculation logic; `commission-data.json` holds contract percentages, product payout rates, and monthly trail rates. There is no build step. The only server-side user data is account-linked defaults.
+An early working version of the commission calculator. `index.html` holds the interface and calculation logic; `commission-data.json` holds contract percentages, product payout rates, and monthly trail rates. There is no build step. Server-side user data consists of account-linked defaults and calculations the agent explicitly saves to the case tracker.
 
 ## Live calculator
 
@@ -34,4 +34,4 @@ The September 2026 supplied screenshots added Nationwide Indexed UL Accumulator 
 
 North American ADvantage 10/15/20/30 uses monthly term premium multiplied by 12, with first-year rates of 58.6950%, 62.8875%, 79.6575%, and 79.6575% respectively. Pacific Horizon ECV IUL uses the Base/LTC Target 1 initial rate of 96.4275% on target premium. SVER-I3 and later target bands are excluded.
 
-This version stores no submitted cases. Payouts are calculated in the visitor's browser.
+Payouts are calculated in the visitor's browser. A calculation is stored only when a signed-in agent selects **Save calculation** and supplies a client or case name. Saved cases can be viewed and deleted from the **Tracking** tab, which also displays their combined commission total.
