@@ -409,7 +409,7 @@
     </div>
     </div>
     <section class="card tracker-card hidden" id="trackerView">
-      <div class="tracker-head"><div><h2>Commission tracking</h2><div class="muted">Saved calculations and agent points tied to your account.</div></div><div class="tracker-metrics"><div class="tracker-total"><span>Combined commission</span><strong id="trackedTotal">$0.00</strong></div><div class="tracker-total points"><span>Total agent points</span><strong id="trackedPoints">0.00</strong></div></div></div>
+      <div class="tracker-head"><div><h2>Commission tracking</h2><div class="muted">Saved calculations and agent points tied to your account.</div></div><div class="tracker-metrics"><div class="tracker-total"><span>Combined commission</span><strong id="trackedTotal">$0.00</strong></div><div class="tracker-total points"><span>Your agent points</span><strong id="trackedPoints">0.00</strong></div></div></div>
       <div class="case-list" id="caseList"><div class="tracker-empty">No calculations saved yet.</div></div>
     </section>
   </main>
@@ -597,12 +597,12 @@
     function renderSavedCases(){
       $('caseCount').textContent=String(savedCases.length);
       $('trackedTotal').textContent=money(savedCases.reduce((sum,item)=>sum+Number(item.commission||0),0));
-      $('trackedPoints').textContent=points(savedCases.reduce((sum,item)=>sum+Number(item.agent_points||0),0));
+      $('trackedPoints').textContent=points(savedCases.reduce((sum,item)=>item.calculation?.caseType==='downline' ? sum : sum+Number(item.agent_points||0),0));
       if(!savedCases.length){ $('caseList').innerHTML='<div class="tracker-empty">No calculations saved yet. Save one from the calculator to begin tracking.</div>'; return; }
       $('caseList').innerHTML=savedCases.map(item=>{
         const date=new Date(item.created_at);
         const trail=Number(item.monthly_trail||0)>0 ? `<span class="saved-case-trail">${money(Number(item.monthly_trail))}/mo trail</span>` : '';
-        const pointLabel=item.calculation?.caseType==='downline' ? 'Downline agent points' : 'Agent points';
+        const pointLabel=item.calculation?.caseType==='downline' ? 'Downline agent points' : 'Your agent points';
         return `<article class="saved-case"><div><div class="saved-case-name">${escapeText(item.client_name)}</div><div class="saved-case-date">${Number.isNaN(date.getTime())?'':date.toLocaleDateString()}</div></div><div class="saved-case-product">${escapeText(item.carrier)} · ${escapeText(item.product)}<span class="saved-case-points">${pointLabel}: ${points(Number(item.agent_points||0))}</span></div><div class="saved-case-amount">${money(Number(item.commission))}${trail}</div><button class="delete-case" type="button" data-case-id="${escapeText(item.id)}" aria-label="Delete ${escapeText(item.client_name)}">Delete</button></article>`;
       }).join('');
     }
