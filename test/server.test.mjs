@@ -121,13 +121,14 @@ test('pilot access requires a real authenticated session and survives refresh', 
     assert.equal((await settingsPost({...defaults,writingContract:'sa'},otherCookie,otherToken)).status,200);
     assert.deepEqual((await (await request('/api/settings',{headers:{Cookie:ownCookie}})).json()).settings,defaults);
     assert.equal((await request('/api/settings',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Cookie:ownCookie},body:new URLSearchParams({settings:JSON.stringify(defaults)})})).status,403);
-    const savedCase = {client_name:'Sample Client',carrier:'Athene',product:'Performance Elite 7',commission:1729.43,monthly_trail:12.25,calculation:{caseType:'personal',productKey:'pe7'}};
+    const savedCase = {client_name:'Sample Client',carrier:'Athene',product:'Performance Elite 7',commission:1729.43,agent_points:3458.85,monthly_trail:12.25,calculation:{caseType:'personal',productKey:'pe7'}};
     const casePost = (saved_case,cookie=ownCookie,csrf=appToken) => request('/api/cases',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Cookie:cookie},body:new URLSearchParams({csrf,saved_case:JSON.stringify(saved_case)})});
     assert.deepEqual(await (await request('/api/cases',{headers:{Cookie:ownCookie}})).json(),[]);
     assert.equal((await casePost(savedCase)).status,201);
     const ownCases = await (await request('/api/cases',{headers:{Cookie:ownCookie}})).json();
     assert.equal(ownCases.length,1);
     assert.equal(ownCases[0].client_name,'Sample Client');
+    assert.equal(ownCases[0].agent_points,3458.85);
     assert.deepEqual(await (await request('/api/cases',{headers:{Cookie:otherCookie}})).json(),[]);
     assert.equal((await casePost({...savedCase,client_name:'Other Agent'},otherCookie,otherToken)).status,201);
     assert.equal((await (await request('/api/cases',{headers:{Cookie:ownCookie}})).json()).length,1);
