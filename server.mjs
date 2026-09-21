@@ -159,7 +159,7 @@ const server = createServer(async (req, res) => {
         return result.ok ? send(res, 200, 'Saved', 'text/plain') : send(res, 503, 'Could not save settings', 'text/plain');
       }
       if (path === '/api/cases' && req.method === 'GET') {
-        const result = await savedCasesRequest(session.access, '?select=id,client_name,carrier,product,commission,monthly_trail,created_at&order=created_at.desc');
+        const result = await savedCasesRequest(session.access, '?select=id,client_name,carrier,product,commission,agent_points,monthly_trail,calculation,created_at&order=created_at.desc');
         if (!result.ok) return send(res, 503, 'Saved cases unavailable', 'text/plain');
         return send(res, 200, await result.text(), 'application/json; charset=utf-8');
       }
@@ -171,11 +171,13 @@ const server = createServer(async (req, res) => {
           carrier: typeof savedCase?.carrier === 'string' ? savedCase.carrier.trim() : '',
           product: typeof savedCase?.product === 'string' ? savedCase.product.trim() : '',
           commission: Number(savedCase?.commission),
+          agent_points: Number(savedCase?.agent_points),
           monthly_trail: Number(savedCase?.monthly_trail || 0),
           calculation: savedCase?.calculation
         };
         if (!clean.client_name || clean.client_name.length > 120 || !clean.carrier || clean.carrier.length > 100 ||
             !clean.product || clean.product.length > 160 || !Number.isFinite(clean.commission) || clean.commission < 0 || clean.commission > 100000000 ||
+            !Number.isFinite(clean.agent_points) || clean.agent_points < 0 || clean.agent_points > 100000000 ||
             !Number.isFinite(clean.monthly_trail) || clean.monthly_trail < 0 || clean.monthly_trail > 10000000 ||
             !clean.calculation || Array.isArray(clean.calculation) || typeof clean.calculation !== 'object' || Object.keys(clean.calculation).length > 40)
           return send(res, 400, 'Invalid saved case', 'text/plain');
