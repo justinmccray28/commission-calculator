@@ -94,6 +94,18 @@ function validPost(req, data) {
   if (!expected || !data.csrf || !/^[a-f0-9]{64}$/.test(expected) || !/^[a-f0-9]{64}$/.test(data.csrf)) return false;
   return timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(data.csrf, 'hex'));
 }
+function validCsrfHeader(req) {
+  if (req.headers.origin && req.headers.origin !== 'null' && req.headers.origin !== origin) return false;
+  const expected = cookies(req)[cookieName('csrf')];
+  const supplied = req.headers['x-csrf-token'];
+  if (!expected || typeof supplied !== 'string' || !/^[a-f0-9]{64}$/.test(expected) || !/^[a-f0-9]{64}$/.test(supplied)) return false;
+  return timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(supplied, 'hex'));
+}
+async function binaryBody(req, limit = 2097152) {
+  const chunks=[]; let size=0;
+  for await (const chunk of req) { size += chunk.length; if (size > limit) throw new Error('Image too large'); chunks.push(chunk); }
+  return Buffer.concat(chunks);
+}
 function escapeHTML(value) { return String(value).replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[char]); }
 function page(title, body) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHTML(title)} · Commission Calculator</title><style>body{min-height:100vh;margin:0;display:grid;place-items:center;background:radial-gradient(circle at 30% 10%,#164260,#071322 65%);color:#f5f9ff;font:16px/1.5 system-ui,sans-serif}.card{width:min(420px,calc(100vw - 48px));padding:30px;border:1px solid #37607e;border-radius:16px;background:linear-gradient(145deg,#18334d,#0b1c30);box-shadow:0 20px 60px #0006}h1{margin:0 0 8px;font-size:27px}p{color:#b9cde2}label{display:block;margin:16px 0 5px}input{box-sizing:border-box;width:100%;padding:12px;background:#0d2338;border:1px solid #3e6986;border-radius:8px;color:white;font:inherit}button{cursor:pointer;width:100%;margin-top:20px;padding:12px;border:0;border-radius:8px;background:linear-gradient(90deg,#43d9e0,#63e6a5);font:700 15px system-ui;color:#08233b}a{color:#81e7e1}.hint{font-size:13px}</style></head><body><main class="card">${body}</main></body></html>`;
@@ -114,6 +126,41 @@ const server = createServer(async (req, res) => {
   try {
     const path = new URL(req.url, origin).pathname;
     if (req.method === 'GET' && path === '/health') return send(res, 200, 'OK', 'text/plain');
+    const avatarMatch = path.match(/^\/api\/organization\/avatar\/([0-9a-f-]{36})$/i);
+    if (req.method === 'GET' && avatarMatch) {
+      const session = await userFromRequest(req, res);
+      if (!session) return send(res, 401, 'Sign in required', 'text/plain');
+      const target = avatarMatch[1];
+      const avatar = await fetch(`${supabase}/storage/v1/object/authenticated/agent-avatars/${encodeURIComponent(target)}/avatar`, {
+        headers: { apikey:key, Authorization:`Bearer ${session.access}` },
+        signal: AbortSignal.timeout(8000)
+      });
+      if (!avatar.ok) return send(res, avatar.status === 404 ? 404 : 403, 'Avatar unavailable', 'text/plain');
+      const bytes=Buffer.from(await avatar.arrayBuffer());
+      res.writeHead(200, {'Content-Type':avatar.headers.get('content-type')||'application/octet-stream','Content-Length':bytes.length,'Cache-Control':'private, max-age=300','X-Content-Type-Options':'nosniff'});
+      return res.end(bytes);
+    }
+    if (req.method === 'POST' && path === '/api/organization/avatar') {
+      if (!validCsrfHeader(req)) return send(res, 403, 'Invalid form token', 'text/plain');
+      const session = await userFromRequest(req, res);
+      if (!session) return send(res, 401, 'Sign in required', 'text/plain');
+      const contentType=(req.headers['content-type']||'').split(';')[0].trim().toLowerCase();
+      if (!['image/jpeg','image/png','image/webp'].includes(contentType)) return send(res, 415, 'Use a JPEG, PNG, or WebP image', 'text/plain');
+      const image=await binaryBody(req);
+      if (!image.length) return send(res, 400, 'Choose an image', 'text/plain');
+      const objectPath=`${session.user.id}/avatar`;
+      const uploaded=await fetch(`${supabase}/storage/v1/object/agent-avatars/${objectPath}`, {
+        method:'POST',
+        headers:{apikey:key,Authorization:`Bearer ${session.access}`,'Content-Type':contentType,'x-upsert':'true'},
+        body:image,
+        signal:AbortSignal.timeout(12000)
+      });
+      if (!uploaded.ok) return send(res, 503, 'Could not upload profile picture', 'text/plain');
+      const updated=await organizationRequest(session.access,`/agent_profiles?user_id=eq.${encodeURIComponent(session.user.id)}`,{
+        method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({avatar_path:objectPath,updated_at:new Date().toISOString()})
+      });
+      return updated.ok ? send(res,200,'Uploaded','text/plain') : send(res,503,'Picture uploaded but profile could not be updated','text/plain');
+    }
     if (req.method === 'GET' && path === '/') return redirect(res, '/app');
     if (req.method === 'GET' && path === '/login') return send(res, 200, loginPage('', csrfToken(res)));
     const posted = req.method === 'POST' ? await form(req) : null;
