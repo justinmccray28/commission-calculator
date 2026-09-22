@@ -258,6 +258,11 @@
     .organization-button { border:1px solid rgba(83,228,211,.55); border-radius:8px; padding:9px 13px; color:#e9fffb; background:linear-gradient(115deg,rgba(20,125,132,.68),rgba(25,82,116,.72)); font-weight:750; cursor:pointer; }
     .organization-button.secondary { border-color:rgba(94,155,202,.45); background:#17344e; color:#dcecf8; }
     .organization-button.reject { border-color:rgba(238,120,132,.4); background:rgba(91,31,46,.3); color:#f2b8bf; }
+    .organization-demo-banner { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:14px; padding:13px 15px; border:1px solid rgba(255,213,114,.48); border-radius:11px; background:linear-gradient(120deg,rgba(130,91,20,.2),rgba(10,35,57,.72)); color:#f5d889; }
+    .organization-demo-banner strong { display:block; color:#ffe69b; }
+    .organization-demo-banner small { display:block; margin-top:3px; color:#cbbd92; }
+    .organization-head-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+    .organization-metric.unverified strong { color:#ffd572; font-size:14px; padding-top:5px; }
     .invite-code { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0; padding:11px 13px; border:1px solid rgba(73,229,208,.45); border-radius:9px; background:rgba(7,35,55,.7); }
     .invite-code strong { color:#65efe1; font:800 20px ui-monospace,monospace; letter-spacing:.08em; }
     .request-list { display:grid; gap:8px; }
@@ -493,7 +498,7 @@
     }
     const $ = id => document.getElementById(id);
     const SETTINGS_KEY='commissionCalculator.defaults.v1';
-    let currentCalculation=null, savedCases=[], organizationData=null;
+    let currentCalculation=null, savedCases=[], organizationData=null, organizationLiveData=null, organizationDemoMode=false;
     const money = n => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number.isFinite(n)?n:0);
     const points = n => new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number.isFinite(n)?n:0);
     const pct = n => `${Number(n).toFixed(4).replace(/0+$/,'').replace(/\.$/,'')}%`;
@@ -692,6 +697,19 @@
         await loadSavedCases();
       } catch(error){ console.error(error); alert('Could not delete this saved calculation. Refresh and try again.'); }
     }
+    function demoOrganizationData(){
+      const nodes=[
+        {user_id:'demo-smd',display_name:'Jordan Blake',contract_level:'smd',direct_upline_id:null,personal_points:18400,saved_case_count:8,descendant_count:7},
+        {user_id:'demo-md-a',display_name:'Alex Morgan',contract_level:'md',direct_upline_id:'demo-smd',personal_points:12650,saved_case_count:6,descendant_count:3},
+        {user_id:'demo-sa-a',display_name:'Taylor Reed',contract_level:'sa',direct_upline_id:'demo-md-a',personal_points:8840,saved_case_count:4,descendant_count:1},
+        {user_id:'demo-assoc-a',display_name:'Cameron Wells',contract_level:'associate',direct_upline_id:'demo-sa-a',personal_points:5320,saved_case_count:3,descendant_count:0},
+        {user_id:'demo-ta-a',display_name:'Avery Cole',contract_level:'ta',direct_upline_id:'demo-md-a',personal_points:2950,saved_case_count:2,descendant_count:0},
+        {user_id:'demo-md-b',display_name:'Morgan Lee',contract_level:'md',direct_upline_id:'demo-smd',personal_points:14100,saved_case_count:7,descendant_count:2},
+        {user_id:'demo-assoc-b',display_name:'Casey Grant',contract_level:'associate',direct_upline_id:'demo-md-b',personal_points:4760,saved_case_count:3,descendant_count:0},
+        {user_id:'demo-ta-b',display_name:'Riley Brooks',contract_level:'ta',direct_upline_id:'demo-md-b',personal_points:2380,saved_case_count:1,descendant_count:0}
+      ];
+      return {profile:{...nodes[0],direct_upline_name:'Independent SMD organization'},tree:nodes,incoming_requests:[{id:'demo-request',agent_id:'demo-pending',agent_name:'Jamie Parker',contract_level:'sa',created_at:new Date().toISOString()}],outgoing_request:null,active_invite:{code:'DEMO-2026',expires_at:new Date(Date.now()+604800000).toISOString()},demo:true};
+    }
     function contractTitle(level){ return contractNames?.[level] || ({ta:'Training Associate',associate:'Associate',sa:'Senior Associate',md:'Marketing Director',smd:'Senior Marketing Director'}[level] || level); }
     function agentInitials(name){ return String(name||'?').split(/\s+/).slice(0,2).map(part=>part[0]||'').join('').toUpperCase(); }
     function renderOrganizationNode(node, children, root=false){
@@ -703,7 +721,7 @@
       const content=$('organizationContent');
       const profile=organizationData?.profile;
       if(!profile){
-        content.innerHTML=`<div class="organization-head"><div><h2>Create your agent profile</h2><div class="muted">Your profile is the starting point for your organization tree.</div></div></div><form class="organization-form organization-panel" id="orgProfileForm"><div class="row"><div><label for="orgDisplayName">Agent name</label><input id="orgDisplayName" name="display_name" maxlength="100" required placeholder="Your full name"></div><div><label for="orgContractLevel">Contract level</label><select id="orgContractLevel" name="contract_level"><option value="ta">Training Associate</option><option value="associate">Associate</option><option value="sa">Senior Associate</option><option value="md" selected>Marketing Director</option><option value="smd">Senior Marketing Director</option></select></div></div><button class="organization-button" type="submit">Create profile</button><div class="organization-status" id="organizationStatus"></div></form>`;
+        content.innerHTML=`<div class="organization-head"><div><h2>Create your agent profile</h2><div class="muted">Your profile is the starting point for your organization tree.</div></div><button class="organization-button secondary" type="button" data-toggle-org-demo>View demo organization</button></div><form class="organization-form organization-panel" id="orgProfileForm"><div class="row"><div><label for="orgDisplayName">Agent name</label><input id="orgDisplayName" name="display_name" maxlength="100" required placeholder="Your full name"></div><div><label for="orgContractLevel">Contract level</label><select id="orgContractLevel" name="contract_level"><option value="ta">Training Associate</option><option value="associate">Associate</option><option value="sa">Senior Associate</option><option value="md" selected>Marketing Director</option><option value="smd">Senior Marketing Director</option></select></div></div><button class="organization-button" type="submit">Create profile</button><div class="organization-status" id="organizationStatus"></div></form>`;
         return;
       }
       const tree=Array.isArray(organizationData.tree)?organizationData.tree:[];
@@ -719,14 +737,15 @@
       else if(organizationData.outgoing_request) uplineMarkup=`<p>Upline confirmation pending</p><strong>${escapeText(organizationData.outgoing_request.upline_name)}</strong>`;
       else uplineMarkup=`<p>Enter the invitation code supplied by the agent who should be your direct upline.</p><form class="organization-form" id="joinOrganizationForm"><input name="code" maxlength="9" autocomplete="off" placeholder="ABCD-2345" required><button class="organization-button" type="submit">Request to join</button></form>`;
       const totalPoints=tree.reduce((sum,node)=>sum+Number(node.personal_points||0),0);
-      content.innerHTML=`<div class="organization-head"><div><h2>My organization</h2><div class="muted">Your expandable downline family tree.</div></div><div class="organization-metrics"><div class="organization-metric"><span>Total downline</span><strong>${Math.max(0,tree.length-1)}</strong></div><div class="organization-metric"><span>Organization points</span><strong>${points(totalPoints)}</strong></div></div></div><div class="organization-grid"><section class="organization-panel"><h3>${escapeText(profile.display_name)}</h3><p>${escapeText(contractTitle(profile.contract_level))}</p><button class="organization-button secondary" type="button" id="editOrgProfile">Edit profile</button></section><section class="organization-panel"><h3>Direct upline</h3>${uplineMarkup}</section><section class="organization-panel"><h3>Invite an agent</h3>${inviteMarkup}</section><section class="organization-panel"><h3>Pending approvals</h3><div class="request-list">${incomingMarkup}</div></section></div><div class="organization-status" id="organizationStatus"></div><section class="organization-section"><h3>Organization tree</h3><div class="muted">Expand any agent to view the branch beneath them.</div><div class="org-tree">${root?renderOrganizationNode(root,children,true):'<div class="tracker-empty">Your organization tree is unavailable.</div>'}</div></section>`;
+      const demoBanner=organizationDemoMode?`<div class="organization-demo-banner"><div><strong>Demo mode · sample organization</strong><small>Nothing shown here creates accounts, invitations, saved cases, or database records.</small></div><button class="organization-button secondary" type="button" data-toggle-org-demo>Exit demo</button></div>`:'';
+      content.innerHTML=`${demoBanner}<div class="organization-head"><div><h2>${organizationDemoMode?'SMD organization demo':'My organization'}</h2><div class="muted">${organizationDemoMode?'Explore a sample expandable base shop and points rollup.':'Your expandable downline family tree.'}</div></div><div class="organization-head-actions">${organizationDemoMode?'':'<button class="organization-button secondary" type="button" data-toggle-org-demo>View demo</button>'}<div class="organization-metrics"><div class="organization-metric"><span>Total downline</span><strong>${Math.max(0,tree.length-1)}</strong></div><div class="organization-metric"><span>Organization points</span><strong>${points(totalPoints)}</strong></div>${organizationDemoMode?'<div class="organization-metric unverified"><span>SMD override forecast</span><strong>Not modeled yet</strong></div>':''}</div></div></div><div class="organization-grid"><section class="organization-panel"><h3>${escapeText(profile.display_name)}</h3><p>${escapeText(contractTitle(profile.contract_level))}</p><button class="organization-button secondary" type="button" id="editOrgProfile">Edit profile</button></section><section class="organization-panel"><h3>Direct upline</h3>${uplineMarkup}</section><section class="organization-panel"><h3>Invite an agent</h3>${inviteMarkup}</section><section class="organization-panel"><h3>Pending approvals</h3><div class="request-list">${incomingMarkup}</div></section></div><div class="organization-status" id="organizationStatus"></div>${organizationDemoMode?'<div class="note"><strong>Override forecast intentionally excluded:</strong> the Advanced model describes up to 24% across as many as six generations, but exact generation qualification and differential rules still need to be encoded and verified.</div>':''}<section class="organization-section"><h3>Organization tree</h3><div class="muted">Expand any agent to view the branch beneath them.</div><div class="org-tree">${root?renderOrganizationNode(root,children,true):'<div class="tracker-empty">Your organization tree is unavailable.</div>'}</div></section>`;
     }
     async function loadOrganization(){
       $('organizationContent').innerHTML='<div class="tracker-empty">Loading your organization…</div>';
       try {
         const response=await fetch('/api/organization',{cache:'no-store'});
         if(!response.ok) throw new Error(`Organization load failed: ${response.status}`);
-        organizationData=await response.json(); renderOrganization();
+        organizationLiveData=await response.json(); organizationData=organizationDemoMode?demoOrganizationData():organizationLiveData; renderOrganization();
       } catch(error){ $('organizationContent').innerHTML='<div class="tracker-empty">Your organization could not be loaded. This feature branch requires its hierarchy database migration.</div>'; console.error(error); }
     }
     async function organizationPost(path,data){
@@ -747,6 +766,24 @@
       finally { if(button.isConnected) button.disabled=false; }
     }
     async function handleOrganizationClick(event){
+      if(event.target.closest('[data-toggle-org-demo]')){
+        organizationDemoMode=!organizationDemoMode;
+        organizationData=organizationDemoMode?demoOrganizationData():organizationLiveData;
+        if(!organizationData && !organizationDemoMode){ await loadOrganization(); return; }
+        renderOrganization(); return;
+      }
+      const demoResponse=event.target.closest('[data-org-response]');
+      if(organizationDemoMode && demoResponse){
+        const request=organizationData.incoming_requests.find(item=>item.id===demoResponse.dataset.requestId);
+        organizationData.incoming_requests=organizationData.incoming_requests.filter(item=>item.id!==demoResponse.dataset.requestId);
+        if(request && demoResponse.dataset.orgResponse==='approve'){
+          const root=organizationData.profile;
+          organizationData.tree.push({user_id:request.agent_id,display_name:request.agent_name,contract_level:request.contract_level,direct_upline_id:root.user_id,personal_points:6100,saved_case_count:3,descendant_count:0});
+          root.descendant_count=organizationData.tree.length-1;
+        }
+        renderOrganization(); return;
+      }
+      if(organizationDemoMode) return;
       const copy=event.target.closest('[data-copy-code]');
       if(copy){ await navigator.clipboard?.writeText(copy.dataset.copyCode); copy.textContent='Copied'; return; }
       if(event.target.closest('#generateOrgInvite')){
