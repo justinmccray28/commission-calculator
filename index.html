@@ -263,6 +263,11 @@
     .organization-demo-banner small { display:block; margin-top:3px; color:#cbbd92; }
     .organization-head-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
     .organization-metric.unverified strong { color:#ffd572; font-size:14px; padding-top:5px; }
+    .org-avatar { position:relative; overflow:hidden; }
+    .org-avatar img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+    .org-profile-upload { margin-top:12px; padding-top:12px; border-top:1px solid rgba(91,153,198,.26); }
+    .org-profile-upload input[type=file] { padding:8px; font-size:12px; }
+    .org-profile-upload small { display:block; margin:6px 0 9px; color:#89a9c5; }
     .invite-code { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0; padding:11px 13px; border:1px solid rgba(73,229,208,.45); border-radius:9px; background:rgba(7,35,55,.7); }
     .invite-code strong { color:#65efe1; font:800 20px ui-monospace,monospace; letter-spacing:.08em; }
     .request-list { display:grid; gap:8px; }
@@ -699,7 +704,7 @@
     }
     function demoOrganizationData(){
       const nodes=[
-        {user_id:'demo-smd',display_name:'Jordan Blake',contract_level:'smd',direct_upline_id:null,personal_points:18400,saved_case_count:8,descendant_count:7},
+        {user_id:'demo-smd',display_name:'Jordan Blake',contract_level:'smd',direct_upline_id:null,avatar_path:null,personal_points:18400,saved_case_count:8,descendant_count:7},
         {user_id:'demo-md-a',display_name:'Alex Morgan',contract_level:'md',direct_upline_id:'demo-smd',personal_points:12650,saved_case_count:6,descendant_count:3},
         {user_id:'demo-sa-a',display_name:'Taylor Reed',contract_level:'sa',direct_upline_id:'demo-md-a',personal_points:8840,saved_case_count:4,descendant_count:1},
         {user_id:'demo-assoc-a',display_name:'Cameron Wells',contract_level:'associate',direct_upline_id:'demo-sa-a',personal_points:5320,saved_case_count:3,descendant_count:0},
@@ -712,10 +717,14 @@
     }
     function contractTitle(level){ return contractNames?.[level] || ({ta:'Training Associate',associate:'Associate',sa:'Senior Associate',md:'Marketing Director',smd:'Senior Marketing Director'}[level] || level); }
     function agentInitials(name){ return String(name||'?').split(/\s+/).slice(0,2).map(part=>part[0]||'').join('').toUpperCase(); }
+    function agentAvatar(node){
+      const initials=escapeText(agentInitials(node.display_name));
+      return `<span class="org-avatar">${initials}${node.avatar_path?`<img src="/api/organization/avatar/${encodeURIComponent(node.user_id)}" alt="" loading="lazy" onerror="this.remove()">`:''}</span>`;
+    }
     function renderOrganizationNode(node, children, root=false){
       const descendants=children.get(node.user_id)||[];
       const childMarkup=descendants.map(child=>renderOrganizationNode(child,children)).join('');
-      return `<details class="org-node${root?' root':''}" ${root?'open':''}><summary><div class="org-person"><div class="org-person-main"><span class="org-avatar">${escapeText(agentInitials(node.display_name))}</span><div><div class="org-person-name">${escapeText(node.display_name)}</div><div class="org-person-level">${escapeText(contractTitle(node.contract_level))}</div></div></div><div class="org-person-stat"><strong>${points(Number(node.personal_points||0))}</strong>personal points</div><div class="org-person-stat"><strong>${Number(node.descendant_count||0)}</strong>downline agents</div></div></summary>${childMarkup?`<div class="org-children">${childMarkup}</div>`:''}</details>`;
+      return `<details class="org-node${root?' root':''}" ${root?'open':''}><summary><div class="org-person"><div class="org-person-main">${agentAvatar(node)}<div><div class="org-person-name">${escapeText(node.display_name)}</div><div class="org-person-level">${escapeText(contractTitle(node.contract_level))}</div></div></div><div class="org-person-stat"><strong>${points(Number(node.personal_points||0))}</strong>personal points</div><div class="org-person-stat"><strong>${Number(node.descendant_count||0)}</strong>downline agents</div></div></summary>${childMarkup?`<div class="org-children">${childMarkup}</div>`:''}</details>`;
     }
     function renderOrganization(){
       const content=$('organizationContent');
@@ -738,7 +747,7 @@
       else uplineMarkup=`<p>Enter the invitation code supplied by the agent who should be your direct upline.</p><form class="organization-form" id="joinOrganizationForm"><input name="code" maxlength="9" autocomplete="off" placeholder="ABCD-2345" required><button class="organization-button" type="submit">Request to join</button></form>`;
       const totalPoints=tree.reduce((sum,node)=>sum+Number(node.personal_points||0),0);
       const demoBanner=organizationDemoMode?`<div class="organization-demo-banner"><div><strong>Demo mode · sample organization</strong><small>Nothing shown here creates accounts, invitations, saved cases, or database records.</small></div><button class="organization-button secondary" type="button" data-toggle-org-demo>Exit demo</button></div>`:'';
-      content.innerHTML=`${demoBanner}<div class="organization-head"><div><h2>${organizationDemoMode?'SMD organization demo':'My organization'}</h2><div class="muted">${organizationDemoMode?'Explore a sample expandable base shop and points rollup.':'Your expandable downline family tree.'}</div></div><div class="organization-head-actions">${organizationDemoMode?'':'<button class="organization-button secondary" type="button" data-toggle-org-demo>View demo</button>'}<div class="organization-metrics"><div class="organization-metric"><span>Total downline</span><strong>${Math.max(0,tree.length-1)}</strong></div><div class="organization-metric"><span>Organization points</span><strong>${points(totalPoints)}</strong></div>${organizationDemoMode?'<div class="organization-metric unverified"><span>SMD override forecast</span><strong>Not modeled yet</strong></div>':''}</div></div></div><div class="organization-grid"><section class="organization-panel"><h3>${escapeText(profile.display_name)}</h3><p>${escapeText(contractTitle(profile.contract_level))}</p><button class="organization-button secondary" type="button" id="editOrgProfile">Edit profile</button></section><section class="organization-panel"><h3>Direct upline</h3>${uplineMarkup}</section><section class="organization-panel"><h3>Invite an agent</h3>${inviteMarkup}</section><section class="organization-panel"><h3>Pending approvals</h3><div class="request-list">${incomingMarkup}</div></section></div><div class="organization-status" id="organizationStatus"></div>${organizationDemoMode?'<div class="note"><strong>Override forecast intentionally excluded:</strong> the Advanced model describes up to 24% across as many as six generations, but exact generation qualification and differential rules still need to be encoded and verified.</div>':''}<section class="organization-section"><h3>Organization tree</h3><div class="muted">Expand any agent to view the branch beneath them.</div><div class="org-tree">${root?renderOrganizationNode(root,children,true):'<div class="tracker-empty">Your organization tree is unavailable.</div>'}</div></section>`;
+      content.innerHTML=`${demoBanner}<div class="organization-head"><div><h2>${organizationDemoMode?'SMD organization demo':'My organization'}</h2><div class="muted">${organizationDemoMode?'Explore a sample expandable base shop and points rollup.':'Your expandable downline family tree.'}</div></div><div class="organization-head-actions">${organizationDemoMode?'':'<button class="organization-button secondary" type="button" data-toggle-org-demo>View demo</button>'}<div class="organization-metrics"><div class="organization-metric"><span>Total downline</span><strong>${Math.max(0,tree.length-1)}</strong></div><div class="organization-metric"><span>Organization points</span><strong>${points(totalPoints)}</strong></div>${organizationDemoMode?'<div class="organization-metric unverified"><span>Generational schedule</span><strong>24% through Gen 6</strong></div>':''}</div></div></div><div class="organization-grid"><section class="organization-panel"><div class="org-person-main">${agentAvatar(profile)}<div><h3>${escapeText(profile.display_name)}</h3><p>${escapeText(contractTitle(profile.contract_level))}</p></div></div><button class="organization-button secondary" type="button" id="editOrgProfile">Edit profile</button>${organizationDemoMode?'':`<form class="org-profile-upload" id="orgAvatarForm"><label for="orgAvatarFile">Profile picture</label><input id="orgAvatarFile" name="avatar" type="file" accept="image/jpeg,image/png,image/webp" required><small>JPEG, PNG, or WebP · maximum 2 MB</small><button class="organization-button" type="submit">Upload picture</button></form>`}</section><section class="organization-panel"><h3>Direct upline</h3>${uplineMarkup}</section><section class="organization-panel"><h3>Invite an agent</h3>${inviteMarkup}</section><section class="organization-panel"><h3>Pending approvals</h3><div class="request-list">${incomingMarkup}</div></section></div><div class="organization-status" id="organizationStatus"></div>${organizationDemoMode?'<div class="note"><strong>Generational rates loaded:</strong> Generation 1: 12%, Generation 2: 6%, Generation 3: 3.5%, Generation 4: 2.5%, Generation 5: 1.25%, and Generation 6: 0.75%. Base-shop overrides remain contract differentials.</div>':''}<section class="organization-section"><h3>Organization tree</h3><div class="muted">Expand any agent to view the branch beneath them.</div><div class="org-tree">${root?renderOrganizationNode(root,children,true):'<div class="tracker-empty">Your organization tree is unavailable.</div>'}</div></section>`;
     }
     async function loadOrganization(){
       $('organizationContent').innerHTML='<div class="tracker-empty">Loading your organization…</div>';
@@ -755,14 +764,21 @@
     }
     async function handleOrganizationSubmit(event){
       const form=event.target.closest('form'); if(!form) return;
-      if(!['orgProfileForm','joinOrganizationForm'].includes(form.id)) return;
+      if(!['orgProfileForm','joinOrganizationForm','orgAvatarForm'].includes(form.id)) return;
       event.preventDefault();
       const button=form.querySelector('button[type="submit"]'); button.disabled=true;
       try {
-        const data=Object.fromEntries(new FormData(form));
-        await organizationPost(form.id==='orgProfileForm'?'/api/organization/profile':'/api/organization/request',data);
+        if(form.id==='orgAvatarForm'){
+          const file=form.querySelector('input[type="file"]').files[0];
+          if(!file || file.size>2097152 || !['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('Choose a JPEG, PNG, or WebP image under 2 MB.');
+          const response=await fetch('/api/organization/avatar',{method:'POST',headers:{'Content-Type':file.type,'X-CSRF-Token':csrfValue()},body:file});
+          if(!response.ok) throw new Error(await response.text()||'Profile picture could not be uploaded.');
+        } else {
+          const data=Object.fromEntries(new FormData(form));
+          await organizationPost(form.id==='orgProfileForm'?'/api/organization/profile':'/api/organization/request',data);
+        }
         await loadOrganization();
-      } catch(error){ const status=$('organizationStatus'); if(status) status.textContent=error.message.includes('Invitation')?'That invitation code is invalid, expired, or already claimed.':'That change could not be saved.'; console.error(error); }
+      } catch(error){ const status=$('organizationStatus'); if(status) status.textContent=error.message.includes('Invitation')?'That invitation code is invalid, expired, or already claimed.':error.message; console.error(error); }
       finally { if(button.isConnected) button.disabled=false; }
     }
     async function handleOrganizationClick(event){
