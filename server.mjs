@@ -192,7 +192,7 @@ const server = createServer(async (req, res) => {
       return send(res, 200, page('Check email', '<h1>Check your email</h1><p>If that address has an account, a reset link is on its way.</p><a href="/login">Return to sign in</a>'));
     }
     if (req.method === 'POST' && path === '/auth/logout') { clearSession(res); return redirect(res, '/login'); }
-    if (['/app', '/api/commission-data', '/api/settings', '/api/cases', '/api/cases/delete', '/api/organization', '/api/organization/profile', '/api/organization/invite', '/api/organization/request', '/api/organization/respond', '/account/password', '/auth/password'].includes(path)) {
+    if (['/app', '/api/commission-data', '/api/settings', '/api/cases', '/api/cases/stage', '/api/cases/delete', '/api/organization', '/api/organization/profile', '/api/organization/invite', '/api/organization/request', '/api/organization/respond', '/account/password', '/auth/password'].includes(path)) {
       const session = await userFromRequest(req, res);
       if (!session) return path.startsWith('/api/') ? send(res, 401, 'Sign in required', 'text/plain') : redirect(res, '/login');
       if (req.method === 'GET' && path === '/app') return send(res, 200, protectedHTML.replace('<body>', `<body><div style="display:flex;justify-content:flex-end;padding:10px 24px 0"><form method="POST" action="/auth/logout">${csrfField(csrfToken(res))}<button style="border:1px solid #38748e;border-radius:7px;background:#102a40;color:#e5f8ff;padding:7px 14px;cursor:pointer">Sign out</button></form></div>`));
@@ -219,7 +219,7 @@ const server = createServer(async (req, res) => {
         return result.ok ? send(res, 200, 'Saved', 'text/plain') : send(res, 503, 'Could not save settings', 'text/plain');
       }
       if (path === '/api/cases' && req.method === 'GET') {
-        const result = await savedCasesRequest(session.access, '?select=id,client_name,carrier,product,commission,agent_points,monthly_trail,calculation,created_at&order=created_at.desc');
+        const result = await savedCasesRequest(session.access, '?select=id,client_name,carrier,product,commission,agent_points,monthly_trail,stage,calculation,created_at&order=created_at.desc');
         if (!result.ok) return send(res, 503, 'Saved cases unavailable', 'text/plain');
         return send(res, 200, await result.text(), 'application/json; charset=utf-8');
       }
@@ -233,7 +233,8 @@ const server = createServer(async (req, res) => {
           commission: Number(savedCase?.commission),
           agent_points: Number(savedCase?.agent_points),
           monthly_trail: Number(savedCase?.monthly_trail || 0),
-          calculation: savedCase?.calculation
+          calculation: savedCase?.calculation,
+          stage: 'prospect'
         };
         if (!clean.client_name || clean.client_name.length > 120 || !clean.carrier || clean.carrier.length > 100 ||
             !clean.product || clean.product.length > 160 || !Number.isFinite(clean.commission) || clean.commission < 0 || clean.commission > 100000000 ||
@@ -247,6 +248,12 @@ const server = createServer(async (req, res) => {
           body: JSON.stringify({ user_id: session.user.id, ...clean })
         });
         return result.ok ? send(res, 201, 'Saved', 'text/plain') : send(res, 503, 'Could not save case', 'text/plain');
+      }
+      if (path === '/api/cases/stage' && req.method === 'POST') {
+        const id = posted.id || '', stage = posted.stage || '';
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id) || !['prospect','submitted','issued','paid','lost'].includes(stage)) return send(res, 400, 'Invalid case stage', 'text/plain');
+        const result = await savedCasesRequest(session.access, `?id=eq.${encodeURIComponent(id)}`, { method:'PATCH', headers:{'Content-Type':'application/json','Prefer':'return=minimal'}, body:JSON.stringify({stage}) });
+        return result.ok ? send(res, 200, 'Updated', 'text/plain') : send(res, 503, 'Could not update case', 'text/plain');
       }
       if (path === '/api/cases/delete' && req.method === 'POST') {
         const id = posted.id || '';

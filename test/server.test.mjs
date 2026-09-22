@@ -102,9 +102,16 @@ const auth = createServer(async (req, res) => {
     if (req.method === 'POST') {
       const data = JSON.parse(body);
       if (data.user_id !== id) { res.statusCode = 403; return res.end('{}'); }
-      records.push({ ...data, id: id === agentOne ? caseOne : caseTwo, created_at: '2026-09-21T12:00:00.000Z' });
+      records.push({ ...data, stage:data.stage||'prospect', id: id === agentOne ? caseOne : caseTwo, created_at: '2026-09-21T12:00:00.000Z' });
       res.statusCode = 201;
       return res.end('{}');
+    }
+    if (req.method === 'PATCH') {
+      const requested = new URL(req.url, 'http://localhost').searchParams.get('id')?.replace(/^eq\./, '');
+      const record = records.find(item => item.id === requested);
+      if (record) Object.assign(record, JSON.parse(body));
+      res.statusCode = 204;
+      return res.end();
     }
     if (req.method === 'DELETE') {
       const requested = new URL(req.url, 'http://localhost').searchParams.get('id')?.replace(/^eq\./, '');
@@ -209,6 +216,11 @@ test('pilot access requires a real authenticated session and survives refresh', 
     assert.equal(ownCases.length,1);
     assert.equal(ownCases[0].client_name,'Sample Client');
     assert.equal(ownCases[0].agent_points,3458.85);
+    assert.equal(ownCases[0].stage,'prospect');
+    assert.equal((await request('/api/cases/stage',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Cookie:ownCookie},body:new URLSearchParams({csrf:appToken,id:caseOne,stage:'issued'})})).status,200);
+    assert.equal((await (await request('/api/cases',{headers:{Cookie:ownCookie}})).json())[0].stage,'issued');
+    assert.equal((await request('/api/cases/stage',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Cookie:otherCookie},body:new URLSearchParams({csrf:otherToken,id:caseOne,stage:'paid'})})).status,200);
+    assert.equal((await (await request('/api/cases',{headers:{Cookie:ownCookie}})).json())[0].stage,'issued');
     assert.deepEqual(await (await request('/api/cases',{headers:{Cookie:otherCookie}})).json(),[]);
     assert.equal((await casePost({...savedCase,client_name:'Other Agent'},otherCookie,otherToken)).status,201);
     assert.equal((await (await request('/api/cases',{headers:{Cookie:ownCookie}})).json()).length,1);
