@@ -9,7 +9,12 @@ const agentOne = '11111111-1111-4111-8111-111111111111';
 const agentTwo = '22222222-2222-4222-8222-222222222222';
 const caseOne = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const caseTwo = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+const inviteOne = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+const requestOne = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 const storedCases = new Map([[agentOne, []], [agentTwo, []]]);
+const profiles = new Map();
+const organizationInvites = [];
+const uplineRequests = [];
 const auth = createServer(async (req, res) => {
   let body = '';
   for await (const chunk of req) body += chunk;
@@ -37,6 +42,57 @@ const auth = createServer(async (req, res) => {
     storedSettings.set(id, data.settings);
     res.statusCode = 201;
     return res.end('{}');
+  }
+  if (req.url.startsWith('/rest/v1/agent_profiles')) {
+    const id = req.headers.authorization === 'Bearer valid-token' ? agentOne : req.headers.authorization === 'Bearer valid-token-two' ? agentTwo : null;
+    if (!id) { res.statusCode = 401; return res.end('{}'); }
+    if (req.method === 'GET') return res.end(JSON.stringify(profiles.has(id) ? [{ user_id:id }] : []));
+    if (req.method === 'POST') {
+      const data=JSON.parse(body);
+      if(data.user_id!==id){ res.statusCode=403; return res.end('{}'); }
+      profiles.set(id,{...data,direct_upline_id:null}); res.statusCode=201; return res.end('{}');
+    }
+    if (req.method === 'PATCH') {
+      const data=JSON.parse(body), current=profiles.get(id);
+      if(!current){ res.statusCode=404; return res.end('{}'); }
+      profiles.set(id,{...current,...data}); res.statusCode=204; return res.end();
+    }
+  }
+  if (req.url === '/rest/v1/organization_invites' && req.method === 'POST') {
+    const id = req.headers.authorization === 'Bearer valid-token' ? agentOne : req.headers.authorization === 'Bearer valid-token-two' ? agentTwo : null;
+    if (!id || !profiles.has(id)) { res.statusCode=403; return res.end('{}'); }
+    const data=JSON.parse(body), invite={...data,id:id===agentOne?inviteOne:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',claimed_by:null,used_at:null,created_at:new Date().toISOString()};
+    organizationInvites.push(invite); res.statusCode=201; return res.end(JSON.stringify([invite]));
+  }
+  if (req.url === '/rest/v1/rpc/request_upline_link' && req.method === 'POST') {
+    const id = req.headers.authorization === 'Bearer valid-token' ? agentOne : req.headers.authorization === 'Bearer valid-token-two' ? agentTwo : null;
+    const {p_code}=JSON.parse(body), invite=organizationInvites.find(item=>item.code===p_code&&!item.claimed_by&&!item.used_at);
+    if(!id||!profiles.has(id)||!invite||invite.created_by===id||profiles.get(id).direct_upline_id){ res.statusCode=400; return res.end('{}'); }
+    invite.claimed_by=id;
+    const request={id:requestOne,agent_id:id,requested_upline_id:invite.created_by,invite_id:invite.id,status:'pending',created_at:new Date().toISOString()};
+    uplineRequests.push(request); return res.end(JSON.stringify({request_id:request.id,status:'pending'}));
+  }
+  if (req.url === '/rest/v1/rpc/respond_upline_request' && req.method === 'POST') {
+    const id = req.headers.authorization === 'Bearer valid-token' ? agentOne : req.headers.authorization === 'Bearer valid-token-two' ? agentTwo : null;
+    const {p_request_id,p_approve}=JSON.parse(body), request=uplineRequests.find(item=>item.id===p_request_id&&item.requested_upline_id===id&&item.status==='pending');
+    if(!request){ res.statusCode=400; return res.end('{}'); }
+    request.status=p_approve?'approved':'rejected';
+    const invite=organizationInvites.find(item=>item.id===request.invite_id);
+    if(p_approve){ profiles.get(request.agent_id).direct_upline_id=id; invite.used_at=new Date().toISOString(); }
+    else invite.claimed_by=null;
+    return res.end(JSON.stringify({request_id:request.id,status:request.status}));
+  }
+  if (req.url === '/rest/v1/rpc/get_organization_dashboard' && req.method === 'POST') {
+    const id = req.headers.authorization === 'Bearer valid-token' ? agentOne : req.headers.authorization === 'Bearer valid-token-two' ? agentTwo : null;
+    if(!id){ res.statusCode=401; return res.end('{}'); }
+    const own=profiles.get(id)||null, tree=[];
+    const add=(user,depth=0)=>{ if(!user)return; tree.push({...user,user_id:user.user_id||[...profiles].find(([,p])=>p===user)?.[0],depth,personal_points:0,saved_case_count:0,descendant_count:0}); for(const [childId,child] of profiles) if(child.direct_upline_id===(user.user_id||id)) add({...child,user_id:childId},depth+1); };
+    if(own) add({...own,user_id:id});
+    for(const node of tree) node.descendant_count=tree.filter(item=>item.depth>node.depth&&item.user_id!==node.user_id).length;
+    const incoming=uplineRequests.filter(item=>item.requested_upline_id===id&&item.status==='pending').map(item=>({id:item.id,agent_id:item.agent_id,agent_name:profiles.get(item.agent_id).display_name,contract_level:profiles.get(item.agent_id).contract_level,created_at:item.created_at}));
+    const outgoing=uplineRequests.find(item=>item.agent_id===id&&item.status==='pending');
+    const active=organizationInvites.filter(item=>item.created_by===id&&!item.claimed_by&&!item.used_at).at(-1)||null;
+    return res.end(JSON.stringify({profile:own?{...own,user_id:id,direct_upline_name:own.direct_upline_id?profiles.get(own.direct_upline_id)?.display_name:null}:null,tree,incoming_requests:incoming,outgoing_request:outgoing?{id:outgoing.id,upline_name:profiles.get(outgoing.requested_upline_id).display_name,status:'pending'}:null,active_invite:active}));
   }
   if (req.url.startsWith('/rest/v1/saved_cases')) {
     const id = req.headers.authorization === 'Bearer valid-token' ? agentOne : req.headers.authorization === 'Bearer valid-token-two' ? agentTwo : null;
@@ -78,6 +134,7 @@ test('pilot access requires a real authenticated session and survives refresh', 
     const request = (path, options = {}) => fetch(base + path, { redirect: 'manual', ...options });
     assert.equal((await request('/app')).status, 303);
     assert.equal((await request('/api/commission-data')).status, 401);
+    assert.equal((await request('/api/organization')).status, 401);
     assert.equal((await request('/api/commission-data', { headers: { Cookie: 'cc-access=forged' } })).status, 401);
     const loginForm = await request('/login');
     const token = (await loginForm.text()).match(/name="csrf" value="([a-f0-9]{64})"/)?.[1];
@@ -121,6 +178,29 @@ test('pilot access requires a real authenticated session and survives refresh', 
     assert.equal((await settingsPost({...defaults,writingContract:'sa'},otherCookie,otherToken)).status,200);
     assert.deepEqual((await (await request('/api/settings',{headers:{Cookie:ownCookie}})).json()).settings,defaults);
     assert.equal((await request('/api/settings',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Cookie:ownCookie},body:new URLSearchParams({settings:JSON.stringify(defaults)})})).status,403);
+    const organizationPost=(path,data,cookie=ownCookie,csrf=appToken)=>request(path,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Cookie:cookie},body:new URLSearchParams({csrf,...data})});
+    assert.deepEqual((await (await request('/api/organization',{headers:{Cookie:ownCookie}})).json()).tree,[]);
+    assert.equal((await organizationPost('/api/organization/profile',{display_name:'Test SMD',contract_level:'smd'})).status,200);
+    assert.equal((await organizationPost('/api/organization/profile',{display_name:'Test Associate',contract_level:'associate'},otherCookie,otherToken)).status,200);
+    const inviteResponse=await organizationPost('/api/organization/invite',{});
+    assert.equal(inviteResponse.status,201);
+    const inviteCode=(await inviteResponse.json())[0].code;
+    assert.match(inviteCode,/^[A-Z2-9]{4}-[A-Z2-9]{4}$/);
+    assert.equal((await organizationPost('/api/organization/request',{code:inviteCode})).status,400);
+    assert.equal((await organizationPost('/api/organization/request',{code:inviteCode},otherCookie,otherToken)).status,200);
+    const pendingUpline=await (await request('/api/organization',{headers:{Cookie:ownCookie}})).json();
+    assert.equal(pendingUpline.incoming_requests.length,1);
+    const pendingDownline=await (await request('/api/organization',{headers:{Cookie:otherCookie}})).json();
+    assert.equal(pendingDownline.tree.length,1);
+    assert.equal(pendingDownline.outgoing_request.upline_name,'Test SMD');
+    assert.equal((await organizationPost('/api/organization/respond',{id:requestOne,decision:'approve'},otherCookie,otherToken)).status,400);
+    assert.equal((await organizationPost('/api/organization/respond',{id:requestOne,decision:'approve'})).status,200);
+    const approvedUpline=await (await request('/api/organization',{headers:{Cookie:ownCookie}})).json();
+    assert.equal(approvedUpline.tree.length,2);
+    assert.equal(approvedUpline.tree.find(item=>item.user_id===agentTwo).direct_upline_id,agentOne);
+    const approvedDownline=await (await request('/api/organization',{headers:{Cookie:otherCookie}})).json();
+    assert.equal(approvedDownline.tree.length,1);
+    assert.equal(approvedDownline.profile.direct_upline_name,'Test SMD');
     const savedCase = {client_name:'Sample Client',carrier:'Athene',product:'Performance Elite 7',commission:1729.43,agent_points:3458.85,monthly_trail:12.25,calculation:{caseType:'personal',productKey:'pe7'}};
     const casePost = (saved_case,cookie=ownCookie,csrf=appToken) => request('/api/cases',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Cookie:cookie},body:new URLSearchParams({csrf,saved_case:JSON.stringify(saved_case)})});
     assert.deepEqual(await (await request('/api/cases',{headers:{Cookie:ownCookie}})).json(),[]);
