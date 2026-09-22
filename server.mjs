@@ -40,6 +40,19 @@ async function savedCasesRequest(access, query = '', options = {}) {
     signal: AbortSignal.timeout(8000)
   });
 }
+async function organizationRequest(access, path, options = {}) {
+  return fetch(`${supabase}/rest/v1${path}`, {
+    ...options,
+    headers: { apikey: key, Authorization: `Bearer ${access}`, ...options.headers },
+    signal: AbortSignal.timeout(8000)
+  });
+}
+function newInviteCode() {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const bytes = randomBytes(8);
+  const chars = [...bytes].map(byte => alphabet[byte % alphabet.length]);
+  return `${chars.slice(0, 4).join('')}-${chars.slice(4).join('')}`;
+}
 async function userFromRequest(req, res) {
   const current = cookies(req);
   const access = current[cookieName('access')];
@@ -132,7 +145,7 @@ const server = createServer(async (req, res) => {
       return send(res, 200, page('Check email', '<h1>Check your email</h1><p>If that address has an account, a reset link is on its way.</p><a href="/login">Return to sign in</a>'));
     }
     if (req.method === 'POST' && path === '/auth/logout') { clearSession(res); return redirect(res, '/login'); }
-    if (['/app', '/api/commission-data', '/api/settings', '/api/cases', '/api/cases/delete', '/account/password', '/auth/password'].includes(path)) {
+    if (['/app', '/api/commission-data', '/api/settings', '/api/cases', '/api/cases/delete', '/api/organization', '/api/organization/profile', '/api/organization/invite', '/api/organization/request', '/api/organization/respond', '/account/password', '/auth/password'].includes(path)) {
       const session = await userFromRequest(req, res);
       if (!session) return path.startsWith('/api/') ? send(res, 401, 'Sign in required', 'text/plain') : redirect(res, '/login');
       if (req.method === 'GET' && path === '/app') return send(res, 200, protectedHTML.replace('<body>', `<body><div style="display:flex;justify-content:flex-end;padding:10px 24px 0"><form method="POST" action="/auth/logout">${csrfField(csrfToken(res))}<button style="border:1px solid #38748e;border-radius:7px;background:#102a40;color:#e5f8ff;padding:7px 14px;cursor:pointer">Sign out</button></form></div>`));
@@ -193,6 +206,70 @@ const server = createServer(async (req, res) => {
         if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) return send(res, 400, 'Invalid case', 'text/plain');
         const result = await savedCasesRequest(session.access, `?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
         return result.ok ? send(res, 200, 'Deleted', 'text/plain') : send(res, 503, 'Could not delete case', 'text/plain');
+      }
+      if (path === '/api/organization' && req.method === 'GET') {
+        const result = await organizationRequest(session.access, '/rpc/get_organization_dashboard', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{}'
+        });
+        if (!result.ok) return send(res, 503, 'Organization unavailable', 'text/plain');
+        return send(res, 200, await result.text(), 'application/json; charset=utf-8');
+      }
+      if (path === '/api/organization/profile' && req.method === 'POST') {
+        const displayName = typeof posted.display_name === 'string' ? posted.display_name.trim().replace(/\s+/g, ' ') : '';
+        const contractLevel = posted.contract_level || '';
+        if (displayName.length < 2 || displayName.length > 100 || !['ta','associate','sa','md','smd'].includes(contractLevel))
+          return send(res, 400, 'Invalid agent profile', 'text/plain');
+        const existing = await organizationRequest(session.access, `/agent_profiles?select=user_id&user_id=eq.${encodeURIComponent(session.user.id)}`);
+        if (!existing.ok) return send(res, 503, 'Could not read agent profile', 'text/plain');
+        const rows = await existing.json();
+        const result = rows.length ? await organizationRequest(session.access, `/agent_profiles?user_id=eq.${encodeURIComponent(session.user.id)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+          body: JSON.stringify({ display_name: displayName, contract_level: contractLevel, updated_at: new Date().toISOString() })
+        }) : await organizationRequest(session.access, '/agent_profiles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+          body: JSON.stringify({ user_id: session.user.id, display_name: displayName, contract_level: contractLevel })
+        });
+        return result.ok ? send(res, 200, 'Saved', 'text/plain') : send(res, 503, 'Could not save agent profile', 'text/plain');
+      }
+      if (path === '/api/organization/invite' && req.method === 'POST') {
+        let result;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const code = newInviteCode();
+          result = await organizationRequest(session.access, '/organization_invites', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' },
+            body: JSON.stringify({ created_by: session.user.id, code, expires_at: new Date(Date.now() + 7 * 86400000).toISOString() })
+          });
+          if (result.ok) return send(res, 201, await result.text(), 'application/json; charset=utf-8');
+          if (result.status !== 409) break;
+        }
+        return send(res, result?.status === 403 ? 400 : 503, 'Could not create invitation', 'text/plain');
+      }
+      if (path === '/api/organization/request' && req.method === 'POST') {
+        const code = String(posted.code || '').trim().toUpperCase();
+        if (!/^[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(code)) return send(res, 400, 'Enter a valid invitation code', 'text/plain');
+        const result = await organizationRequest(session.access, '/rpc/request_upline_link', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_code: code })
+        });
+        return result.ok ? send(res, 200, await result.text(), 'application/json; charset=utf-8') : send(res, 400, 'Invitation could not be requested', 'text/plain');
+      }
+      if (path === '/api/organization/respond' && req.method === 'POST') {
+        const id = posted.id || '';
+        const approve = posted.decision === 'approve';
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id) || !['approve','reject'].includes(posted.decision))
+          return send(res, 400, 'Invalid upline request', 'text/plain');
+        const result = await organizationRequest(session.access, '/rpc/respond_upline_request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_request_id: id, p_approve: approve })
+        });
+        return result.ok ? send(res, 200, await result.text(), 'application/json; charset=utf-8') : send(res, 400, 'Request could not be updated', 'text/plain');
       }
       if (req.method === 'GET' && path === '/account/password') return send(res, 200, page('Set password', `<h1>Set your password</h1><p>Choose a password for your agent account.</p><form method="POST" action="/auth/password">${csrfField(csrfToken(res))}<label for="password">New password</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="12" required><button>Save password</button></form>`));
       if (req.method === 'POST' && path === '/auth/password') {
