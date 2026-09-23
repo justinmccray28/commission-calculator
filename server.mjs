@@ -137,7 +137,7 @@ const server = createServer(async (req, res) => {
       });
       if (!avatar.ok) return send(res, avatar.status === 404 ? 404 : 403, 'Avatar unavailable', 'text/plain');
       const bytes=Buffer.from(await avatar.arrayBuffer());
-      res.writeHead(200, {'Content-Type':avatar.headers.get('content-type')||'application/octet-stream','Content-Length':bytes.length,'Cache-Control':'private, max-age=300','X-Content-Type-Options':'nosniff'});
+      res.writeHead(200, {'Content-Type':avatar.headers.get('content-type')||'application/octet-stream','Content-Length':bytes.length,'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'});
       return res.end(bytes);
     }
     if (req.method === 'POST' && path === '/api/organization/avatar') {
@@ -146,8 +146,12 @@ const server = createServer(async (req, res) => {
       if (!session) return send(res, 401, 'Sign in required', 'text/plain');
       const contentType=(req.headers['content-type']||'').split(';')[0].trim().toLowerCase();
       if (!['image/jpeg','image/png','image/webp'].includes(contentType)) return send(res, 415, 'Use a JPEG, PNG, or WebP image', 'text/plain');
-      const image=await binaryBody(req);
+      const image=await binaryBody(req,2097152);
       if (!image.length) return send(res, 400, 'Choose an image', 'text/plain');
+      const validImage=(contentType==='image/jpeg'&&image[0]===0xff&&image[1]===0xd8&&image[2]===0xff) ||
+        (contentType==='image/png'&&image.subarray(0,8).equals(Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]))) ||
+        (contentType==='image/webp'&&image.subarray(0,4).toString()==='RIFF'&&image.subarray(8,12).toString()==='WEBP');
+      if(!validImage) return send(res,400,'The optimized profile picture is invalid','text/plain');
       const objectPath=`${session.user.id}/avatar`;
       const uploaded=await fetch(`${supabase}/storage/v1/object/agent-avatars/${objectPath}`, {
         method:'POST',

@@ -850,7 +850,7 @@
       const totalPoints=tree.reduce((sum,node)=>sum+Number(node.personal_points||0),0);
       const bonusCenter=root&&root.contract_level==='smd'?compensationSummary(tree,root,children):'<section class="bonus-center"><h3>Income & Bonus Center</h3><div class="muted">SMD bonus programs unlock when your profile reaches the SMD contract level.</div></section>';
       const demoBanner=organizationDemoMode?`<div class="organization-demo-banner"><div><strong>Demo mode · sample organization</strong><small>Nothing shown here creates accounts, invitations, saved cases, or database records.</small></div><button class="organization-button secondary" type="button" data-toggle-org-demo>Exit demo</button></div>`:'';
-      content.innerHTML=`${demoBanner}<div class="organization-head"><div><h2>${organizationDemoMode?'SMD organization demo':'My organization'}</h2><div class="muted">${organizationDemoMode?'Explore a sample expandable base shop and points rollup.':'Your expandable downline family tree.'}</div></div><div class="organization-head-actions">${organizationDemoMode?'':'<button class="organization-button secondary" type="button" data-toggle-org-demo>View demo</button>'}<div class="organization-metrics"><div class="organization-metric"><span>Total downline</span><strong>${Math.max(0,tree.length-1)}</strong></div><div class="organization-metric"><span>Organization points</span><strong>${points(totalPoints)}</strong></div>${organizationDemoMode?'<div class="organization-metric unverified"><span>Generational schedule</span><strong>24% through Gen 6</strong></div>':''}</div></div></div><div class="organization-grid"><section class="organization-panel"><div class="org-person-main">${agentAvatar(profile)}<div><h3>${escapeText(profile.display_name)}</h3><p>${escapeText(contractTitle(profile.contract_level))}</p></div></div><button class="organization-button secondary" type="button" id="editOrgProfile">Edit profile</button>${organizationDemoMode?'':`<form class="org-profile-upload" id="orgAvatarForm"><label for="orgAvatarFile">Profile picture</label><input id="orgAvatarFile" name="avatar" type="file" accept="image/jpeg,image/png,image/webp" required><small>JPEG, PNG, or WebP · maximum 2 MB</small><button class="organization-button" type="submit">Upload picture</button></form>`}</section><section class="organization-panel"><h3>Direct upline</h3>${uplineMarkup}</section><section class="organization-panel"><h3>Invite an agent</h3>${inviteMarkup}</section><section class="organization-panel"><h3>Pending approvals</h3><div class="request-list">${incomingMarkup}</div></section></div><div class="organization-status" id="organizationStatus"></div>${organizationDemoMode?'<div class="note"><strong>Generational rates loaded:</strong> Generation 1: 12%, Generation 2: 6%, Generation 3: 3.5%, Generation 4: 2.5%, Generation 5: 1.25%, and Generation 6: 0.75%. Base-shop overrides remain contract differentials.</div>':''}<section class="organization-section"><h3>Organization tree</h3><div class="muted">Expand any agent to view the branch beneath them.</div><div class="org-tree">${root?renderOrganizationNode(root,children,true):'<div class="tracker-empty">Your organization tree is unavailable.</div>'}</div></section>`;
+      content.innerHTML=`${demoBanner}<div class="organization-head"><div><h2>${organizationDemoMode?'SMD organization demo':'My organization'}</h2><div class="muted">${organizationDemoMode?'Explore a sample expandable base shop and points rollup.':'Your expandable downline family tree.'}</div></div><div class="organization-head-actions">${organizationDemoMode?'':'<button class="organization-button secondary" type="button" data-toggle-org-demo>View demo</button>'}<div class="organization-metrics"><div class="organization-metric"><span>Total downline</span><strong>${Math.max(0,tree.length-1)}</strong></div><div class="organization-metric"><span>Organization points</span><strong>${points(totalPoints)}</strong></div>${organizationDemoMode?'<div class="organization-metric unverified"><span>Generational schedule</span><strong>24% through Gen 6</strong></div>':''}</div></div></div><div class="organization-grid"><section class="organization-panel"><div class="org-person-main">${agentAvatar(profile)}<div><h3>${escapeText(profile.display_name)}</h3><p>${escapeText(contractTitle(profile.contract_level))}</p></div></div><button class="organization-button secondary" type="button" id="editOrgProfile">Edit profile</button>${organizationDemoMode?'':`<form class="org-profile-upload" id="orgAvatarForm"><label for="orgAvatarFile">Profile picture</label><input id="orgAvatarFile" name="avatar" type="file" accept="image/*" required><small>Choose an image up to 10 MB. It will be cropped and optimized automatically.</small><button class="organization-button" type="submit">Upload picture</button></form>`}</section><section class="organization-panel"><h3>Direct upline</h3>${uplineMarkup}</section><section class="organization-panel"><h3>Invite an agent</h3>${inviteMarkup}</section><section class="organization-panel"><h3>Pending approvals</h3><div class="request-list">${incomingMarkup}</div></section></div><div class="organization-status" id="organizationStatus"></div>${organizationDemoMode?'<div class="note"><strong>Generational rates loaded:</strong> Generation 1: 12%, Generation 2: 6%, Generation 3: 3.5%, Generation 4: 2.5%, Generation 5: 1.25%, and Generation 6: 0.75%. Base-shop overrides remain contract differentials.</div>':''}<section class="organization-section"><h3>Organization tree</h3><div class="muted">Expand any agent to view the branch beneath them.</div><div class="org-tree">${root?renderOrganizationNode(root,children,true):'<div class="tracker-empty">Your organization tree is unavailable.</div>'}</div></section>`;
       content.querySelector('.organization-grid').insertAdjacentHTML('beforebegin',bonusCenter);
     }
     async function loadOrganization(){
@@ -866,6 +866,27 @@
       if(!response.ok) throw new Error(await response.text() || `Request failed: ${response.status}`);
       return response;
     }
+    async function optimizeAvatar(file){
+      if(!file || file.size>10*1024*1024 || !file.type.startsWith('image/')) throw new Error('Choose an image under 10 MB.');
+      let source,release=()=>{};
+      try {
+        if('createImageBitmap' in window) source=await createImageBitmap(file,{imageOrientation:'from-image'});
+        else {
+          const url=URL.createObjectURL(file); release=()=>URL.revokeObjectURL(url);
+          source=await new Promise((resolve,reject)=>{ const image=new Image(); image.onload=()=>resolve(image); image.onerror=()=>reject(new Error('This image format is not supported by your browser.')); image.src=url; });
+        }
+        const width=source.width||source.naturalWidth,height=source.height||source.naturalHeight;
+        if(!width||!height) throw new Error('This image could not be read.');
+        const side=Math.min(width,height),sx=(width-side)/2,sy=(height-side)/2;
+        const canvas=document.createElement('canvas'); canvas.width=512; canvas.height=512;
+        canvas.getContext('2d',{alpha:true}).drawImage(source,sx,sy,side,side,0,0,512,512);
+        const makeBlob=(type,quality)=>new Promise(resolve=>canvas.toBlob(resolve,type,quality));
+        let blob=await makeBlob('image/webp',.86);
+        if(!blob || blob.type!=='image/webp') blob=await makeBlob('image/jpeg',.86);
+        if(!blob) throw new Error('This image could not be optimized.');
+        return blob;
+      } finally { if(source?.close) source.close(); release(); }
+    }
     async function handleOrganizationSubmit(event){
       const form=event.target.closest('form'); if(!form) return;
       if(!['orgProfileForm','joinOrganizationForm','orgAvatarForm'].includes(form.id)) return;
@@ -874,8 +895,10 @@
       try {
         if(form.id==='orgAvatarForm'){
           const file=form.querySelector('input[type="file"]').files[0];
-          if(!file || file.size>2097152 || !['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('Choose a JPEG, PNG, or WebP image under 2 MB.');
-          const response=await fetch('/api/organization/avatar',{method:'POST',headers:{'Content-Type':file.type,'X-CSRF-Token':csrfValue()},body:file});
+          button.textContent='Optimizing…';
+          const optimized=await optimizeAvatar(file);
+          button.textContent='Uploading…';
+          const response=await fetch('/api/organization/avatar',{method:'POST',headers:{'Content-Type':optimized.type,'X-CSRF-Token':csrfValue()},body:optimized});
           if(!response.ok) throw new Error(await response.text()||'Profile picture could not be uploaded.');
         } else {
           const data=Object.fromEntries(new FormData(form));
@@ -883,7 +906,7 @@
         }
         await loadOrganization();
       } catch(error){ const status=$('organizationStatus'); if(status) status.textContent=error.message.includes('Invitation')?'That invitation code is invalid, expired, or already claimed.':error.message; console.error(error); }
-      finally { if(button.isConnected) button.disabled=false; }
+      finally { if(button.isConnected){ button.disabled=false; if(form.id==='orgAvatarForm') button.textContent='Upload picture'; } }
     }
     async function handleOrganizationClick(event){
       if(event.target.closest('[data-toggle-org-demo]')){
