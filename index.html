@@ -958,24 +958,30 @@
     }
     function compensationSummary(tree,root,children){
       const rates=[0,.12,.06,.035,.025,.0125,.0075,0], totals=Array.from({length:8},()=>({current:0,pipeline:0}));
-      let currentBaseOverride=0,pipelineBaseOverride=0,directSmds=0;
+      let currentBaseOverride=0,pipelineBaseOverride=0;
       const rootRate=Number(contractRates?.[root.contract_level]||0)/100;
       const walk=(node,generation)=>{
         const current=Number(node.current_points||0),pipeline=Number(node.pipeline_points||0),bucket=Math.min(generation,7);
         totals[bucket].current+=current; totals[bucket].pipeline+=pipeline;
         if(node.user_id!==root.user_id&&generation===0){ const spread=Math.max(0,rootRate-Number(contractRates?.[node.contract_level]||0)/100); currentBaseOverride+=current*spread; pipelineBaseOverride+=pipeline*spread; }
-        for(const child of children.get(node.user_id)||[]){ const next=generation+(child.contract_level==='smd'?1:0); if(generation===0&&child.contract_level==='smd') directSmds++; walk(child,next); }
+        for(const child of children.get(node.user_id)||[]){ const next=generation+(child.contract_level==='smd'?1:0); walk(child,next); }
       };
       walk(root,0);
       const generationIncome=projected=>totals.slice(1,7).reduce((sum,item,index)=>sum+(item.current+(projected?item.pipeline:0))*rates[index+1],0);
       const currentPoints=totals.reduce((sum,item)=>sum+item.current,0),pipelinePoints=totals.reduce((sum,item)=>sum+item.pipeline,0);
-      const baseProjected=totals[0].current+totals[0].pipeline,superbaseProjected=totals[1].current+totals[1].pipeline,superteamProjected=totals.slice(2,7).reduce((sum,item)=>sum+item.current+item.pipeline,0);
+      const baseProjected=totals[0].current+totals[0].pipeline;
       const bonus=(title,value,threshold,detail)=>{ const qualified=value>=threshold,gap=Math.max(0,threshold-value); return `<div class="bonus-tile"><span>${title}</span><strong>${points(value)} / ${points(threshold)}</strong><small>${detail}</small><span class="bonus-status${qualified?'':' progress'}">${qualified?'On the line':`${points(gap)} to go`}</span></div>`; };
-      const baseEligible=baseProjected>=25000,superbaseEligible=directSmds>=3&&superbaseProjected>=100000&&baseProjected>=15000,superteamEligible=directSmds>=3&&superteamProjected>=500000&&superbaseProjected>=100000;
-      const monthlyLow=(baseEligible?baseProjected*.02:0)+(superbaseEligible?superbaseProjected*.015:0)+(superteamEligible?superteamProjected*.015:0);
-      const monthlyHigh=(baseEligible?baseProjected*.06:0)+(superbaseEligible?superbaseProjected*.04:0)+(superteamEligible?superteamProjected*.04:0);
+      const baseEligible=baseProjected>=25000;
+      // This profile model currently tops out at SMD. Do not expose or include
+      // EMD, CEO MD, or EVC programs until the agent actually holds that level.
+      const applicableBonuses=root.contract_level==='smd' ? [
+        bonus('SMD base-shop pool',baseProjected,25000,'Estimated additional 2%–6%; final payout depends on companywide qualifying production.'),
+        bonus('Quarterly base-shop',baseProjected,100000,'Minimum $1,000 when qualified, plus pro-rata remainder; YoY growth applies.')
+      ] : [];
+      const monthlyLow=baseEligible?baseProjected*.02:0;
+      const monthlyHigh=baseEligible?baseProjected*.06:0;
       const projectedExact=Number(root.current_commission||0)+Number(root.pipeline_commission||0)+currentBaseOverride+pipelineBaseOverride+generationIncome(true);
-      return `<section class="bonus-center"><h3>Income & Bonus Center</h3><div class="muted">Issued + paid are current. Prospect + submitted are pipeline. Lost cases are excluded.</div><div class="income-grid"><div class="income-tile"><span>Current points</span><strong>${points(currentPoints)}</strong></div><div class="income-tile"><span>Pipeline points</span><strong>${points(pipelinePoints)}</strong></div><div class="income-tile"><span>Exact projected income</span><strong>${money(projectedExact)}</strong></div><div class="income-tile"><span>With estimated monthly pools</span><strong>${monthlyHigh?`${money(projectedExact+monthlyLow)}–${money(projectedExact+monthlyHigh)}`:money(projectedExact)}</strong></div></div><div class="bonus-grid">${bonus('SMD base-shop pool',baseProjected,25000,'Estimated additional 2%–6%; final payout depends on companywide qualifying production.')}${bonus('EMD superbase pool',superbaseProjected,100000,`${directSmds}/3 direct SMDs · also requires 15,000 base-shop points.`)}${bonus('EMD superteam pool',superteamProjected,500000,'Requires 3 direct SMDs and 100,000 superbase points.')}${bonus('Quarterly base-shop',baseProjected,100000,'Minimum $1,000 when qualified, plus pro-rata remainder; YoY growth applies.')}${bonus('CEO MD Elite Partner',directSmds,6,'Non-cash Elite Partner benefit.')}${bonus('EVC level',directSmds,9,'Unlocks executive superbase and all-generation programs.')}</div><div class="note"><strong>Total formula:</strong> personal commission + base-shop contract differentials + SMD generation overrides + eligible bonus estimates. Pool estimates remain provisional until companywide production and growth adjustments are known.</div></section>`;
+      return `<section class="bonus-center"><h3>Income & Bonus Center</h3><div class="muted">Issued + paid are current. Prospect + submitted are pipeline. Lost cases are excluded.</div><div class="income-grid"><div class="income-tile"><span>Current points</span><strong>${points(currentPoints)}</strong></div><div class="income-tile"><span>Pipeline points</span><strong>${points(pipelinePoints)}</strong></div><div class="income-tile"><span>Exact projected income</span><strong>${money(projectedExact)}</strong></div><div class="income-tile"><span>With estimated monthly pools</span><strong>${monthlyHigh?`${money(projectedExact+monthlyLow)}–${money(projectedExact+monthlyHigh)}`:money(projectedExact)}</strong></div></div>${applicableBonuses.length?`<div class="bonus-grid">${applicableBonuses.join('')}</div>`:''}<div class="note"><strong>Total formula:</strong> personal commission + base-shop contract differentials + SMD generation overrides + eligible bonus estimates. Pool estimates remain provisional until companywide production and growth adjustments are known.</div></section>`;
     }
     function renderOrganization(){
       const content=$('organizationContent');
