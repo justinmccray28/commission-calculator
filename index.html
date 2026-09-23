@@ -364,6 +364,68 @@
     html[data-theme="light"] .modal-card p { color:#617b94; }
     html[data-theme="light"] .modal-summary { color:#536f89; background:#eaf4fa; }
     html[data-theme="light"] .sign-out-button { color:#173a5b; border-color:#c5d6e4; background:rgba(255,255,255,.75); }
+    .mobile-section-toggle,.mobile-bottom-nav { display:none; }
+    .mobile-section-body { display:contents; }
+    @media(max-width:700px) {
+      body { padding-bottom:78px; }
+      .account-bar { padding:8px 12px 0; }
+      .sign-out-button { padding:6px 10px; font-size:11px; }
+      .wrap { padding:10px 12px 24px; }
+      .page-head { margin:2px 0 14px; align-items:center; }
+      h1 { font-size:26px; letter-spacing:-.04em; }
+      .head-mark { display:flex; gap:9px; padding:0; }
+      .head-mark .bars { height:28px; gap:3px; }
+      .head-mark .bars i { width:5px; height:calc(var(--h) * .42); }
+      .head-mark span { display:none; }
+      .app-tabs { display:none; }
+      .settings-panel { margin-bottom:10px; }
+      .settings-panel:not([open]) { display:none; }
+      .grid { display:flex; flex-direction:column; gap:10px; }
+      #results { order:-1; width:100%; }
+      .card,#results,.tracker-card,.organization-card { padding:15px; border-radius:14px; }
+      .input-head { margin-bottom:10px; }
+      .input-head .heading-icon { width:40px; height:40px; }
+      .input-head h2 { font-size:18px; }
+      .input-head p { font-size:11px; }
+      .mobile-section-toggle { display:flex; width:100%; align-items:center; gap:10px; margin-top:9px; padding:13px 14px; border:1px solid rgba(81,151,205,.46); border-radius:10px; color:#edf7ff; background:linear-gradient(110deg,rgba(25,60,91,.78),rgba(12,35,58,.82)); font:750 14px system-ui; text-align:left; cursor:pointer; }
+      .mobile-section-toggle span { color:#54dbe0; font-size:17px; }
+      .mobile-section-toggle b { margin-left:auto; color:#7abce9; font-size:16px; }
+      .mobile-section-toggle.open { border-color:rgba(52,217,204,.58); background:linear-gradient(110deg,rgba(17,79,91,.74),rgba(16,47,72,.82)); }
+      .mobile-section-body { display:none; padding:2px 3px 7px; }
+      .mobile-section-body.open { display:block; }
+      .mobile-section-body .row { grid-template-columns:1fr 1fr; gap:8px; }
+      .mobile-section-body label { margin-top:9px; }
+      .hero { min-height:58px; margin:0 -15px; padding:11px 15px; }
+      .hero .heading-icon { width:39px; height:39px; }
+      .hero h2 { font-size:17px; }
+      .hero .muted { overflow:hidden; max-width:190px; text-overflow:ellipsis; white-space:nowrap; }
+      .save-case-button { padding:8px 10px; font-size:11px; }
+      .clarity-row { min-height:110px; margin:0 -15px; padding:14px 15px; }
+      .clarity-copy { display:none; }
+      .wave { width:39%; opacity:.48; }
+      .total-block { min-width:0; }
+      .big { font-size:43px; }
+      .commission-panels { display:flex; gap:10px; margin:0 -3px 12px; padding:0 3px 4px; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; }
+      .commission-panels::-webkit-scrollbar { display:none; }
+      .commission-panel { flex:0 0 82%; min-height:145px; scroll-snap-align:start; }
+      #overridePanel { flex-basis:82%; }
+      .trail-grid { grid-template-columns:1fr 1fr; }
+      .result-toggle { margin-top:5px; }
+      .result-details .section-title { display:none; }
+      .result-details table { margin-top:9px; }
+      .result-details table th:nth-child(2),.result-details table td:nth-child(2) { display:none; }
+      .formula { overflow-wrap:anywhere; }
+      .mobile-bottom-nav { position:fixed; z-index:30; left:0; right:0; bottom:0; display:grid; grid-template-columns:repeat(4,1fr); padding:6px max(8px,env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left)); border-top:1px solid rgba(91,158,208,.45); background:rgba(5,20,35,.94); box-shadow:0 -8px 30px rgba(0,5,15,.32); backdrop-filter:blur(20px) saturate(140%); }
+      .mobile-bottom-nav button { display:flex; flex-direction:column; align-items:center; gap:2px; padding:5px 2px; border:0; border-radius:9px; color:#89a9c7; background:transparent; font:650 10px system-ui; cursor:pointer; }
+      .mobile-bottom-nav button span { color:#78a9d6; font-size:20px; line-height:1; }
+      .mobile-bottom-nav button.active { color:#68ecdf; background:rgba(25,111,122,.22); }
+      .mobile-bottom-nav button.active span { color:#55e8df; }
+      html[data-theme="light"] .mobile-section-toggle { color:#173a5a; border-color:#c9dbe8; background:linear-gradient(110deg,#f8fcff,#edf6fb); }
+      html[data-theme="light"] .mobile-section-toggle.open { border-color:rgba(28,186,179,.48); background:linear-gradient(110deg,#e7fbf8,#edf8fc); }
+      html[data-theme="light"] .mobile-bottom-nav { border-color:#cbdce8; background:rgba(250,253,255,.95); box-shadow:0 -8px 25px rgba(41,88,121,.12); }
+      html[data-theme="light"] .mobile-bottom-nav button { color:#617c96; }
+      html[data-theme="light"] .mobile-bottom-nav button.active { color:#058f8f; background:rgba(51,209,196,.12); }
+    }
   </style>
 </head>
 <body>
@@ -396,6 +458,8 @@
     <div class="grid">
       <section class="card">
         <div class="input-head"><span class="heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="9" cy="6" r="2.4" fill="#163c4e"/><circle cx="16" cy="12" r="2.4" fill="#163c4e"/><circle cx="9" cy="18" r="2.4" fill="#163c4e"/></svg></span><div><h2>Case inputs</h2><p>Enter the case details to calculate estimated commissions.</p></div></div>
+        <button class="mobile-section-toggle open" type="button" aria-expanded="true"><span>▤</span> Case details <b>⌃</b></button>
+        <div class="mobile-section-body open">
         <label for="caseType">▣　Case type</label>
         <div class="field-wrap"><span class="field-icon">▣</span><select id="caseType">
           <option value="personal">My business</option>
@@ -453,7 +517,10 @@
           <label for="trailBasis">Accumulated value for monthly trail ($)</label>
           <div class="field-wrap"><span class="field-icon">$</span><input id="trailBasis" type="number" min="0" step="0.01" value="0"></div>
         </div>
+        </div>
 
+        <button class="mobile-section-toggle" type="button" aria-expanded="false"><span>◔</span> Contracts &amp; splits <b>⌄</b></button>
+        <div class="mobile-section-body">
         <div class="row">
           <div><label for="myContract">Writing agent contract</label><div class="field-wrap"><span class="field-icon">♙</span><select id="myContract"><option value="ta">Training Associate</option><option value="associate">Associate</option><option value="sa">Senior Associate</option><option value="md" selected>Marketing Director</option><option value="smd">Senior Marketing Director</option></select></div></div>
           <div id="splitContractField"><label for="otherContract">Split agent contract</label><div class="field-wrap"><span class="field-icon">♙</span><select id="otherContract"><option value="ta">Training Associate</option><option value="associate">Associate</option><option value="sa" selected>Senior Associate</option><option value="md">Marketing Director</option><option value="smd">Senior Marketing Director</option></select></div></div>
@@ -475,6 +542,7 @@
           <div class="field-wrap"><span class="field-icon">%</span><input id="overridePercent" type="number" min="0" step="0.01" placeholder="Auto"></div>
           <label for="overrideBasis">Override basis ($; leave blank to use other party's allocated gross)</label>
           <input id="overrideBasis" type="number" min="0" step="0.01" placeholder="Auto">
+        </div>
         </div>
       </section>
 
@@ -508,12 +576,15 @@
             <div class="trail-stat"><span>Override agent trail</span><strong id="trailOverrideOutput">$0.00</strong></div>
           </div>
         </div>
+        <button class="mobile-section-toggle result-toggle" type="button" aria-expanded="false"><span>▦</span> Calculation breakdown <b>⌄</b></button>
+        <div class="mobile-section-body result-details">
         <div class="section-title"><span class="section-icon">▣</span><strong>Calculation breakdown</strong><span class="muted" style="margin-left:auto;font-size:12px">Based on entered case details　ⓘ</span></div>
         <table><thead><tr><th>Component</th><th>Calculation</th><th>Amount</th></tr></thead><tbody id="breakdown"></tbody></table>
         <div class="formula" id="formula">Formula will appear here.</div>
         <div class="note" id="note">Rates are editable. Confirm current carrier schedules and actual coding before relying on a result.</div>
         <div class="note hidden" id="productInfo" role="note"></div>
         <div class="footer hidden" id="atheneTrailNote">Athene Option 2 uses the monthly 0.0350% trail only. No duplicate annual trail is added.</div>
+        </div>
       </section>
     </div>
     </div>
@@ -525,6 +596,7 @@
       <div id="organizationContent"><div class="tracker-empty">Loading your organization…</div></div>
     </section>
   </main>
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation"><button class="active" type="button" data-mobile-view="calculator"><span>▦</span>Calculator</button><button type="button" data-mobile-view="tracker"><span>▥</span>Tracking</button><button type="button" data-mobile-view="organization"><span>♟</span>Organization</button><button type="button" data-mobile-view="settings"><span>⚙</span>Settings</button></nav>
   <div class="modal-backdrop hidden" id="saveCaseModal" role="dialog" aria-modal="true" aria-labelledby="saveCaseTitle">
     <div class="modal-card"><h2 id="saveCaseTitle">Save calculation</h2><p>Add a client or case name. Use initials if you prefer.</p><label for="savedCaseName">Client or case name</label><input id="savedCaseName" type="text" maxlength="120" autocomplete="off"><div class="modal-summary"><span id="saveCaseProduct">Product</span><strong id="saveCaseAmount">$0.00</strong></div><div class="modal-status" id="saveCaseStatus" aria-live="polite"></div><div class="modal-actions"><button id="cancelSaveCase" type="button">Cancel</button><button class="primary" id="confirmSaveCase" type="button">Save case</button></div></div>
   </div>
@@ -715,6 +787,7 @@
       $('calculatorTab').classList.toggle('active',!tracking&&!organization);
       $('trackerTab').classList.toggle('active',tracking);
       $('organizationTab').classList.toggle('active',organization);
+      document.querySelectorAll('[data-mobile-view]').forEach(button=>button.classList.toggle('active',button.dataset.mobileView===(tracking?'tracker':organization?'organization':'calculator')));
       if(tracking) loadSavedCases();
       if(organization) loadOrganization();
     }
@@ -1159,6 +1232,15 @@
     $('saveCaseModal').addEventListener('click',event=>{ if(event.target===$('saveCaseModal')) closeSaveCaseModal(); });
     $('caseList').addEventListener('click',event=>{ const button=event.target.closest('[data-case-id]'); if(button) deleteSavedCase(button.dataset.caseId); });
     $('caseList').addEventListener('change',event=>{ const select=event.target.closest('[data-case-stage]'); if(select) updateCaseStage(select.dataset.caseStage,select.value,select); });
+    document.addEventListener('click',event=>{
+      const toggle=event.target.closest('.mobile-section-toggle');
+      if(toggle){ const body=toggle.nextElementSibling,open=!toggle.classList.contains('open'); toggle.classList.toggle('open',open); toggle.setAttribute('aria-expanded',String(open)); toggle.querySelector('b').textContent=open?'⌃':'⌄'; body.classList.toggle('open',open); return; }
+      const mobile=event.target.closest('[data-mobile-view]');
+      if(!mobile) return;
+      const view=mobile.dataset.mobileView;
+      if(view==='settings'){ showView('calculator'); $('settingsPanel').open=true; $('settingsPanel').scrollIntoView({behavior:'smooth',block:'start'}); document.querySelectorAll('[data-mobile-view]').forEach(button=>button.classList.toggle('active',button===mobile)); }
+      else showView(view);
+    });
     $('organizationContent').addEventListener('submit',handleOrganizationSubmit); $('organizationContent').addEventListener('click',handleOrganizationClick);
     document.querySelectorAll('input, select').forEach(element=>{
       element.addEventListener('input',calculate);
