@@ -195,7 +195,7 @@ const server = createServer(async (req, res) => {
     if (['/app', '/api/commission-data', '/api/settings', '/api/cases', '/api/cases/stage', '/api/cases/delete', '/api/organization', '/api/organization/profile', '/api/organization/invite', '/api/organization/request', '/api/organization/respond', '/account/password', '/auth/password'].includes(path)) {
       const session = await userFromRequest(req, res);
       if (!session) return path.startsWith('/api/') ? send(res, 401, 'Sign in required', 'text/plain') : redirect(res, '/login');
-      if (req.method === 'GET' && path === '/app') return send(res, 200, protectedHTML.replace('<body>', `<body><div style="display:flex;justify-content:flex-end;padding:10px 24px 0"><form method="POST" action="/auth/logout">${csrfField(csrfToken(res))}<button style="border:1px solid #38748e;border-radius:7px;background:#102a40;color:#e5f8ff;padding:7px 14px;cursor:pointer">Sign out</button></form></div>`));
+      if (req.method === 'GET' && path === '/app') return send(res, 200, protectedHTML.replace('<body>', `<body><div class="account-bar"><form method="POST" action="/auth/logout">${csrfField(csrfToken(res))}<button class="sign-out-button">Sign out</button></form></div>`));
       if (req.method === 'GET' && path === '/api/commission-data') return send(res, 200, commissionData, 'application/json; charset=utf-8');
       if (path === '/api/settings' && req.method === 'GET') {
         const result = await settingsRequest(session.access);
@@ -206,9 +206,11 @@ const server = createServer(async (req, res) => {
       if (path === '/api/settings' && req.method === 'POST') {
         let settings;
         try { settings = JSON.parse(posted.settings); } catch { return send(res, 400, 'Invalid settings', 'text/plain'); }
-        const names = ['caseType','carrier','product','option','termLength','writingContract','splitContract','overrideContract','isSplit','splitWithDownline','mySplit','otherSplit','overridePercent'];
+        if (settings && !Array.isArray(settings) && typeof settings === 'object' && settings.theme === undefined) settings.theme = 'dark';
+        const names = ['theme','caseType','carrier','product','option','termLength','writingContract','splitContract','overrideContract','isSplit','splitWithDownline','mySplit','otherSplit','overridePercent'];
         if (!settings || Array.isArray(settings) || typeof settings !== 'object' ||
             Object.keys(settings).some(name => !names.includes(name)) ||
+            !['dark','light'].includes(settings.theme) ||
             names.some(name => typeof settings[name] !== (['isSplit','splitWithDownline'].includes(name) ? 'boolean' : 'string') || (typeof settings[name] === 'string' && settings[name].length > 100)))
           return send(res, 400, 'Invalid settings', 'text/plain');
         const result = await settingsRequest(session.access, {

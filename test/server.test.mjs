@@ -171,7 +171,7 @@ test('pilot access requires a real authenticated session and survives refresh', 
     const appToken = appHTML.match(/name="csrf" value="([a-f0-9]{64})"/)?.[1];
     const appCsrfCookie = page.headers.getSetCookie().find(item => item.startsWith('cc-csrf='))?.split(';')[0];
     assert.ok(appToken && appCsrfCookie);
-    const defaults = {caseType:'personal',carrier:'',product:'',option:'1',termLength:'',writingContract:'md',splitContract:'sa',overrideContract:'md',isSplit:false,splitWithDownline:false,mySplit:'50',otherSplit:'50',overridePercent:''};
+    const defaults = {theme:'dark',caseType:'personal',carrier:'',product:'',option:'1',termLength:'',writingContract:'md',splitContract:'sa',overrideContract:'md',isSplit:false,splitWithDownline:false,mySplit:'50',otherSplit:'50',overridePercent:''};
     const ownCookie = `${cookieHeader}; ${appCsrfCookie}`;
     const settingsPost = (settings, cookie, csrf) => request('/api/settings', { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded', Cookie:cookie }, body:new URLSearchParams({ csrf, settings:JSON.stringify(settings) }) });
     const initial = await request('/api/settings', { headers:{Cookie:ownCookie} });

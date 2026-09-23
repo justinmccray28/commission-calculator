@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Commission Calculator</title>
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('commission-calculator-theme')||'dark'}catch{document.documentElement.dataset.theme='dark'}</script>
   <style>
     :root { --bg:#06101d; --panel:#0b1a2d; --panel2:#102641; --text:#f5f8fc; --muted:#9bb0c9; --accent:#23e0d5; --accent2:#5b9dff; --line:#1c4a73; --warn:#f4c84d; }
     * { box-sizing:border-box; }
@@ -314,6 +315,55 @@
     @media(max-width:700px) { .tracker-head,.organization-head { align-items:stretch; flex-direction:column; } .tracker-metrics,.income-grid,.bonus-grid { grid-template-columns:1fr 1fr; } .tracker-total { min-width:0; text-align:left; } .saved-case { grid-template-columns:1fr auto; gap:8px 12px; } .saved-case-product { grid-column:1; } .saved-case-amount { grid-column:2; grid-row:1/3; } .case-stage { grid-column:1/-1; } .delete-case { grid-column:1/-1; width:max-content; } .organization-grid { grid-template-columns:1fr; } .org-person { grid-template-columns:minmax(130px,1fr) auto; gap:8px; } .org-person::before { display:none; } .org-person-stat:last-child { grid-column:1/-1; text-align:left; padding-left:44px; } }
     @media(max-width:430px) { .tracker-metrics { grid-template-columns:1fr; } }
     @media(max-width:520px) { .settings-grid { grid-template-columns:1fr; } .settings-grid .check { margin-top:12px; } .settings-actions { align-items:flex-start; flex-wrap:wrap; } .app-tabs { width:100%; } .app-tab { flex:1; } }
+    .account-bar { position:relative; z-index:2; display:flex; justify-content:flex-end; padding:10px 24px 0; }
+    .sign-out-button { border:1px solid #38748e; border-radius:7px; padding:7px 14px; color:#e5f8ff; background:#102a40; cursor:pointer; }
+
+    /* High-fidelity daylight glass theme */
+    html[data-theme="light"] { --bg:#f6fbff; --panel:#fff; --panel2:#eef7fd; --text:#0a2342; --muted:#58718e; --accent:#00aaa9; --accent2:#168ee5; --line:#cfdeeb; --warn:#c88a00; }
+    html[data-theme="light"] body { color:#0a2342; background-color:#f7fbfe; background-image:radial-gradient(ellipse 34% 42% at 3% 31%,rgba(67,214,226,.13),transparent 72%),radial-gradient(ellipse 34% 44% at 98% 15%,rgba(62,174,239,.12),transparent 72%),radial-gradient(ellipse 37% 46% at 94% 82%,rgba(57,163,227,.1),transparent 72%),linear-gradient(135deg,#fbfdff 0%,#f4faff 48%,#fff 100%); }
+    html[data-theme="light"] body:before { background:radial-gradient(ellipse 65% 24% at 55% 4%,rgba(91,196,236,.1),transparent 80%); }
+    html[data-theme="light"] body:after { opacity:.025; mix-blend-mode:multiply; }
+    html[data-theme="light"] h1 { color:#092344; text-shadow:0 2px 20px rgba(35,117,173,.08); }
+    html[data-theme="light"] .head-mark { color:#587493; }
+    html[data-theme="light"] .head-mark span { border-color:#c8dae8; }
+    html[data-theme="light"] .bars i { background:linear-gradient(0deg,#168cda,#25d8c8); box-shadow:0 0 12px rgba(14,178,210,.22); }
+    html[data-theme="light"] .card,html[data-theme="light"] .card:first-child,html[data-theme="light"] #results { border-color:rgba(125,165,196,.42); background:linear-gradient(145deg,rgba(255,255,255,.86),rgba(246,251,255,.78)); box-shadow:0 16px 44px rgba(35,88,126,.1),inset 0 1px rgba(255,255,255,.95); backdrop-filter:blur(24px) saturate(130%); }
+    html[data-theme="light"] .settings-panel { border-color:rgba(126,166,197,.42); background:rgba(255,255,255,.72); box-shadow:0 8px 24px rgba(41,94,132,.07),inset 0 1px #fff; }
+    html[data-theme="light"] .settings-panel summary,html[data-theme="light"] label,html[data-theme="light"] .check { color:#173b5f; }
+    html[data-theme="light"] .settings-panel summary span,html[data-theme="light"] .muted,html[data-theme="light"] .sub,html[data-theme="light"] .input-head p,html[data-theme="light"] .clarity-copy p,html[data-theme="light"] .contract-caption { color:#5e7895; }
+    html[data-theme="light"] .settings-body { border-color:#dce7f0; }
+    html[data-theme="light"] input,html[data-theme="light"] select,html[data-theme="light"] .case-stage { color:#102f50; color-scheme:light; border-color:#c6d7e5; background:linear-gradient(110deg,rgba(248,252,255,.98),rgba(239,247,252,.98)); box-shadow:inset 0 1px #fff,0 2px 7px rgba(50,98,133,.04); }
+    html[data-theme="light"] select option,html[data-theme="light"] select optgroup { color:#102f50!important; background:#fff!important; }
+    html[data-theme="light"] input:focus,html[data-theme="light"] select:focus { border-color:#21bbb6; outline-color:rgba(24,186,179,.16); box-shadow:0 0 0 4px rgba(31,201,192,.08); }
+    html[data-theme="light"] .field-icon { color:#4e83ae; border-color:#d4e2ed; background:rgba(222,238,248,.58); }
+    html[data-theme="light"] .heading-icon { color:#029c9c; border-color:rgba(20,183,177,.28); background:linear-gradient(145deg,rgba(194,249,243,.72),rgba(223,246,251,.72)); box-shadow:inset 0 1px #fff; }
+    html[data-theme="light"] .hero { border-color:#dbe6ef; background:linear-gradient(180deg,rgba(226,242,250,.45),transparent); }
+    html[data-theme="light"] .clarity-copy { border-color:#d5e2ec; }
+    html[data-theme="light"] .clarity-copy h3,html[data-theme="light"] .panel-line strong { color:#123353; }
+    html[data-theme="light"] .total-block .muted,html[data-theme="light"] .panel-line { color:#5d7690; }
+    html[data-theme="light"] .commission-panel { border-color:rgba(23,191,180,.45); background:linear-gradient(125deg,rgba(224,251,247,.73),rgba(246,253,253,.7)); box-shadow:inset 0 1px #fff,0 10px 24px rgba(26,122,126,.07); }
+    html[data-theme="light"] #splitPanel { border-color:rgba(48,148,229,.38); background:linear-gradient(125deg,rgba(229,244,255,.82),rgba(249,252,255,.75)); }
+    html[data-theme="light"] table { border-color:#c8d9e7; background:rgba(255,255,255,.66); }
+    html[data-theme="light"] th { color:#42627f; background:rgba(226,239,248,.78); }
+    html[data-theme="light"] td { color:#173652; border-color:#dbe6ef; }
+    html[data-theme="light"] td.muted { color:#607994; }
+    html[data-theme="light"] tbody tr:nth-child(even),html[data-theme="light"] tbody tr:hover { background:rgba(224,241,249,.38); }
+    html[data-theme="light"] .formula { color:#725500; border-color:#edcf82; background:linear-gradient(90deg,rgba(255,245,211,.85),rgba(255,252,239,.75)); }
+    html[data-theme="light"] .note { color:#516d88; border-color:#d2e1ec; background:rgba(235,245,252,.78); }
+    html[data-theme="light"] .app-tabs { border-color:#ccdae6; background:rgba(244,249,253,.8); box-shadow:inset 0 1px #fff; }
+    html[data-theme="light"] .app-tab { color:#496783; }
+    html[data-theme="light"] .app-tab.active { color:#06363d; background:linear-gradient(90deg,#62e1df,#69ebc0); }
+    html[data-theme="light"] .settings-actions button,html[data-theme="light"] .save-case-button,html[data-theme="light"] .organization-button { color:#063d45; border-color:rgba(8,173,167,.4); background:linear-gradient(110deg,#63dedb,#6ae5bb); }
+    html[data-theme="light"] .settings-actions button.secondary,html[data-theme="light"] .organization-button.secondary,html[data-theme="light"] .modal-actions button { color:#365675; border-color:#c8d9e6; background:#eef5fa; }
+    html[data-theme="light"] .tracker-total,html[data-theme="light"] .tracker-total.points,html[data-theme="light"] .saved-case,html[data-theme="light"] .bonus-center,html[data-theme="light"] .income-tile,html[data-theme="light"] .bonus-tile,html[data-theme="light"] .organization-panel,html[data-theme="light"] .organization-metric,html[data-theme="light"] .invite-code,html[data-theme="light"] .request-item,html[data-theme="light"] .org-tree,html[data-theme="light"] .org-person { color:#153451; border-color:#cbdde9; background:linear-gradient(135deg,rgba(255,255,255,.82),rgba(237,247,252,.76)); box-shadow:inset 0 1px #fff; }
+    html[data-theme="light"] .saved-case-name,html[data-theme="light"] .org-person-name,html[data-theme="light"] .organization-panel h3 { color:#102f50; }
+    html[data-theme="light"] .saved-case-product,html[data-theme="light"] .saved-case-date,html[data-theme="light"] .organization-panel p,html[data-theme="light"] .income-tile span,html[data-theme="light"] .bonus-tile span,html[data-theme="light"] .bonus-tile small,html[data-theme="light"] .org-person-level,html[data-theme="light"] .org-person-stat { color:#607b95; }
+    html[data-theme="light"] .tracker-empty { color:#617d96; border-color:#bfd3e2; background:rgba(255,255,255,.42); }
+    html[data-theme="light"] .modal-backdrop { background:rgba(218,232,242,.68); }
+    html[data-theme="light"] .modal-card { color:#102f50; border-color:#bfd5e4; background:linear-gradient(145deg,#fff,#f0f8fd); box-shadow:0 25px 70px rgba(33,77,110,.2); }
+    html[data-theme="light"] .modal-card p { color:#617b94; }
+    html[data-theme="light"] .modal-summary { color:#536f89; background:#eaf4fa; }
+    html[data-theme="light"] .sign-out-button { color:#173a5b; border-color:#c5d6e4; background:rgba(255,255,255,.75); }
   </style>
 </head>
 <body>
@@ -326,6 +376,7 @@
       <div class="settings-body">
         <div class="settings-grid">
           <div><label for="defaultCaseType">Default case type</label><select id="defaultCaseType"><option value="personal">My business</option><option value="downline">Downline business</option></select></div>
+          <div><label for="defaultTheme">Appearance</label><select id="defaultTheme"><option value="dark">Dark mode</option><option value="light">Light mode</option></select></div>
           <div><label for="defaultCarrier">Default carrier</label><select id="defaultCarrier"><option value="">No default carrier</option></select></div>
           <div><label for="defaultProduct">Default product</label><select id="defaultProduct" disabled><option value="">No default product</option></select></div>
           <div><label for="defaultOption">Default FIA option</label><select id="defaultOption"><option value="1">Option 1</option><option value="2">Option 2</option><option value="3">Option 3</option></select></div>
@@ -545,17 +596,18 @@
       $('defaultOption').disabled=!(isAscent||isFia);
     }
     function defaultSettings(){
-      return {caseType:'personal',carrier:'',product:'',option:'1',termLength:'',writingContract:'md',splitContract:'sa',overrideContract:'md',isSplit:false,splitWithDownline:false,mySplit:'50',otherSplit:'50',overridePercent:''};
+      return {theme:'dark',caseType:'personal',carrier:'',product:'',option:'1',termLength:'',writingContract:'md',splitContract:'sa',overrideContract:'md',isSplit:false,splitWithDownline:false,mySplit:'50',otherSplit:'50',overridePercent:''};
     }
     function readSavedSettings(){
       try { const saved=JSON.parse(localStorage.getItem(SETTINGS_KEY)); return saved && typeof saved==='object' ? {...defaultSettings(),...saved} : null; }
       catch(error){ console.warn('Saved calculator settings could not be read:',error); return null; }
     }
     function settingsFromForm(){
-      return {caseType:settingValue('defaultCaseType'),carrier:settingValue('defaultCarrier'),product:settingValue('defaultProduct'),option:settingValue('defaultOption'),termLength:settingValue('defaultTermLength'),writingContract:settingValue('defaultWritingContract'),splitContract:settingValue('defaultSplitContract'),overrideContract:settingValue('defaultOverrideContract'),isSplit:$('defaultIsSplit').checked,splitWithDownline:$('defaultSplitWithDownline').checked,mySplit:settingValue('defaultMySplit'),otherSplit:settingValue('defaultOtherSplit'),overridePercent:settingValue('defaultOverridePercent')};
+      return {theme:settingValue('defaultTheme'),caseType:settingValue('defaultCaseType'),carrier:settingValue('defaultCarrier'),product:settingValue('defaultProduct'),option:settingValue('defaultOption'),termLength:settingValue('defaultTermLength'),writingContract:settingValue('defaultWritingContract'),splitContract:settingValue('defaultSplitContract'),overrideContract:settingValue('defaultOverrideContract'),isSplit:$('defaultIsSplit').checked,splitWithDownline:$('defaultSplitWithDownline').checked,mySplit:settingValue('defaultMySplit'),otherSplit:settingValue('defaultOtherSplit'),overridePercent:settingValue('defaultOverridePercent')};
     }
     function setSettingsForm(settings){
       const values={...defaultSettings(),...(settings||{})};
+      $('defaultTheme').value=values.theme;
       $('defaultCaseType').value=values.caseType;
       $('defaultWritingContract').value=values.writingContract;
       $('defaultSplitContract').value=values.splitContract;
@@ -574,6 +626,7 @@
     }
     function applySettings(settings){
       const values={...defaultSettings(),...(settings||{})};
+      applyTheme(values.theme);
       $('caseType').value=values.caseType;
       $('isSplit').checked=!!values.isSplit;
       $('splitWithDownline').checked=values.caseType!=='downline' && !!values.splitWithDownline;
@@ -604,6 +657,12 @@
         $('rate').value=0; updateSelections();
       }
       updateCaseType(); calculate();
+    }
+    function applyTheme(theme){
+      const selected=theme==='light'?'light':'dark';
+      document.documentElement.dataset.theme=selected;
+      document.documentElement.style.colorScheme=selected;
+      try { localStorage.setItem('commission-calculator-theme',selected); } catch {}
     }
     async function persistSettings(settings){
       const token=document.querySelector('form[action="/auth/logout"] input[name="csrf"]')?.value;
@@ -1070,7 +1129,7 @@
     $('isSplit').addEventListener('change',()=>{ if(!$('isSplit').checked) $('splitWithDownline').checked=false; updateCaseType(); calculate(); });
     $('splitWithDownline').addEventListener('change',()=>{ if($('splitWithDownline').checked) $('isSplit').checked=true; updateCaseType(); calculate(); });
     $('carrier').addEventListener('change',populateProducts); $('product').addEventListener('change',setPreset); $('termLength').addEventListener('change',setPreset); $('optionChoice').addEventListener('change',setPreset); $('clientAge').addEventListener('input',()=>{ setPreset(); calculate(); }); $('basis').addEventListener('input',()=>formatCommaInput($('basis'))); $('coverage').addEventListener('input',()=>{ formatCommaInput($('coverage')); setPreset(); calculate(); });
-    $('defaultCarrier').addEventListener('change',populateDefaultProducts); $('defaultProduct').addEventListener('change',populateDefaultDependencies); $('saveSettings').addEventListener('click',saveSettings); $('resetSettings').addEventListener('click',resetSettings);
+    $('defaultTheme').addEventListener('change',event=>applyTheme(event.target.value)); $('defaultCarrier').addEventListener('change',populateDefaultProducts); $('defaultProduct').addEventListener('change',populateDefaultDependencies); $('saveSettings').addEventListener('click',saveSettings); $('resetSettings').addEventListener('click',resetSettings);
     $('calculatorTab').addEventListener('click',()=>showView('calculator')); $('trackerTab').addEventListener('click',()=>showView('tracker')); $('organizationTab').addEventListener('click',()=>showView('organization'));
     $('openSaveCase').addEventListener('click',openSaveCaseModal); $('cancelSaveCase').addEventListener('click',closeSaveCaseModal); $('confirmSaveCase').addEventListener('click',saveCurrentCase);
     $('savedCaseName').addEventListener('keydown',event=>{ if(event.key==='Enter'){ event.preventDefault(); saveCurrentCase(); } });
