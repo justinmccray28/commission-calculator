@@ -426,6 +426,76 @@
       html[data-theme="light"] .mobile-bottom-nav button { color:#617c96; }
       html[data-theme="light"] .mobile-bottom-nav button.active { color:#058f8f; background:rgba(51,209,196,.12); }
     }
+    /* Purpose-built phone layout. Desktop markup and presentation stay unchanged. */
+    .mobile-dashboard,.mobile-save-wrap,.mobile-notes-toggle { display:none; }
+    .case-field { display:contents; }
+    @media(max-width:700px) {
+      body { padding-bottom:92px; background-image:radial-gradient(circle at 88% 7%,rgba(23,129,186,.24),transparent 28%),radial-gradient(circle at 8% 38%,rgba(0,214,205,.10),transparent 34%),linear-gradient(165deg,#061321 0%,#071a2d 48%,#06111e 100%); }
+      .account-bar { position:absolute; top:9px; right:9px; z-index:4; }
+      .account-bar > :not(.sign-out-button) { display:none!important; }
+      .sign-out-button { width:35px; height:35px; overflow:hidden; padding:0; border-radius:50%; color:transparent; }
+      .sign-out-button:after { content:'•••'; display:grid; place-items:center; height:100%; color:#8ebce2; font-size:17px; letter-spacing:1px; }
+      .wrap { max-width:520px; padding:18px 12px 30px; }
+      .page-head { justify-content:flex-start; gap:12px; margin:0 44px 17px 5px; min-height:42px; }
+      .page-head:before { content:''; width:42px; height:42px; flex:none; background:linear-gradient(180deg,#27f2e4,#188cf4); clip-path:polygon(8% 70%,27% 70%,27% 100%,8% 100%,40% 48%,59% 48%,59% 100%,40% 100%,72% 20%,91% 20%,91% 100%,72% 100%); filter:drop-shadow(0 0 9px rgba(34,220,238,.7)); }
+      .page-head h1 { margin:0; font-size:25px; line-height:1.05; white-space:nowrap; }
+      .head-mark { display:none; }
+      #calculatorView { display:flex; flex-direction:column; gap:12px; }
+      .settings-panel { order:8; }
+      .grid { display:contents; }
+      .grid > .card:first-child,#results { display:contents; }
+      .input-head,#results > .hero,#results > .clarity-row,#results > .commission-panels,#trailPanel { display:none!important; }
+      .mobile-dashboard { order:1; display:block; }
+      .mobile-business-switch { display:grid; grid-template-columns:1fr 1fr; gap:3px; padding:4px; margin-bottom:13px; border:1px solid rgba(75,131,177,.5); border-radius:14px; background:rgba(8,28,48,.72); box-shadow:inset 0 1px rgba(190,229,255,.08); }
+      .mobile-business-switch button { min-height:52px; border:0; border-radius:11px; color:#a9c1da; background:transparent; font:750 15px system-ui; }
+      .mobile-business-switch button.active { color:#fff; border:1px solid #26cde4; background:linear-gradient(135deg,rgba(12,164,208,.85),rgba(24,90,193,.8)); box-shadow:0 0 18px rgba(25,217,229,.48),inset 0 1px rgba(232,255,255,.35); }
+      .mobile-payout-card { position:relative; min-height:170px; overflow:hidden; padding:23px 20px; border:1px solid #1fcae5; border-radius:17px; background:radial-gradient(circle at 82% 84%,rgba(15,133,227,.35),transparent 36%),linear-gradient(145deg,rgba(13,49,78,.92),rgba(8,29,51,.94)); box-shadow:0 0 20px rgba(16,207,222,.28),inset 0 1px rgba(191,248,255,.22); }
+      .mobile-payout-card:after { content:''; position:absolute; right:17px; bottom:20px; width:126px; height:72px; opacity:.75; background:linear-gradient(90deg,transparent 0 7%,#0a71aa 7% 14%,transparent 14% 21%,#0b83bc 21% 30%,transparent 30% 37%,#0c91ca 37% 47%,transparent 47% 54%,#13a8d8 54% 65%,transparent 65% 72%,#20c1e2 72% 84%,transparent 84% 90%,#35dbe6 90%); clip-path:polygon(0 92%,100% 8%,100% 100%,0 100%); filter:drop-shadow(0 0 7px rgba(35,210,238,.5)); }
+      .mobile-payout-card small { display:block; color:#bfd4e9; font-size:16px; }
+      .mobile-live { position:absolute; top:20px; right:16px; z-index:2; padding:8px 12px; border:1px solid rgba(29,203,170,.55); border-radius:20px; color:#a3ead8; background:rgba(6,53,55,.7); font-size:11px; }
+      .mobile-live:before { content:''; display:inline-block; width:8px; height:8px; margin-right:7px; border-radius:50%; background:#22e4a9; box-shadow:0 0 8px #22e4a9; }
+      #mobileTotal { position:relative; z-index:2; margin-top:6px; font-size:45px; line-height:1; font-weight:850; letter-spacing:-.045em; color:#f8fbff; text-shadow:0 0 18px rgba(118,222,255,.24); }
+      .mobile-metrics { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+      .mobile-metric { min-width:0; padding:14px 13px; border:1px solid rgba(50,132,190,.62); border-radius:14px; background:linear-gradient(145deg,rgba(15,51,79,.94),rgba(9,32,56,.92)); box-shadow:inset 0 1px rgba(172,226,255,.1); }
+      .mobile-metric-icon { float:left; display:grid; place-items:center; width:42px; height:42px; margin-right:10px; border:1px solid #188ec2; border-radius:50%; color:#26d7ee; font-size:21px; }
+      .mobile-metric span { display:block; overflow:hidden; color:#adc3dc; font-size:11px; white-space:nowrap; text-overflow:ellipsis; }
+      .mobile-metric strong { display:block; overflow:hidden; margin-top:2px; color:#fff; font-size:20px; white-space:nowrap; text-overflow:ellipsis; }
+      .mobile-section-toggle { order:2; min-height:69px; margin:0; padding:17px 16px; border-radius:14px; font-size:17px; box-shadow:inset 0 1px rgba(188,232,255,.12),0 8px 20px rgba(0,8,18,.18); }
+      .mobile-section-toggle span { display:grid; place-items:center; width:31px; color:#3bcff4; font-size:22px; }
+      .mobile-section-toggle b { font-size:21px; }
+      .mobile-section-toggle.open { border-color:rgba(40,202,223,.72); box-shadow:0 0 18px rgba(21,184,213,.16),inset 0 1px rgba(190,244,255,.15); }
+      .mobile-section-body { order:3; margin-top:-12px; padding:11px 12px 15px; border:1px solid rgba(45,140,190,.46); border-top:0; border-radius:0 0 15px 15px; background:linear-gradient(150deg,rgba(14,52,78,.9),rgba(8,31,52,.92)); }
+      .mobile-section-body.open { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 10px; }
+      .mobile-section-body > .case-field,.mobile-section-body > #productBox,.mobile-section-body > #termLengthBox,.mobile-section-body > #optionBox,.mobile-section-body > #ageBox,.mobile-section-body > #coverageBox,.mobile-section-body > #trailRateBox,.mobile-section-body > #option2TrailBox { display:block; min-width:0; }
+      .mobile-section-body > .case-type-field { display:none; }
+      .mobile-section-body > #trailRateBox,.mobile-section-body > #option2TrailBox { grid-column:1/-1; }
+      .mobile-section-body label { min-height:17px; margin:9px 0 5px; overflow:hidden; color:#b9cce0; font-size:11px; white-space:nowrap; text-overflow:ellipsis; }
+      .mobile-section-body .field-icon { display:none; }
+      .mobile-section-body .field-wrap input,.mobile-section-body .field-wrap select { padding-left:11px; }
+      .mobile-section-body input,.mobile-section-body select { min-width:0; min-height:45px; font-size:13px; }
+      .contracts-toggle { order:4; }
+      .contracts-body { order:5; }
+      .contracts-body.open { display:block; }
+      .result-toggle { order:6; }
+      .result-details { order:7; }
+      .result-details.open { display:block; }
+      .result-details table { margin-top:4px; }
+      .result-details .formula { margin-bottom:0; }
+      .mobile-notes-toggle { display:flex; order:8; }
+      .mobile-notes-body { order:9; }
+      .mobile-notes-body.open { display:block; }
+      .mobile-save-wrap { order:10; display:block; padding:4px 2px; }
+      .mobile-save-button { width:100%; min-height:62px; border:1px solid #31eced; border-radius:32px; color:#fff; background:linear-gradient(100deg,#04a7cf,#15d4d0 58%,#27e2bb); box-shadow:0 0 22px rgba(31,224,224,.42),inset 0 1px rgba(255,255,255,.38); font:800 17px system-ui; }
+      .mobile-save-button:disabled { opacity:.42; filter:saturate(.55); box-shadow:none; }
+      .mobile-bottom-nav { left:50%; right:auto; width:min(100%,520px); transform:translateX(-50%); grid-template-columns:repeat(4,1fr); padding:8px 8px calc(8px + env(safe-area-inset-bottom)); border:1px solid rgba(59,124,173,.45); border-bottom:0; border-radius:19px 19px 0 0; background:rgba(5,25,43,.97); }
+      .mobile-bottom-nav button { min-height:59px; font-size:11px; }
+      .mobile-bottom-nav button span { font-size:23px; }
+      .mobile-bottom-nav button.active { color:#65f1e5; border:1px solid rgba(34,192,210,.4); box-shadow:inset 0 0 18px rgba(27,180,199,.15); }
+      html[data-theme="light"] .mobile-payout-card,html[data-theme="light"] .mobile-metric { color:#123656; border-color:#8ddae7; background:linear-gradient(145deg,rgba(255,255,255,.94),rgba(228,246,252,.92)); }
+      html[data-theme="light"] #mobileTotal,html[data-theme="light"] .mobile-metric strong { color:#07345a; }
+      html[data-theme="light"] .mobile-section-body { border-color:#b9d8e6; background:linear-gradient(145deg,#fbfdff,#eef7fb); }
+      html[data-theme="light"] .mobile-save-button { color:#063d45; }
+    }
   </style>
 </head>
 <body>
@@ -433,6 +503,11 @@
     <div class="page-head"><div><h1>Commission Calculator</h1></div><div class="head-mark" aria-hidden="true"><div class="bars"><i style="--h:13px"></i><i style="--h:25px"></i><i style="--h:37px"></i><i style="--h:50px"></i><i style="--h:63px"></i></div><span>MISSION<br>BEFORE<br>COMMISSION</span></div></div>
     <nav class="app-tabs" aria-label="Calculator sections"><button class="app-tab active" id="calculatorTab" type="button">Calculator</button><button class="app-tab" id="trackerTab" type="button">Tracking <span class="tab-badge" id="caseCount">0</span></button><button class="app-tab" id="organizationTab" type="button">Organization</button></nav>
     <div id="calculatorView">
+    <section class="mobile-dashboard" aria-label="Live commission summary">
+      <div class="mobile-business-switch" role="group" aria-label="Case type"><button class="active" type="button" data-mobile-business="personal">My Business</button><button type="button" data-mobile-business="downline">Downline</button></div>
+      <div class="mobile-payout-card"><small>Estimated payout</small><span class="mobile-live">Live calculation</span><div id="mobileTotal">$0.00</div></div>
+      <div class="mobile-metrics"><div class="mobile-metric"><i class="mobile-metric-icon">♛</i><span>Agent points</span><strong id="mobilePoints">0.00</strong></div><div class="mobile-metric"><i class="mobile-metric-icon">◉</i><span>Monthly trail</span><strong id="mobileTrail">$0.00</strong></div></div>
+    </section>
     <details class="settings-panel" id="settingsPanel">
       <summary>Settings <span>Save your personal account defaults</span></summary>
       <div class="settings-body">
@@ -460,12 +535,12 @@
         <div class="input-head"><span class="heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="9" cy="6" r="2.4" fill="#163c4e"/><circle cx="16" cy="12" r="2.4" fill="#163c4e"/><circle cx="9" cy="18" r="2.4" fill="#163c4e"/></svg></span><div><h2>Case inputs</h2><p>Enter the case details to calculate estimated commissions.</p></div></div>
         <button class="mobile-section-toggle open" type="button" aria-expanded="true"><span>▤</span> Case details <b>⌃</b></button>
         <div class="mobile-section-body open">
-        <label for="caseType">▣　Case type</label>
+        <div class="case-field case-type-field"><label for="caseType">▣　Case type</label>
         <div class="field-wrap"><span class="field-icon">▣</span><select id="caseType">
           <option value="personal">My business</option>
           <option value="downline">Downline business</option>
-        </select></div>
-        <label for="carrier">▥　Carrier</label>
+        </select></div></div>
+        <div class="case-field"><label for="carrier">▥　Carrier</label>
         <div class="field-wrap"><span class="field-icon">▥</span><select id="carrier" disabled>
           <option value="" selected disabled>Select a carrier</option>
           <option value="athene">Athene</option>
@@ -476,7 +551,7 @@
           <option value="transamerica">Transamerica</option>
           <option value="pacific">Pacific Life</option>
           <option value="custom">Other / custom carrier</option>
-        </select></div>
+        </select></div></div>
 
         <div id="productBox" class="hidden">
           <label for="product">▤　Product</label>
@@ -504,10 +579,10 @@
           <div class="field-wrap"><span class="field-icon">$</span><input id="coverage" type="text" inputmode="decimal" value="0"></div>
         </div>
 
-        <label id="basisLabel" for="basis">$　Premium / deposit ($)</label>
-        <div class="field-wrap"><span class="field-icon">$</span><input id="basis" type="text" inputmode="decimal" value="0"></div>
-        <label for="rate">%　Payout rate (%)</label>
-        <div class="field-wrap"><span class="field-icon">%</span><input id="rate" type="number" min="0" step="0.0001" value="0"></div>
+        <div class="case-field"><label id="basisLabel" for="basis">$　Premium / deposit ($)</label>
+        <div class="field-wrap"><span class="field-icon">$</span><input id="basis" type="text" inputmode="decimal" value="0"></div></div>
+        <div class="case-field"><label for="rate">%　Payout rate (%)</label>
+        <div class="field-wrap"><span class="field-icon">%</span><input id="rate" type="number" min="0" step="0.0001" value="0"></div></div>
 
         <div id="trailRateBox" class="hidden">
           <label for="trailRate">Monthly trail rate (%)</label>
@@ -519,8 +594,8 @@
         </div>
         </div>
 
-        <button class="mobile-section-toggle" type="button" aria-expanded="false"><span>◔</span> Contracts &amp; splits <b>⌄</b></button>
-        <div class="mobile-section-body">
+        <button class="mobile-section-toggle contracts-toggle" type="button" aria-expanded="false"><span>◔</span> Contracts &amp; splits <b>⌄</b></button>
+        <div class="mobile-section-body contracts-body">
         <div class="row">
           <div><label for="myContract">Writing agent contract</label><div class="field-wrap"><span class="field-icon">♙</span><select id="myContract"><option value="ta">Training Associate</option><option value="associate">Associate</option><option value="sa">Senior Associate</option><option value="md" selected>Marketing Director</option><option value="smd">Senior Marketing Director</option></select></div></div>
           <div id="splitContractField"><label for="otherContract">Split agent contract</label><div class="field-wrap"><span class="field-icon">♙</span><select id="otherContract"><option value="ta">Training Associate</option><option value="associate">Associate</option><option value="sa" selected>Senior Associate</option><option value="md">Marketing Director</option><option value="smd">Senior Marketing Director</option></select></div></div>
@@ -581,12 +656,12 @@
         <div class="section-title"><span class="section-icon">▣</span><strong>Calculation breakdown</strong><span class="muted" style="margin-left:auto;font-size:12px">Based on entered case details　ⓘ</span></div>
         <table><thead><tr><th>Component</th><th>Calculation</th><th>Amount</th></tr></thead><tbody id="breakdown"></tbody></table>
         <div class="formula" id="formula">Formula will appear here.</div>
-        <div class="note" id="note">Rates are editable. Confirm current carrier schedules and actual coding before relying on a result.</div>
-        <div class="note hidden" id="productInfo" role="note"></div>
-        <div class="footer hidden" id="atheneTrailNote">Athene Option 2 uses the monthly 0.0350% trail only. No duplicate annual trail is added.</div>
         </div>
+        <button class="mobile-section-toggle mobile-notes-toggle" type="button" aria-expanded="false"><span>▤</span> Notes <b>⌄</b></button>
+        <div class="mobile-section-body mobile-notes-body"><div class="note" id="note">Rates are editable. Confirm current carrier schedules and actual coding before relying on a result.</div><div class="note hidden" id="productInfo" role="note"></div><div class="footer hidden" id="atheneTrailNote">Athene Option 2 uses the monthly 0.0350% trail only. No duplicate annual trail is added.</div></div>
       </section>
     </div>
+    <div class="mobile-save-wrap"><button class="mobile-save-button" id="mobileSaveCase" type="button" disabled>▣　Save calculation</button></div>
     </div>
     <section class="card tracker-card hidden" id="trackerView">
       <div class="tracker-head"><div><h2>Commission tracking</h2><div class="muted">Saved calculations and agent points tied to your account.</div></div><div class="tracker-metrics"><div class="tracker-total"><span>Combined commission</span><strong id="trackedTotal">$0.00</strong></div><div class="tracker-total points"><span>Your agent points</span><strong id="trackedPoints">0.00</strong></div></div></div>
@@ -596,7 +671,7 @@
       <div id="organizationContent"><div class="tracker-empty">Loading your organization…</div></div>
     </section>
   </main>
-  <nav class="mobile-bottom-nav" aria-label="Mobile navigation"><button class="active" type="button" data-mobile-view="calculator"><span>▦</span>Calculator</button><button type="button" data-mobile-view="tracker"><span>▥</span>Tracking</button><button type="button" data-mobile-view="organization"><span>♟</span>Organization</button><button type="button" data-mobile-view="settings"><span>⚙</span>Settings</button></nav>
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation"><button class="active" type="button" data-mobile-view="calculator"><span>▦</span>Calculator</button><button type="button" data-mobile-view="tracker"><span>▥</span>Tracking</button><button type="button" data-mobile-view="organization"><span>♟</span>Organization</button><button type="button" data-mobile-view="profile"><span>●</span>Profile</button></nav>
   <div class="modal-backdrop hidden" id="saveCaseModal" role="dialog" aria-modal="true" aria-labelledby="saveCaseTitle">
     <div class="modal-card"><h2 id="saveCaseTitle">Save calculation</h2><p>Add a client or case name. Use initials if you prefer.</p><label for="savedCaseName">Client or case name</label><input id="savedCaseName" type="text" maxlength="120" autocomplete="off"><div class="modal-summary"><span id="saveCaseProduct">Product</span><strong id="saveCaseAmount">$0.00</strong></div><div class="modal-status" id="saveCaseStatus" aria-live="polite"></div><div class="modal-actions"><button id="cancelSaveCase" type="button">Cancel</button><button class="primary" id="confirmSaveCase" type="button">Save case</button></div></div>
   </div>
@@ -630,6 +705,7 @@
         $('summary').textContent='Commission rates could not be loaded';
         $('note').textContent='Refresh the page to try again. Calculations are unavailable until rates load.';
         $('openSaveCase').disabled=true;
+        $('mobileSaveCase').disabled=true;
         console.error('Commission data load failed:',error);
       }
     }
@@ -1213,7 +1289,12 @@
         calculation:{caseType,carrier:$('carrier').value,productFamily:$('product').value,productKey:product,termLength:$('termLength').value,option:$('optionChoice').value,basis:$('basis').value,rate:$('rate').value,clientAge:$('clientAge').value,coverage:$('coverage').value,writingContract:$('myContract').value,splitContract:$('otherContract').value,overrideContract:$('overrideContract').value,isSplit:split,splitWithDownline,mySplit:$('mySplit').value,otherSplit:$('otherSplit').value,overridePercent:$('overridePercent').value,overrideBasis:$('overrideBasis').value,trailRate:$('trailRate').value,trailBasis:$('trailBasis').value}
       } : null;
       $('openSaveCase').disabled=!currentCalculation;
+      $('mobileSaveCase').disabled=!currentCalculation;
       animateMoney('total',userTotal);
+      animateMoney('mobileTotal',userTotal);
+      $('mobilePoints').textContent=points(myBase);
+      $('mobileTrail').textContent=money(userMonthlyTrail);
+      document.querySelectorAll('[data-mobile-business]').forEach(button=>button.classList.toggle('active',button.dataset.mobileBusiness===caseType));
       $('summary').textContent=term && !product ? 'Select a policy length to see its rate' : needsCoverage ? 'Enter specified coverage of at least $25,000 to see its rate' : `${$('product').selectedOptions[0]?.textContent || 'Select a product'}${term ? ` • ${$('termLength').value} years • annualized premium` : ''} • ${split?'split case':'not split'}`;
       formula=term ? `Annual premium = monthly premium × 12; gross points = annual premium × ${pct(rate*100)}; split first; apply contract percentage second.` : ['iul','target','wl'].includes(catalog[product]?.kind) ? `Initial gross points = target premium × ${pct(rate*100)}; split first; apply contract percentage second.` : `Gross points = basis × ${pct(rate*100)}; split first; apply contract percentage second.`;
       note=term ? `${money(enteredBasis)} monthly premium × 12 = ${money(basis)} annual premium before applying the ${pct(rate*100)} payout rate.` : needsCoverage ? 'The supplied Lifetime WL schedule begins at $25,000 of specified coverage.' : 'Rates are editable so you can replace remembered reference rates with a current carrier payout schedule.';
@@ -1227,18 +1308,20 @@
     $('carrier').addEventListener('change',populateProducts); $('product').addEventListener('change',setPreset); $('termLength').addEventListener('change',setPreset); $('optionChoice').addEventListener('change',setPreset); $('clientAge').addEventListener('input',()=>{ setPreset(); calculate(); }); $('basis').addEventListener('input',()=>formatCommaInput($('basis'))); $('coverage').addEventListener('input',()=>{ formatCommaInput($('coverage')); setPreset(); calculate(); });
     $('defaultTheme').addEventListener('change',event=>applyTheme(event.target.value)); $('defaultCarrier').addEventListener('change',populateDefaultProducts); $('defaultProduct').addEventListener('change',populateDefaultDependencies); $('saveSettings').addEventListener('click',saveSettings); $('resetSettings').addEventListener('click',resetSettings);
     $('calculatorTab').addEventListener('click',()=>showView('calculator')); $('trackerTab').addEventListener('click',()=>showView('tracker')); $('organizationTab').addEventListener('click',()=>showView('organization'));
-    $('openSaveCase').addEventListener('click',openSaveCaseModal); $('cancelSaveCase').addEventListener('click',closeSaveCaseModal); $('confirmSaveCase').addEventListener('click',saveCurrentCase);
+    $('openSaveCase').addEventListener('click',openSaveCaseModal); $('mobileSaveCase').addEventListener('click',openSaveCaseModal); $('cancelSaveCase').addEventListener('click',closeSaveCaseModal); $('confirmSaveCase').addEventListener('click',saveCurrentCase);
     $('savedCaseName').addEventListener('keydown',event=>{ if(event.key==='Enter'){ event.preventDefault(); saveCurrentCase(); } });
     $('saveCaseModal').addEventListener('click',event=>{ if(event.target===$('saveCaseModal')) closeSaveCaseModal(); });
     $('caseList').addEventListener('click',event=>{ const button=event.target.closest('[data-case-id]'); if(button) deleteSavedCase(button.dataset.caseId); });
     $('caseList').addEventListener('change',event=>{ const select=event.target.closest('[data-case-stage]'); if(select) updateCaseStage(select.dataset.caseStage,select.value,select); });
     document.addEventListener('click',event=>{
+      const business=event.target.closest('[data-mobile-business]');
+      if(business){ $('caseType').value=business.dataset.mobileBusiness; $('caseType').dispatchEvent(new Event('change',{bubbles:true})); return; }
       const toggle=event.target.closest('.mobile-section-toggle');
       if(toggle){ const body=toggle.nextElementSibling,open=!toggle.classList.contains('open'); toggle.classList.toggle('open',open); toggle.setAttribute('aria-expanded',String(open)); toggle.querySelector('b').textContent=open?'⌃':'⌄'; body.classList.toggle('open',open); return; }
       const mobile=event.target.closest('[data-mobile-view]');
       if(!mobile) return;
       const view=mobile.dataset.mobileView;
-      if(view==='settings'){ showView('calculator'); $('settingsPanel').open=true; $('settingsPanel').scrollIntoView({behavior:'smooth',block:'start'}); document.querySelectorAll('[data-mobile-view]').forEach(button=>button.classList.toggle('active',button===mobile)); }
+      if(view==='profile'){ showView('organization'); document.querySelectorAll('[data-mobile-view]').forEach(button=>button.classList.toggle('active',button===mobile)); setTimeout(()=>$('organizationContent')?.scrollIntoView({behavior:'smooth',block:'start'}),120); }
       else showView(view);
     });
     $('organizationContent').addEventListener('submit',handleOrganizationSubmit); $('organizationContent').addEventListener('click',handleOrganizationClick);
