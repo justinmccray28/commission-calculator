@@ -196,10 +196,15 @@ const server = createServer(async (req, res) => {
       return send(res, 200, page('Check email', '<h1>Check your email</h1><p>If that address has an account, a reset link is on its way.</p><a href="/login">Return to sign in</a>'));
     }
     if (req.method === 'POST' && path === '/auth/logout') { clearSession(res); return redirect(res, '/login'); }
-    if (['/app', '/api/commission-data', '/api/settings', '/api/cases', '/api/cases/stage', '/api/cases/delete', '/api/organization', '/api/organization/profile', '/api/organization/invite', '/api/organization/request', '/api/organization/respond', '/account/password', '/auth/password'].includes(path)) {
+    if (['/app', '/api/commission-data', '/api/settings', '/api/cases', '/api/cases/stage', '/api/cases/delete', '/api/organization', '/api/organization/profile', '/api/organization/invite', '/api/organization/request', '/api/organization/respond', '/api/admin', '/api/admin/role', '/account/password', '/auth/password'].includes(path)) {
       const session = await userFromRequest(req, res);
       if (!session) return path.startsWith('/api/') ? send(res, 401, 'Sign in required', 'text/plain') : redirect(res, '/login');
-      if (req.method === 'GET' && path === '/app') return send(res, 200, protectedHTML.replace('<body>', `<body><div class="account-bar"><form method="POST" action="/auth/logout">${csrfField(csrfToken(res))}<button class="sign-out-button">Sign out</button></form></div>`));
+      if (req.method === 'GET' && path === '/app') {
+        let adminRole='agent';
+        const roleResult=await organizationRequest(session.access,'/rpc/get_my_admin_role',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+        if(roleResult.ok){ const role=await roleResult.json().catch(()=>null); if(['owner','data_admin'].includes(role)) adminRole=role; }
+        return send(res, 200, protectedHTML.replace('<body>', `<body data-admin-role="${adminRole}"><div class="account-bar"><form method="POST" action="/auth/logout">${csrfField(csrfToken(res))}<button class="sign-out-button">Sign out</button></form></div>`));
+      }
       if (req.method === 'GET' && path === '/api/commission-data') return send(res, 200, commissionData, 'application/json; charset=utf-8');
       if (path === '/api/settings' && req.method === 'GET') {
         const result = await settingsRequest(session.access);
@@ -330,6 +335,19 @@ const server = createServer(async (req, res) => {
           body: JSON.stringify({ p_request_id: id, p_approve: approve })
         });
         return result.ok ? send(res, 200, await result.text(), 'application/json; charset=utf-8') : send(res, 400, 'Request could not be updated', 'text/plain');
+      }
+      if (path === '/api/admin' && req.method === 'GET') {
+        const result=await organizationRequest(session.access,'/rpc/get_admin_dashboard',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+        if(!result.ok) return send(res,result.status===401||result.status===403?403:503,result.status===401||result.status===403?'Administrator access required':'Admin dashboard unavailable','text/plain');
+        return send(res,200,await result.text(),'application/json; charset=utf-8');
+      }
+      if (path === '/api/admin/role' && req.method === 'POST') {
+        const userId=String(posted.user_id||''), role=String(posted.role||'');
+        if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId)||!['agent','data_admin','owner'].includes(role))
+          return send(res,400,'Invalid administrator assignment','text/plain');
+        const result=await organizationRequest(session.access,'/rpc/set_admin_user_role',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_user_id:userId,p_role:role})});
+        if(!result.ok){ const message=await result.json().catch(()=>({})); return send(res,result.status===401||result.status===403?403:400,message.message||'Administrator role could not be updated','text/plain'); }
+        return send(res,200,await result.text(),'application/json; charset=utf-8');
       }
       if (req.method === 'GET' && path === '/account/password') return send(res, 200, page('Set password', `<h1>Set your password</h1><p>Choose a password for your agent account.</p><form method="POST" action="/auth/password">${csrfField(csrfToken(res))}<label for="password">New password</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="12" required><button>Save password</button></form>`));
       if (req.method === 'POST' && path === '/auth/password') {
