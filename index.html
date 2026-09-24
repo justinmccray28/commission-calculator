@@ -301,6 +301,19 @@
     .org-person-stat strong { display:block; color:#82c7ff; font-size:14px; }
     .org-children { padding-left:14px; border-left:1px solid rgba(79,180,197,.25); }
     .organization-status { min-height:18px; margin-top:8px; color:#70e8d1; font-size:12px; }
+    .admin-card { padding:22px; }
+    .admin-head { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; margin-bottom:18px; }
+    .admin-head h2 { margin:0 0 5px; }
+    .admin-role-badge { padding:7px 11px; border:1px solid rgba(75,228,207,.5); border-radius:99px; color:#71efdf; background:rgba(14,91,98,.3); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
+    .admin-section { margin-top:18px; }
+    .admin-section h3 { margin:0 0 9px; }
+    .admin-user-list,.admin-audit-list { display:grid; gap:9px; }
+    .admin-user { display:grid; grid-template-columns:minmax(180px,1.2fr) minmax(140px,.7fr) minmax(150px,.7fr) auto; gap:12px; align-items:center; padding:13px 15px; border:1px solid rgba(86,151,198,.38); border-radius:11px; background:linear-gradient(120deg,rgba(23,55,82,.68),rgba(8,28,48,.76)); }
+    .admin-user strong,.admin-audit strong { display:block; color:#f2f8ff; }
+    .admin-user small,.admin-audit small { display:block; color:#8faac4; }
+    .admin-user select { min-height:38px; }
+    .admin-audit { padding:11px 13px; border:1px solid rgba(85,142,186,.3); border-radius:9px; background:rgba(8,29,49,.52); }
+    .admin-status { min-height:18px; margin-top:10px; color:#70e8d1; font-size:12px; }
     .modal-backdrop { position:fixed; inset:0; z-index:20; display:grid; place-items:center; padding:20px; background:rgba(2,10,19,.76); backdrop-filter:blur(8px); }
     .modal-card { width:min(420px,100%); padding:24px; border:1px solid rgba(102,181,220,.58); border-radius:16px; background:linear-gradient(150deg,#173653,#091c30); box-shadow:0 25px 80px #000a; }
     .modal-card h2 { margin:0 0 5px; }
@@ -312,7 +325,7 @@
     .modal-actions .primary { border:0; color:#082238; background:linear-gradient(90deg,#42dae0,#62e7aa); }
     .modal-status { min-height:18px; margin-top:8px; color:#ffb4bd; font-size:12px; }
     @media(max-width:850px) { .settings-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-    @media(max-width:700px) { .tracker-head,.organization-head { align-items:stretch; flex-direction:column; } .tracker-metrics,.income-grid,.bonus-grid { grid-template-columns:1fr 1fr; } .tracker-total { min-width:0; text-align:left; } .saved-case { grid-template-columns:1fr auto; gap:8px 12px; } .saved-case-product { grid-column:1; } .saved-case-amount { grid-column:2; grid-row:1/3; } .case-stage { grid-column:1/-1; } .delete-case { grid-column:1/-1; width:max-content; } .organization-grid { grid-template-columns:1fr; } .org-person { grid-template-columns:minmax(130px,1fr) auto; gap:8px; } .org-person::before { display:none; } .org-person-stat:last-child { grid-column:1/-1; text-align:left; padding-left:44px; } }
+    @media(max-width:700px) { .tracker-head,.organization-head,.admin-head { align-items:stretch; flex-direction:column; } .tracker-metrics,.income-grid,.bonus-grid { grid-template-columns:1fr 1fr; } .tracker-total { min-width:0; text-align:left; } .saved-case { grid-template-columns:1fr auto; gap:8px 12px; } .saved-case-product { grid-column:1; } .saved-case-amount { grid-column:2; grid-row:1/3; } .case-stage { grid-column:1/-1; } .delete-case { grid-column:1/-1; width:max-content; } .organization-grid { grid-template-columns:1fr; } .org-person { grid-template-columns:minmax(130px,1fr) auto; gap:8px; } .org-person::before { display:none; } .org-person-stat:last-child { grid-column:1/-1; text-align:left; padding-left:44px; } .admin-user { grid-template-columns:1fr; } }
     @media(max-width:430px) { .tracker-metrics { grid-template-columns:1fr; } }
     @media(max-width:520px) { .settings-grid { grid-template-columns:1fr; } .settings-grid .check { margin-top:12px; } .settings-actions { align-items:flex-start; flex-wrap:wrap; } .app-tabs { width:100%; } .app-tab { flex:1; } }
     .account-bar { position:relative; z-index:2; display:flex; justify-content:flex-end; padding:10px 24px 0; }
@@ -364,6 +377,9 @@
     html[data-theme="light"] .modal-card p { color:#617b94; }
     html[data-theme="light"] .modal-summary { color:#536f89; background:#eaf4fa; }
     html[data-theme="light"] .sign-out-button { color:#173a5b; border-color:#c5d6e4; background:rgba(255,255,255,.75); }
+    html[data-theme="light"] .admin-user,html[data-theme="light"] .admin-audit { border-color:#cbdde9; background:linear-gradient(135deg,rgba(255,255,255,.82),rgba(237,247,252,.76)); }
+    html[data-theme="light"] .admin-user strong,html[data-theme="light"] .admin-audit strong { color:#102f50; }
+    html[data-theme="light"] .admin-user small,html[data-theme="light"] .admin-audit small { color:#607b95; }
     .mobile-section-toggle,.mobile-bottom-nav { display:none; }
     .mobile-section-body { display:contents; }
     @media(max-width:700px) {
@@ -420,6 +436,7 @@
       .mobile-bottom-nav button span { color:#78a9d6; font-size:20px; line-height:1; }
       .mobile-bottom-nav button.active { color:#68ecdf; background:rgba(25,111,122,.22); }
       .mobile-bottom-nav button.active span { color:#55e8df; }
+      body:not([data-admin-role="agent"]) .mobile-bottom-nav { grid-template-columns:repeat(5,1fr); }
       html[data-theme="light"] .mobile-section-toggle { color:#173a5a; border-color:#c9dbe8; background:linear-gradient(110deg,#f8fcff,#edf6fb); }
       html[data-theme="light"] .mobile-section-toggle.open { border-color:rgba(28,186,179,.48); background:linear-gradient(110deg,#e7fbf8,#edf8fc); }
       html[data-theme="light"] .mobile-bottom-nav { border-color:#cbdce8; background:rgba(250,253,255,.95); box-shadow:0 -8px 25px rgba(41,88,121,.12); }
@@ -501,7 +518,7 @@
 <body>
   <main class="wrap">
     <div class="page-head"><div><h1>Commission Calculator</h1></div><div class="head-mark" aria-hidden="true"><div class="bars"><i style="--h:13px"></i><i style="--h:25px"></i><i style="--h:37px"></i><i style="--h:50px"></i><i style="--h:63px"></i></div><span>MISSION<br>BEFORE<br>COMMISSION</span></div></div>
-    <nav class="app-tabs" aria-label="Calculator sections"><button class="app-tab active" id="calculatorTab" type="button">Calculator</button><button class="app-tab" id="trackerTab" type="button">Tracking <span class="tab-badge" id="caseCount">0</span></button><button class="app-tab" id="organizationTab" type="button">Organization</button></nav>
+    <nav class="app-tabs" aria-label="Calculator sections"><button class="app-tab active" id="calculatorTab" type="button">Calculator</button><button class="app-tab" id="trackerTab" type="button">Tracking <span class="tab-badge" id="caseCount">0</span></button><button class="app-tab" id="organizationTab" type="button">Organization</button><button class="app-tab hidden" id="adminTab" type="button">Admin</button></nav>
     <div id="calculatorView">
     <section class="mobile-dashboard" aria-label="Live commission summary">
       <div class="mobile-business-switch" role="group" aria-label="Case type"><button class="active" type="button" data-mobile-business="personal">My Business</button><button type="button" data-mobile-business="downline">Downline</button></div>
@@ -670,8 +687,11 @@
     <section class="card organization-card hidden" id="organizationView">
       <div id="organizationContent"><div class="tracker-empty">Loading your organization…</div></div>
     </section>
+    <section class="card admin-card hidden" id="adminView">
+      <div id="adminContent"><div class="tracker-empty">Loading administrator controls…</div></div>
+    </section>
   </main>
-  <nav class="mobile-bottom-nav" aria-label="Mobile navigation"><button class="active" type="button" data-mobile-view="calculator"><span>▦</span>Calculator</button><button type="button" data-mobile-view="tracker"><span>▥</span>Tracking</button><button type="button" data-mobile-view="organization"><span>♟</span>Organization</button><button type="button" data-mobile-view="profile"><span>●</span>Profile</button></nav>
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation"><button class="active" type="button" data-mobile-view="calculator"><span>▦</span>Calculator</button><button type="button" data-mobile-view="tracker"><span>▥</span>Tracking</button><button type="button" data-mobile-view="organization"><span>♟</span>Organization</button><button type="button" data-mobile-view="profile"><span>●</span>Profile</button><button class="hidden" type="button" data-mobile-view="admin"><span>⚙</span>Admin</button></nav>
   <div class="modal-backdrop hidden" id="saveCaseModal" role="dialog" aria-modal="true" aria-labelledby="saveCaseTitle">
     <div class="modal-card"><h2 id="saveCaseTitle">Save calculation</h2><p>Add a client or case name. Use initials if you prefer.</p><label for="savedCaseName">Client or case name</label><input id="savedCaseName" type="text" maxlength="120" autocomplete="off"><div class="modal-summary"><span id="saveCaseProduct">Product</span><strong id="saveCaseAmount">$0.00</strong></div><div class="modal-status" id="saveCaseStatus" aria-live="polite"></div><div class="modal-actions"><button id="cancelSaveCase" type="button">Cancel</button><button class="primary" id="confirmSaveCase" type="button">Save case</button></div></div>
   </div>
@@ -711,7 +731,8 @@
     }
     const $ = id => document.getElementById(id);
     const SETTINGS_KEY='commissionCalculator.defaults.v1';
-    let currentCalculation=null, savedCases=[], organizationData=null, organizationLiveData=null, organizationDemoMode=false;
+    let currentCalculation=null, savedCases=[], organizationData=null, organizationLiveData=null, organizationDemoMode=false, adminData=null;
+    const adminRole=document.body.dataset.adminRole||'agent';
     const money = n => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number.isFinite(n)?n:0);
     const points = n => new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number.isFinite(n)?n:0);
     const pct = n => `${Number(n).toFixed(4).replace(/0+$/,'').replace(/\.$/,'')}%`;
@@ -857,15 +878,19 @@
     function showView(view){
       const tracking=view==='tracker';
       const organization=view==='organization';
-      $('calculatorView').classList.toggle('hidden',tracking||organization);
+      const admin=view==='admin'&&adminRole!=='agent';
+      $('calculatorView').classList.toggle('hidden',tracking||organization||admin);
       $('trackerView').classList.toggle('hidden',!tracking);
       $('organizationView').classList.toggle('hidden',!organization);
-      $('calculatorTab').classList.toggle('active',!tracking&&!organization);
+      $('adminView').classList.toggle('hidden',!admin);
+      $('calculatorTab').classList.toggle('active',!tracking&&!organization&&!admin);
       $('trackerTab').classList.toggle('active',tracking);
       $('organizationTab').classList.toggle('active',organization);
-      document.querySelectorAll('[data-mobile-view]').forEach(button=>button.classList.toggle('active',button.dataset.mobileView===(tracking?'tracker':organization?'organization':'calculator')));
+      $('adminTab').classList.toggle('active',admin);
+      document.querySelectorAll('[data-mobile-view]').forEach(button=>button.classList.toggle('active',button.dataset.mobileView===(tracking?'tracker':organization?'organization':admin?'admin':'calculator')));
       if(tracking) loadSavedCases();
       if(organization) loadOrganization();
+      if(admin) loadAdmin();
     }
     function renderSavedCases(){
       $('caseCount').textContent=String(savedCases.length);
@@ -1015,6 +1040,28 @@
         if(!response.ok) throw new Error(`Organization load failed: ${response.status}`);
         organizationLiveData=await response.json(); organizationData=organizationDemoMode?demoOrganizationData():organizationLiveData; renderOrganization();
       } catch(error){ $('organizationContent').innerHTML='<div class="tracker-empty">Your organization could not be loaded. This feature branch requires its hierarchy database migration.</div>'; console.error(error); }
+    }
+    function renderAdmin(){
+      const content=$('adminContent'), role=adminData?.role||adminRole;
+      if(role==='data_admin'){
+        content.innerHTML='<div class="admin-head"><div><h2>Administration</h2><div class="muted">Your Data Admin account is ready for product, rate, and bonus publishing tools.</div></div><span class="admin-role-badge">Data Admin</span></div><div class="organization-panel"><h3>Data controls</h3><p>The protected role system is active. Product and rate publishing will be added here in the next admin phase.</p></div>';
+        return;
+      }
+      const users=Array.isArray(adminData?.users)?adminData.users:[], audit=Array.isArray(adminData?.audit)?adminData.audit:[];
+      const userRows=users.map(user=>`<form class="admin-user" data-admin-user="${escapeText(user.user_id)}"><div><strong>${escapeText(user.display_name||user.email||'Unnamed account')}</strong><small>${escapeText(user.email||'')} · ${escapeText(contractTitle(user.contract_level||''))}</small></div><div><small>Current access</small><strong>${escapeText(user.admin_role==='owner'?'Owner Admin':user.admin_role==='data_admin'?'Data Admin':'Agent')}</strong></div><label><span class="hidden">Administrator role</span><select name="role" aria-label="Role for ${escapeText(user.display_name||user.email||'account')}">${[['agent','Agent'],['data_admin','Data Admin'],['owner','Owner Admin']].map(([value,label])=>`<option value="${value}"${value===user.admin_role?' selected':''}>${label}</option>`).join('')}</select></label><button class="organization-button" type="submit">Update access</button></form>`).join('');
+      const auditRows=audit.map(item=>{ const before=item.previous_value?.role||'agent',after=item.new_value?.role||'agent',date=new Date(item.created_at); return `<div class="admin-audit"><strong>${escapeText(item.actor_name||'System')} changed ${escapeText(item.target_name||'an account')}</strong><small>${escapeText(before)} → ${escapeText(after)}${Number.isNaN(date.getTime())?'':` · ${date.toLocaleString()}`}</small></div>`; }).join('');
+      content.innerHTML=`<div class="admin-head"><div><h2>Administration</h2><div class="muted">Manage calculator access. WFG promotion level and software authority remain separate.</div></div><span class="admin-role-badge">Owner Admin</span></div><section class="admin-section"><h3>Users and permissions</h3><div class="admin-user-list">${userRows||'<div class="tracker-empty">No user accounts found.</div>'}</div><div class="admin-status" id="adminStatus" aria-live="polite"></div></section><section class="admin-section"><h3>Recent access changes</h3><div class="admin-audit-list">${auditRows||'<div class="tracker-empty">No administrator changes recorded yet.</div>'}</div></section>`;
+    }
+    async function loadAdmin(){
+      $('adminContent').innerHTML='<div class="tracker-empty">Loading administrator controls…</div>';
+      try { const response=await fetch('/api/admin',{cache:'no-store'}); if(!response.ok) throw new Error(await response.text()); adminData=await response.json(); renderAdmin(); }
+      catch(error){ $('adminContent').innerHTML='<div class="tracker-empty">Administrator controls could not be loaded.</div>'; console.error(error); }
+    }
+    async function handleAdminSubmit(event){
+      const form=event.target.closest('[data-admin-user]'); if(!form) return;
+      event.preventDefault(); const button=form.querySelector('button'),status=$('adminStatus'); button.disabled=true; if(status) status.textContent='Updating access…';
+      try { const response=await fetch('/api/admin/role',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({csrf:csrfValue(),user_id:form.dataset.adminUser,role:new FormData(form).get('role')})}); if(!response.ok) throw new Error(await response.text()); await loadAdmin(); const next=$('adminStatus'); if(next) next.textContent='Administrator access updated.'; }
+      catch(error){ if(status) status.textContent=error.message||'Access could not be updated.'; button.disabled=false; }
     }
     async function organizationPost(path,data){
       const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({csrf:csrfValue(),...data})});
@@ -1313,7 +1360,7 @@
     $('splitWithDownline').addEventListener('change',()=>{ if($('splitWithDownline').checked) $('isSplit').checked=true; updateCaseType(); calculate(); });
     $('carrier').addEventListener('change',populateProducts); $('product').addEventListener('change',setPreset); $('termLength').addEventListener('change',setPreset); $('optionChoice').addEventListener('change',setPreset); $('clientAge').addEventListener('input',()=>{ setPreset(); calculate(); }); $('basis').addEventListener('input',()=>formatCommaInput($('basis'))); $('coverage').addEventListener('input',()=>{ formatCommaInput($('coverage')); setPreset(); calculate(); });
     $('defaultTheme').addEventListener('change',event=>applyTheme(event.target.value)); $('defaultCarrier').addEventListener('change',populateDefaultProducts); $('defaultProduct').addEventListener('change',populateDefaultDependencies); $('saveSettings').addEventListener('click',saveSettings); $('resetSettings').addEventListener('click',resetSettings);
-    $('calculatorTab').addEventListener('click',()=>showView('calculator')); $('trackerTab').addEventListener('click',()=>showView('tracker')); $('organizationTab').addEventListener('click',()=>showView('organization'));
+    $('calculatorTab').addEventListener('click',()=>showView('calculator')); $('trackerTab').addEventListener('click',()=>showView('tracker')); $('organizationTab').addEventListener('click',()=>showView('organization')); $('adminTab').addEventListener('click',()=>showView('admin'));
     $('openSaveCase').addEventListener('click',openSaveCaseModal); $('mobileSaveCase').addEventListener('click',openSaveCaseModal); $('cancelSaveCase').addEventListener('click',closeSaveCaseModal); $('confirmSaveCase').addEventListener('click',saveCurrentCase);
     $('savedCaseName').addEventListener('keydown',event=>{ if(event.key==='Enter'){ event.preventDefault(); saveCurrentCase(); } });
     $('saveCaseModal').addEventListener('click',event=>{ if(event.target===$('saveCaseModal')) closeSaveCaseModal(); });
@@ -1330,12 +1377,13 @@
       if(view==='profile'){ showView('organization'); document.querySelectorAll('[data-mobile-view]').forEach(button=>button.classList.toggle('active',button===mobile)); setTimeout(()=>$('organizationContent')?.scrollIntoView({behavior:'smooth',block:'start'}),120); }
       else showView(view);
     });
-    $('organizationContent').addEventListener('submit',handleOrganizationSubmit); $('organizationContent').addEventListener('click',handleOrganizationClick);
+    $('organizationContent').addEventListener('submit',handleOrganizationSubmit); $('organizationContent').addEventListener('click',handleOrganizationClick); $('adminContent').addEventListener('submit',handleAdminSubmit);
     document.querySelectorAll('input, select').forEach(element=>{
       element.addEventListener('input',calculate);
       element.addEventListener('change',calculate);
     });
     $('summary').textContent='Loading commission rates…';
+    if(adminRole!=='agent'){ $('adminTab').classList.remove('hidden'); document.querySelector('[data-mobile-view="admin"]')?.classList.remove('hidden'); }
     loadCommissionData();
   </script>
 </body>
