@@ -15,6 +15,8 @@ const storedCases = new Map([[agentOne, []], [agentTwo, []]]);
 const profiles = new Map();
 const organizationInvites = [];
 const uplineRequests = [];
+const adminRoles = new Map([[agentOne, 'owner']]);
+const adminAudit = [];
 const auth = createServer(async (req, res) => {
   let body = '';
   for await (const chunk of req) body += chunk;
@@ -42,6 +44,25 @@ const auth = createServer(async (req, res) => {
     storedSettings.set(id, data.settings);
     res.statusCode = 201;
     return res.end('{}');
+  }
+  if (req.url === '/rest/v1/rpc/get_my_admin_role' && req.method === 'POST') {
+    const id = req.headers.authorization === 'Bearer valid-token' ? agentOne : req.headers.authorization === 'Bearer valid-token-two' ? agentTwo : null;
+    if(!id){ res.statusCode=401; return res.end('{}'); }
+    return res.end(JSON.stringify(adminRoles.get(id)||'agent'));
+  }
+  if (req.url === '/rest/v1/rpc/get_admin_dashboard' && req.method === 'POST') {
+    const id = req.headers.authorization === 'Bearer valid-token' ? agentOne : req.headers.authorization === 'Bearer valid-token-two' ? agentTwo : null;
+    const role=adminRoles.get(id);
+    if(!id||!role){ res.statusCode=403; return res.end('{}'); }
+    return res.end(JSON.stringify({role,users:role==='owner'?[{user_id:agentOne,email:'invited@example.com',display_name:'Owner Agent',contract_level:'md',admin_role:'owner'},{user_id:agentTwo,email:'agent@example.com',display_name:'Second Agent',contract_level:'sa',admin_role:adminRoles.get(agentTwo)||'agent'}]:[],audit:role==='owner'?adminAudit:[]}));
+  }
+  if (req.url === '/rest/v1/rpc/set_admin_user_role' && req.method === 'POST') {
+    const id = req.headers.authorization === 'Bearer valid-token' ? agentOne : req.headers.authorization === 'Bearer valid-token-two' ? agentTwo : null;
+    if(adminRoles.get(id)!=='owner'){ res.statusCode=403; return res.end(JSON.stringify({message:'Owner access required'})); }
+    const {p_user_id,p_role}=JSON.parse(body),previous=adminRoles.get(p_user_id)||'agent';
+    if(p_role==='agent') adminRoles.delete(p_user_id); else adminRoles.set(p_user_id,p_role);
+    adminAudit.unshift({id:adminAudit.length+1,actor_user_id:id,actor_name:'Owner Agent',action:'admin_role_changed',target_user_id:p_user_id,target_name:'Second Agent',previous_value:{role:previous},new_value:{role:p_role},created_at:new Date().toISOString()});
+    return res.end(JSON.stringify({user_id:p_user_id,role:p_role}));
   }
   if (req.url.startsWith('/rest/v1/agent_profiles')) {
     const id = req.headers.authorization === 'Bearer valid-token' ? agentOne : req.headers.authorization === 'Bearer valid-token-two' ? agentTwo : null;
@@ -162,6 +183,10 @@ test('pilot access requires a real authenticated session and survives refresh', 
     assert.equal(page.status, 200);
     const appHTML = await page.text();
     assert.match(appHTML, /fetch\('\/api\/commission-data'/);
+    assert.match(appHTML, /data-admin-role="owner"/);
+    const adminDashboard=await request('/api/admin',{headers:{Cookie:cookieHeader}});
+    assert.equal(adminDashboard.status,200);
+    assert.equal((await adminDashboard.json()).role,'owner');
     const data = await request('/api/commission-data', { headers: { Cookie: cookieHeader } });
     assert.equal(data.status, 200);
     assert.ok((await data.json()).presets);
@@ -173,6 +198,11 @@ test('pilot access requires a real authenticated session and survives refresh', 
     assert.ok(appToken && appCsrfCookie);
     const defaults = {theme:'dark',caseType:'personal',carrier:'',product:'',option:'1',termLength:'',writingContract:'md',splitContract:'sa',overrideContract:'md',isSplit:false,splitWithDownline:false,mySplit:'50',otherSplit:'50',overridePercent:''};
     const ownCookie = `${cookieHeader}; ${appCsrfCookie}`;
+    const adminGrant=await request('/api/admin/role',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Cookie:ownCookie},body:new URLSearchParams({csrf:appToken,user_id:agentTwo,role:'data_admin'})});
+    assert.equal(adminGrant.status,200);
+    const secondAdminPage=await request('/app',{headers:{Cookie:'cc-access=valid-token-two'}});
+    assert.equal(secondAdminPage.status,200);
+    assert.match(await secondAdminPage.text(),/data-admin-role="data_admin"/);
     const settingsPost = (settings, cookie, csrf) => request('/api/settings', { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded', Cookie:cookie }, body:new URLSearchParams({ csrf, settings:JSON.stringify(settings) }) });
     const initial = await request('/api/settings', { headers:{Cookie:ownCookie} });
     assert.deepEqual(await initial.json(), {settings:null});
